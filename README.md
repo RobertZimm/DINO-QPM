@@ -1,5 +1,4 @@
-# DINO-QPM: Adapting Visual Foundation Models for Globally Interpretable
-Image Classification
+# DINO-QPM: Adapting Visual Foundation Models for Globally Interpretable Image Classification
 
 [![arXiv](https://img.shields.io/badge/<...>.svg)](<placeholder>)
 
