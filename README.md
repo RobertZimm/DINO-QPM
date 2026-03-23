@@ -1,24 +1,11 @@
 # DINO-QPM
-
-> Local training, inference, and evaluation codebase for DINO-QPM.
->
-> Note: the Python package/import name in this repository is still `CleanCodeRelease` for backward compatibility.
-
 ## Overview
 
-DINO-QPM is a framework for interpretable image classification experiments with dense and finetuned models.
-This repository supports:
-
-- Local training
-- Local inference
-- Local evaluation
-- Config-driven experiments
-
-This README intentionally focuses on **local execution only**.
+...
 
 ## Abstract
 
-Although visual foundation models like DINOv2 provide state-of-the-art performance as feature extractors, their complex, high-dimensional representations create substantial hurdles for interpretability. This work proposes DINO-QPM, which converts these powerful but entangled features into contrastive, class-independent representations that are interpretable by humans. DINO-QPM is a lightweight interpretability adapter that pursues globally interpretable image classification, adapting the Quadratic Programming Enhanced Model (QPM) to operate on strictly frozen DINO backbones. While classification with visual foundation models typically relies on the \texttt{CLS} token, we deliberately diverge from this standard. By leveraging average-pooling, we directly connect the patch embeddings to the model's features and therefore enable spatial localisation of DINO-QPM's globally interpretable features within the input space. Furthermore, we apply a sparsity loss to minimise spatial scatter and background noise, ensuring that explanations are grounded in relevant object parts. With DINO-QPM we make the level of interpretability of QPM available as an adapter while exceeding the accuracy of DINOv2 linear probe. Evaluated through an introduced Plausbility metric and other interpretability metrics, extensive experiments demonstrate that DINO-QPM is superior to other applicable methods for frozen visual foundation models in both classification accuracy and explanation quality. 
+Although visual foundation models like DINOv2 provide state-of-the-art performance as feature extractors, their complex, high-dimensional representations create substantial hurdles for interpretability. This work proposes DINO-QPM, which converts these powerful but entangled features into contrastive, class-independent representations that are interpretable by humans. DINO-QPM is a lightweight interpretability adapter that pursues globally interpretable image classification, adapting the Quadratic Programming Enhanced Model (QPM) to operate on strictly frozen DINO backbones. While classification with visual foundation models typically relies on the CLS token, we deliberately diverge from this standard. By leveraging average-pooling, we directly connect the patch embeddings to the model's features and therefore enable spatial localisation of DINO-QPM's globally interpretable features within the input space. Furthermore, we apply a sparsity loss to minimise spatial scatter and background noise, ensuring that explanations are grounded in relevant object parts. With DINO-QPM we make the level of interpretability of QPM available as an adapter while exceeding the accuracy of DINOv2 linear probe. Evaluated through an introduced Plausbility metric and other interpretability metrics, extensive experiments demonstrate that DINO-QPM is superior to other applicable methods for frozen visual foundation models in both classification accuracy and explanation quality. 
 
 ## Paper Assets (Placeholders)
 
@@ -191,25 +178,6 @@ Useful options:
 - `--dataset <dataset_name>`
 - `--save-features`
 
-## Output Artifacts (Typical)
-
-Depending on mode/config, typical outputs include:
-
-- Model checkpoints (`.pth`)
-- Run config snapshots (`config.yaml`)
-- Result JSON files (`Results_*.json`)
-- Optional inference visualization artifacts
-
-## Reproducibility Notes
-
-- Use fixed `--seed` values.
-- Keep your `config.yaml` with each trained model.
-- Prefer one conda environment per project to avoid dependency drift.
-
-## Troubleshooting
-
-### Import Errors
-
 Re-run editable install from repo root:
 
 ```bash
@@ -224,7 +192,7 @@ Pass `--config-file` explicitly, or place `config.yaml` near the checkpoint.
 
 Confirm directory structure under `~/tmp/Datasets` and verify dataset names in config.
 
-## Citation (Placeholder)
+## Citation
 
 ```bibtex
 @article{TODO_DINO_QPM,
@@ -234,7 +202,3 @@ Confirm directory structure under `~/tmp/Datasets` and verify dataset names in c
   year    = {TODO}
 }
 ```
-
----
-
-If you use this repository, please replace all TODO placeholders with the final text, figures, and tables from your paper.
