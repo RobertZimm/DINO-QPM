@@ -1,7 +1,7 @@
 # DINO-QPM: Adapting Visual Foundation Models for Globally Interpretable
 Image Classification
 
-[![arXiv](https://img.shields.io/badge/arXiv-2603.16645-b31b1b.svg)](<placeholder>)
+[![arXiv](https://img.shields.io/badge/<...>.svg)](<placeholder>)
 
 <short_description>
  
@@ -139,7 +139,7 @@ The code will follow soon.
 If you use this work, please cite:
 
 ```bibtex
-@misc{schween2026bussard,
+@misc{zimmermann2026dino-qpm,
   title         = {{DINO-QPM}: Adapting Visual Foundation Models for Globally Interpretable
 Image Classification},
   author        = {Zimmermann, Robert and Norrenbrock, Thomas and Rosenhahn, Bodo},
@@ -154,7 +154,7 @@ Image Classification},
 Once published at CVPR, please use:
  
 ```bibtex
-@inproceedings{schween2026bussard,
+@inproceedings{zimmermann2026dino-qpm,
   title     = {{DINO-QPM}: Adapting Visual Foundation Models for Globally Interpretable
 Image Classification},
   author    = {Zimmermann, Robert and Norrenbrock, Thomas and Rosenhahn, Bodo},
