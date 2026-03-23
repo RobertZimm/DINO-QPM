@@ -1,71 +1,19 @@
-# DINO-QPM
-## Overview
+# DINO-QPM: Adapting Visual Foundation Models for Globally Interpretable
+Image Classification
 
-...
+[![arXiv](https://img.shields.io/badge/arXiv-2603.16645-b31b1b.svg)](<placeholder>)
+
+<short_description>
+ 
+## Pipeline
+ 
+![DINO-QPM Architecture](<placeholder>)
 
 ## Abstract
 
 Although visual foundation models like DINOv2 provide state-of-the-art performance as feature extractors, their complex, high-dimensional representations create substantial hurdles for interpretability. This work proposes DINO-QPM, which converts these powerful but entangled features into contrastive, class-independent representations that are interpretable by humans. DINO-QPM is a lightweight interpretability adapter that pursues globally interpretable image classification, adapting the Quadratic Programming Enhanced Model (QPM) to operate on strictly frozen DINO backbones. While classification with visual foundation models typically relies on the CLS token, we deliberately diverge from this standard. By leveraging average-pooling, we directly connect the patch embeddings to the model's features and therefore enable spatial localisation of DINO-QPM's globally interpretable features within the input space. Furthermore, we apply a sparsity loss to minimise spatial scatter and background noise, ensuring that explanations are grounded in relevant object parts. With DINO-QPM we make the level of interpretability of QPM available as an adapter while exceeding the accuracy of DINOv2 linear probe. Evaluated through an introduced Plausbility metric and other interpretability metrics, extensive experiments demonstrate that DINO-QPM is superior to other applicable methods for frozen visual foundation models in both classification accuracy and explanation quality. 
 
-## Paper Assets (Placeholders)
-
-Replace these placeholders with your final paper assets.
-
-### Figure 1
-
-![Figure 1: Method overview](docs/paper/Figure1_method_overview.png)
-
-**Caption:** TODO: Add caption from paper.
-
-### Figure 2
-
-![Figure 2: Training pipeline](docs/paper/Figure2_training_pipeline.png)
-
-**Caption:** TODO: Add caption from paper.
-
-### Figure 3
-
-![Figure 3: Qualitative examples](docs/paper/Figure3_qualitative_examples.png)
-
-**Caption:** TODO: Add caption from paper.
-
-### Figure 4
-
-![Figure 4: Main quantitative comparison](docs/paper/Figure4_quantitative_results.png)
-
-**Caption:** TODO: Add caption from paper.
-
-### Figure 5
-
-![Figure 5: Ablation study](docs/paper/Figure5_ablation.png)
-
-**Caption:** TODO: Add caption from paper.
-
-### Table 1 (Placeholder)
-
-| Method | Dataset | Metric 1 | Metric 2 | Metric 3 |
-| --- | ---: | ---: | ---: | ---: |
-| TODO | TODO | TODO | TODO | TODO |
-| TODO | TODO | TODO | TODO | TODO |
-
-**Caption:** TODO: Add caption from paper.
-
-### Table 2 (Placeholder)
-
-| Variant | Setting | Accuracy | Interpretation Metric |
-| --- | --- | ---: | ---: |
-| TODO | TODO | TODO | TODO |
-| TODO | TODO | TODO | TODO |
-
-**Caption:** TODO: Add caption from paper.
-
-## Repository Name vs Package Name
-
-Branding name: **DINO-QPM**
-
-Python package name (from `pyproject.toml`): **CleanCodeRelease**
-
-Keep imports as-is (for example `from CleanCodeRelease...`) unless you plan a full package rename refactor.
+## Code
 
 ## Installation (Conda + Editable Install)
 
@@ -184,21 +132,33 @@ Re-run editable install from repo root:
 python -m pip install -e .
 ```
 
-### Config Not Found During Inference/Evaluation
-
-Pass `--config-file` explicitly, or place `config.yaml` near the checkpoint.
-
-### Dataset Not Found
-
-Confirm directory structure under `~/tmp/Datasets` and verify dataset names in config.
+The code will follow soon.
 
 ## Citation
 
+If you use this work, please cite:
+
 ```bibtex
-@article{TODO_DINO_QPM,
-  title   = {TODO},
-  author  = {TODO},
-  journal = {TODO},
-  year    = {TODO}
+@misc{schween2026bussard,
+  title         = {{DINO-QPM}: Adapting Visual Foundation Models for Globally Interpretable
+Image Classification},
+  author        = {Zimmermann, Robert and Norrenbrock, Thomas and Rosenhahn, Bodo},
+  year          = {2026},
+  eprint        = {...},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/...}
+}
+```
+ 
+Once published at CVPR, please use:
+ 
+```bibtex
+@inproceedings{schween2026bussard,
+  title     = {{DINO-QPM}: Adapting Visual Foundation Models for Globally Interpretable
+Image Classification},
+  author    = {Zimmermann, Robert and Norrenbrock, Thomas and Rosenhahn, Bodo},
+  booktitle = {...},
+  year      = {2026}
 }
 ```
