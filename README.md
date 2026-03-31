@@ -6,7 +6,7 @@
  
 ## Pipeline
  
-![DINO-QPM Architecture](<placeholder>)
+![DINO-QPM Architecture](imgs/model-scheme_avg_pooling.pdf)
 
 ## Abstract
 
