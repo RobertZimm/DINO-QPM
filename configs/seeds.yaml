@@ -1,0 +1,19 @@
+# Permanently stored seeds for reproducible experiments.
+# Edit this file to change the seed pool; do NOT generate new seeds at runtime.
+#
+# seeds : shared default pool for both local and slurm entrypoints.
+#   - running main.py directly without --seed falls back to seeds[0]
+#   - slurm_master.py --num-seeds N uses seeds[0..N-1]
+#   Maximum N = 10.
+
+seeds:
+  - 2847391
+  - 6190452
+  - 3748291
+  - 9182736
+  - 5647382
+  - 1093847
+  - 8374619
+  - 4728391
+  - 7391028
+  - 2938475

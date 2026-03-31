@@ -1,0 +1,44 @@
+arch: dinov2 # options: dino, dinov2, dinov3, resnet50
+
+# Available model_types are:
+# small, base, large, giant; also with _reg
+# neco_small, neco_base; also with _reg
+# sinder
+model_type: base_reg
+
+mlp: True # whether to use an mlp on top of the features; only for dinov2
+
+use_prototypes: False
+
+sldd_mode: qpm # options: qsenn, sldd, qpm
+
+dataset: ImageNet # \in [CUB2011, StanfordCars, ImageNet, Fitzpatrick17k]
+
+# Whether to load pre-computed feature maps/vectors from disk.
+# If False, the frozen backbone is run live during training instead.
+# Used for VFM datasets handled through DinoData (CUB2011, StanfordCars,
+# ImageNet, Fitzpatrick17k). Ignored for non-VFM architectures (e.g. resnet50).
+load_pre_computed: False
+
+log_dir_prefix: DINO-QPM
+
+default_save_dir: /home/zimmerro/tmp/saveCCR
+
+# Sweep configuration for slurm_master.py
+# Format:
+#   sweep:
+#     params: [param1, param2, ...]      # List of parameter names
+#     combinations:                       # List of value tuples (in same order as params)
+#       - [val1, val2, ...]
+#       - [val1, val2, ...]
+#     seeds: [[0, 1], [2, 3, 4, 5]]       # Optional: indices of combos that share seeds
+#                                         # If omitted, each combo gets unique seeds
+
+sweep: null
+# sweep:
+#   params: ["arch", "sldd_mode"] # List of parameter names to sweep; if no sweep set to null
+#   combinations: # List of value tuples (in same order as params); if no sweep set to null
+#     - ["dinov2", "qpm"]     # 2
+#     - ["dinov2", "qsenn"]
+#     - ["dinov2", "sldd"]
+#   seeds: [[0, 1, 2,]]
