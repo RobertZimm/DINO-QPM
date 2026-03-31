@@ -9,11 +9,11 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 <table width="100%">
   <tr valign="middle">
     <td width="50%" align="center">
-      <img src="imgs/model-scheme_avg_pooling.svg" alt="Pipeline Diagram" width="100%">
+      <img src="res/model-scheme_avg_pooling.svg" alt="Pipeline Diagram" width="100%">
     </td>
     <td width="50%">
-      <<p>This text should now be vertically centred in both your IDE and on GitHub.</p>
-      <p>Ensure you only use HTML tags like &lt;p&gt;, &lt;b&gt;, or &lt;br&gt; inside this right-hand column. If you try to use standard Markdown like asterisks for bolding inside an HTML table, your IDE will likely break the formatting.</p>>
+      <p>This text should now be vertically centred in both your IDE and on GitHub.</p>
+      <p>Ensure you only use HTML tags like &lt;p&gt;, &lt;b&gt;, or &lt;br&gt; inside this right-hand column. If you try to use standard Markdown like asterisks for bolding inside an HTML table, your IDE will likely break the formatting.</p>
     </td>
   </tr>
 </table>
