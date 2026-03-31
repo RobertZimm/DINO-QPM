@@ -45,13 +45,7 @@ Expected dataset folders:
 ```text
 ~/tmp/Datasets/
 ├── CUB200/
-├── StanfordCars/
-├── FGVCAircraft/
-├── Fitzpatrick17k/
-├── TravelingBirds/
-└── ImageNet/ILSVRC/Data/CLS-LOC/
-    ├── train/
-    └── val/
+└── StanfordCars/
 ```
 
 ## Configuration
