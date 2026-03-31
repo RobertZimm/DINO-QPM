@@ -6,16 +6,17 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 <br>
 
 ## DINO-QPM Pipeline
-<div style="display: flex; align-items: center;">
-  <div style="width: 50%; border-right: 2px solid #ccc; padding-right: 20px; margin-right: 20px; display: flex; justify-content: center; align-items: center;">
-    <img src="imgs/model-scheme_avg_pooling.png" alt="Pipeline Diagram" style="width: 80%;">
-  </div>
-
-  <div style="width: 50%;">
-    <p>This text is now perfectly centred vertically relative to the image on the left.</p>
-    <p>Because the image's container is also a flexbox, the 80% width image is now floating perfectly in the middle of its designated left-hand space.</p>
-  </div>
-</div>
+<table width="100%">
+  <tr valign="middle">
+    <td width="50%" align="center">
+      <img src="imgs/model-scheme_avg_pooling.png" alt="Pipeline Diagram" width="80%">
+    </td>
+    <td width="50%">
+      <p>This text should now be vertically centred in both your IDE and on GitHub.</p>
+      <p>Ensure you only use HTML tags like &lt;p&gt;, &lt;b&gt;, or &lt;br&gt; inside this right-hand column. If you try to use standard Markdown like asterisks for bolding inside an HTML table, your IDE will likely break the formatting.</p>
+    </td>
+  </tr>
+</table>
 
 ## Code
 
