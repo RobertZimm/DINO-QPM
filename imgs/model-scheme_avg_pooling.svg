@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<style>
+   @media (prefers-color-scheme: dark) {
+   :root {
+      filter: invert(100%) hue-rotate(180deg);
+   }
+   }
+</style>
 <svg
    width="88.588577mm"
    height="65.320747mm"
