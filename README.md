@@ -9,7 +9,7 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 <table width="100%">
   <tr valign="middle">
     <td width="50%" align="center">
-      <img src="imgs/model-scheme_avg_pooling.svg" alt="Pipeline Diagram" width="80%">
+      <img src="imgs/model-scheme_avg_pooling.svg" alt="Pipeline Diagram" width="100%">
     </td>
     <td width="50%">
       <p>This text should now be vertically centred in both your IDE and on GitHub.</p>
