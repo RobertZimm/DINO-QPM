@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<style>
-   @media (prefers-color-scheme: dark) {
-   :root {
-      filter: invert(100%) hue-rotate(180deg);
-   }
-   }
-</style>
 <svg
    width="88.588577mm"
    height="65.320747mm"
@@ -25,6 +18,15 @@
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:ns6="http://www.iki.fi/pav/software/textext/">
+
+   <style>
+     @media (prefers-color-scheme: dark) {
+       :root {
+          filter: invert(100%) hue-rotate(180deg);
+       }
+     }
+  </style>
+
   <sodipodi:namedview
      id="namedview1"
      pagecolor="#ffffff"
