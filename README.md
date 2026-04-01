@@ -11,7 +11,8 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
       <img src="res/model-scheme_avg_pooling.svg" alt="Pipeline Diagram" width="100%">
     </td>
     <td width="50%">
-      <p><b>What the figure shows:</b> the input image is first processed by a <b>frozen backbone</b> (e.g. DINOv2), producing patch-level feature maps and a global feature vector.</p>
+      <p><b>What the figure shows:</b> the input image is first processed by a <b>frozen backbone</b> (e.g. DINOv2), which can provide patch-level feature maps and a global vector (CLS-like token).</p>
+      <p>The depicted SVG corresponds to the <b>avg-pooling strategy</b>: the adapter builds its feature vector from pooled patch embeddings, i.e. it does <b>not</b> directly use the backbone global vector in this path.</p>
       <p>These frozen representations are transformed by the DINO-QPM adapter into class scores while preserving spatial structure for interpretability. The dense stage trains the adapter head, then the finetuning stage applies the selected sparse/interpretable mode (<b>qpm</b>, <b>qsenn</b>, or <b>sldd</b>).</p>
       <p><b>How this maps to the code path:</b> <code>main.py</code> resolves the command (<code>train</code>, <code>evaluate</code>, <code>inference</code>), configures dataset root resolution, and dispatches to the corresponding CLI. In training, dense training/evaluation runs first, optional finetuning runs second, and the final model is evaluated and saved.</p>
     </td>
@@ -76,7 +77,7 @@ Notes:
 
 - `mlp: false` on DINO variants routes to the corresponding `_no_mlp` model config.
 - `dataset` is configured at top level (not nested under `data`).
-- `load_pre_computed` is meaningful for vision foundation model pipelines.
+- `load_pre_computed` is a top-level setting in `dino_qpm/configs/main_training.yaml` and is meaningful for vision foundation model pipelines.
 
 Typical parameters to check first:
 
@@ -92,10 +93,16 @@ There are multiple strategies for how frozen backbone outputs are processed befo
 
 Key strategy knobs:
 
-- `load_pre_computed`: use precomputed maps/vectors from disk vs on-the-fly frozen-backbone forward passes.
+- `load_pre_computed` (top level, in `main_training.yaml`): use precomputed maps/vectors from disk vs on-the-fly frozen-backbone forward passes.
 - `data.layer_num`: choose which late backbone layer output is used.
 - `model.feat_vec_type`: choose feature vector construction (`normal`, `avg_pooling`, `max_pooling`, `mean_avg_pooling`).
 - `model.arch_type`: adapter fusion style (`normal` vs `concat`).
+
+Global-vector usage note:
+
+- `model.feat_vec_type: normal` uses the backbone global vector directly.
+- `model.feat_vec_type: mean_avg_pooling` combines global-vector and pooled-patch information.
+- The SVG shown in this README corresponds to the avg-pooling style, where the adapter feature vector is derived from patch embeddings.
 
 Where to look in code:
 
@@ -198,8 +205,9 @@ Useful options:
 Typical workflow:
 
 1. Edit `dino_qpm/configs/main_training.yaml` to choose `dataset`, `arch`, `model_type`, and `sldd_mode`.
-2. Edit the selected model config (for example `dino_qpm/configs/models/qpm/dinov2.yaml`) to set strategy keys like `load_pre_computed`, `data.layer_num`, `model.arch_type`, and `model.feat_vec_type`.
-3. Run `python main.py train` and compare results/interpretability artifacts under the generated run directory.
+2. Set top-level strategy switches in `dino_qpm/configs/main_training.yaml` (for example `load_pre_computed`).
+3. Edit the selected model config (for example `dino_qpm/configs/models/qpm/dinov2.yaml`) to set strategy keys like `data.layer_num`, `model.arch_type`, and `model.feat_vec_type`.
+4. Run `python main.py train` and compare results/interpretability artifacts under the generated run directory.
 
 Example strategy toggles:
 
