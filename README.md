@@ -10,6 +10,7 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
   <tr valign="middle">
     <td width="50%" align="center">
       <img src="res/model-scheme_avg_pooling.svg" alt="DINO-QPM Architecture" width="100%">
+      <br>
     </td>
     <td width="50%">
       <p>The input image is first processed by a <b>frozen backbone</b> (e.g. DINOv2), which can provide patch-level feature maps and a global vector (CLS-like token).</p>
@@ -19,12 +20,6 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
   </tr>
 </table>
 <br>
-
-<p><b>How this maps to the code path:</b> <code>main.py</code> resolves the command (<code>train</code>, <code>evaluate</code>, <code>inference</code>), configures dataset root resolution, and dispatches to the corresponding CLI. In training, dense training/evaluation runs first, optional finetuning runs second, and the final model is evaluated and saved.</p>
-
-<p align="center">
-  <img src="res/qpm_pipeline.svg" alt="Pipeline Diagram" width="80%">
-</p>
 
 ## Code
 
@@ -147,6 +142,12 @@ Global option (before subcommand):
 - `--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}`
 
 ### 1. Training
+
+<p align="center">
+  <img src="res/qpm_pipeline.svg" alt="Pipeline Diagram" width="80%">
+  <br>
+  <em>An overview of the DINO-QPM training pipeline</em>
+</p>
 
 Note: `train` runs evaluation by default.
 It evaluates the dense model after dense training and, when finetuning is enabled, evaluates the finetuned model as well.
