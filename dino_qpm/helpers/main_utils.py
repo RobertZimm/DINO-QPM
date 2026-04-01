@@ -32,8 +32,7 @@ def create_log_dir_path(config: dict,
                         dataset_key: str,
                         sldd_mode: str,
                         model_type: str,
-                        seed: int | None,
-                        use_prototypes: bool = False) -> Path:
+                        seed: int | None) -> Path:
     """
     Create a log directory based on the provided configuration and parameters.
 
@@ -53,9 +52,7 @@ def create_log_dir_path(config: dict,
     if log_dir_prefix is not None:
         base = base / log_dir_prefix
 
-    model_mode = f"proto_{sldd_mode}" if use_prototypes else sldd_mode
-
-    base = base / arch / dataset_key / model_mode / model_type
+    base = base / arch / dataset_key / sldd_mode / model_type
     # For dinov2 with mlp=False, append no_mlp level
     if arch == "dinov2" and not config.get("mlp", True):
         base = base / "no_mlp"
@@ -110,8 +107,7 @@ def create_log_dir(input_ft_dir: str | None,
                    dataset_key: str,
                    sldd_mode: str,
                    model_type: str,
-                   seed: int | None = None,
-                   use_prototypes: bool = False) -> Path:
+                   seed: int | None = None) -> Path:
     print("--- Creating log directory ---")
 
     if input_ft_dir is None:
@@ -125,8 +121,7 @@ def create_log_dir(input_ft_dir: str | None,
                                       dataset_key=dataset_key,
                                       sldd_mode=sldd_mode,
                                       model_type=model_type,
-                                      seed=seed,
-                                      use_prototypes=use_prototypes)
+                                      seed=seed)
 
     else:
         log_dir = find_file_in_hierarchy(
@@ -156,8 +151,6 @@ def init_dense_params(config: dict,
     arch = config["arch"]
     n_classes = dataset_constants[dataset]["num_classes"]
     mode = "dense"
-    use_prototypes = config["model"].get("use_prototypes", False)
-
     sys.setrecursionlimit(10000)
 
     job_name = "local_run"
@@ -181,7 +174,7 @@ def init_dense_params(config: dict,
 
     return (is_rerun,
             dataset_key, arch, mode, job_name, job_id,
-            array_job_id, task_id, run_number, n_classes, seed, use_prototypes)
+            array_job_id, task_id, run_number, n_classes, seed)
 
 
 def init_ft_params(input_ft_dir: str | None,

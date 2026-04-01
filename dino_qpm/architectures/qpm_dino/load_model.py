@@ -264,7 +264,7 @@ def load_final_model(config: dict,
         raise NotImplementedError(
             f"Loading not implemented for model type {model_type}")
 
-    if config["model"].get("use_prototypes", False):
+    if "proto_layer.prototypes" in state_dict and hasattr(model, "proto_layer") and model.proto_layer is not None:
         # Set model.proto_layer.prototypes to have the size according to loaded state dict
         prots = state_dict["proto_layer.prototypes"]
         prev_prot = state_dict["proto_layer._previous_prototypes"]

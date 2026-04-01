@@ -29,7 +29,7 @@ class Dino2Div(nn.Module, FinalLayer):
                   f"Forcing n_features to dino_channels as n_layers=0.")
             self.n_features = self.dino_channels
 
-        if self.use_prototypes and self.proto_method != "pipnet":
+        if self.proto_layer is not None and self.proto_method != "pipnet":
             n_features = self.n_prototypes
 
         else:
@@ -84,7 +84,7 @@ class Dino2Div(nn.Module, FinalLayer):
         # corresponding prototype
         # feat_vec entry of prototype becomes some sort of pooling (max/average)
         # over that feature map
-        if self.use_prototypes:
+        if self.proto_layer is not None:
             if self.proto_method == "pipnet":
                 # Apply softmax over embedding dimension D (prototype dimension) of feat_maps
                 # to get normalized similarity scores with prototypes
@@ -288,7 +288,7 @@ class Dino2Div(nn.Module, FinalLayer):
         return feat_maps, feat_vec
 
     def get_feat_vec_embeddings(self, x: torch.Tensor, epoch: int = None):
-        if self.use_prototypes:
+        if self.proto_layer is not None:
             similarity_maps, feat_vec, feat_maps = self.pre_transform_forward(
                 x, ret_pre_feat_maps=True, epoch=epoch)
         else:
@@ -467,7 +467,6 @@ class Dino2Div(nn.Module, FinalLayer):
             "relu_after_scaling", False)
 
         self.learn_masking = config["model"]["masking"] == "learn_masking"
-        self.use_prototypes = config["model"].get("use_prototypes", False)
         self.proto_method = config["model"].get("proto_method", "other")
 
         if config["model"]["masking"] == "none":
@@ -515,7 +514,7 @@ class Dino2Div(nn.Module, FinalLayer):
         self.avgpool = torch.nn.AdaptiveAvgPool2d((1, 1))
         self.maxpool = torch.nn.AdaptiveMaxPool2d((1, 1))
 
-        if self.use_prototypes and self.proto_method != "pipnet":
+        if config["model"].get("n_prototypes", 0) > 0 and self.proto_method != "pipnet":
             self.n_prototypes = config["model"]["n_prototypes"]
 
             # Initialize the prototype layer with proper parameters
@@ -529,7 +528,7 @@ class Dino2Div(nn.Module, FinalLayer):
             self.proto_layer = None
 
         if self.scale_feat_vec:
-            if self.use_prototypes:
+            if self.proto_layer is not None:
                 dim = self.n_prototypes
             else:
                 dim = self.n_features

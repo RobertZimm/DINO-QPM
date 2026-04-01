@@ -1,11 +1,11 @@
 import schedulefree
 import torch
 from dino_qpm.helpers.data import select_mask
-from dino_qpm.training.losses.FeatureDiversityLoss import FeatureDiversityLoss, PrototypeDiversityLoss
+from dino_qpm.training.losses.FeatureDiversityLoss import FeatureDiversityLoss
 from dino_qpm.training.losses.general import get_acc, get_l1_loss, feature_similarity_loss, get_iou_loss, \
     get_l1_weights_loss, get_l1_fv_loss
 from tqdm import tqdm
-from dino_qpm.training.utils import VariableLossLogPrinter, TrainingLogger, get_prototype_training_logs
+from dino_qpm.training.utils import VariableLossLogPrinter, TrainingLogger
 
 from dino_qpm.training.losses.FeatureDiversityLoss import FeatureDiversityLoss
 from dino_qpm.training.losses.ConservationOfSimilarity import ConservationOfFeatureSimilarity
@@ -13,7 +13,6 @@ from dino_qpm.training.optim import get_optimizer
 from tqdm import trange
 
 from dino_qpm.training.losses.FeatureGroundlingLoss import get_feature_grounding_loss
-from dino_qpm.training.losses.RepresentativePrototypeLoss import get_repr_prot_loss
 from dino_qpm.architectures.registry import is_vision_foundation_model
 
 
@@ -30,7 +29,7 @@ def train(model: torch.nn.Module,
           alignment_info=None,
           logger: TrainingLogger = None,
           cofs: ConservationOfFeatureSimilarity = None,
-          pdl: PrototypeDiversityLoss = None,
+          pdl=None,
           backbone_model: torch.nn.Module = None) -> torch.nn.Module:
     """
     Train a model for one epoch.
@@ -185,7 +184,7 @@ def train(model: torch.nn.Module,
                        mask=selected_mask,
                        feat_vec=final_features)
 
-        if cofs is not None and config["model"].get("use_prototypes", False) and cofs.gamma > eps:
+        if cofs is not None and cofs.gamma > eps:
             cos_loss = cofs(frozen_embeddings=on_device[:, :-1, :],
                             feature_embeddings=model.feat_embeddings,
                             proto_sim=feature_maps.reshape(feature_maps.shape[0],
@@ -220,13 +219,8 @@ def train(model: torch.nn.Module,
                                                         target=target_on_device,
                                                         weight=model.linear.weight)
 
-        if rpl_weight > eps and model.proto_layer is not None:
-            rpl_loss = get_repr_prot_loss(feat_embeddings=model.feat_embeddings,
-                                          prototypes=model.proto_layer.prototypes,
-                                          selection=model.selection if hasattr(
-                                              model, "selection") else None,
-                                          similarity_method=model.proto_layer.similarity_method,
-                                          gamma=model.proto_layer.rbf_gamma if hasattr(model.proto_layer, 'rbf_gamma') else 1e-3)
+        if rpl_weight > eps:
+            rpl_loss = torch.tensor(0.0, device=device)
 
         if l1_w_weight > eps:
             l1_w_loss = get_l1_weights_loss(model=model)
@@ -247,7 +241,7 @@ def train(model: torch.nn.Module,
         if pdl is not None and abs(pdl_loss) > eps:
             total_loss += pdl_loss
 
-        if cofs is not None and config["model"]["use_prototypes"] and abs(cos_loss) > eps:
+        if cofs is not None and abs(cos_loss) > eps:
             total_loss += cos_loss
 
         if fdl_avg is not None and abs(fdl_avg_loss) > eps:
@@ -299,7 +293,7 @@ def train(model: torch.nn.Module,
 
             logs["PDL"] = VariableLossPrinter.losses["PDL"].avg
 
-        if cofs is not None and config["model"].get("use_prototypes", False) and abs(cos_loss) > eps:
+        if cofs is not None and abs(cos_loss) > eps:
             VariableLossPrinter.log_loss(
                 "CoFS", cos_loss.item(), on_device.size(0))
 
@@ -360,11 +354,6 @@ def train(model: torch.nn.Module,
 
         iterator.set_description(
             f"Train Epoch:{epoch} | {VariableLossPrinter.get_loss_string()}")
-
-    # Add prototype-specific logs
-    prototype_logs = get_prototype_training_logs(
-        model, alignment_info, epoch, mode, config)
-    logs.update(prototype_logs)
 
     # Log all training metrics using the logger
     if logger:
@@ -470,12 +459,6 @@ def test(model: torch.nn.Module,
         f"CE-Loss": VariableLossPrinter.losses["CE"].avg
     }
 
-    if config["model"].get("use_prototypes", False):
-        # Add prototype-specific logs for test phase
-        prototype_logs = get_prototype_training_logs(
-            model, alignment_info, epoch, mode, config)
-        logs.update(prototype_logs)
-
     # Log all test metrics using the logger
     if logger:
         logger.log(logs, epoch, "test")
@@ -504,37 +487,19 @@ def train_n_epochs(model,
     """
     # Initialize the logger
     logger = TrainingLogger(log_dir, mode) if log_dir else None
-    use_prototypes = config["model"].get("use_prototypes", False)
-
     optimizer, schedule, epochs = get_optimizer(model=model,
                                                 schedulingClass=optimization_schedule,
                                                 mode=mode,
                                                 config=config)
-    pdl_weight = config[mode].get("pdl", 0)
-    pdl = PrototypeDiversityLoss(pdl_weight,
-                                 model.proto_layer.prototypes) if use_prototypes and pdl_weight > 0 else None
+    pdl = None
 
     fdl = FeatureDiversityLoss(beta,
                                model.linear)
 
-    if use_prototypes:
-        cofs = ConservationOfFeatureSimilarity(
-            k=config[mode].get("cofs_k", 100),
-            per_prototype=config[mode].get("per_prototype", False),
-            gamma=config[mode].get("cofs_weight", 1),
-            similarity_method=model.proto_layer.similarity_method if hasattr(
-                model, 'proto_layer') and model.proto_layer is not None else 'cosine',
-            rbf_gamma=model.proto_layer.rbf_gamma if hasattr(model, 'proto_layer') and model.proto_layer is not None and hasattr(model.proto_layer, 'rbf_gamma') else 1e-3)
+    cofs = None
 
-    else:
-        cofs = None
-
-    if not use_prototypes:
-        fdl_avg = FeatureDiversityLoss(beta_avg,
-                                       model.linear)
-
-    else:
-        fdl_avg = None
+    fdl_avg = FeatureDiversityLoss(beta_avg,
+                                   model.linear)
 
     # Initialize prototype layer if needed
     device = torch.device(

@@ -126,7 +126,7 @@ dense:
   # params means hyperparameters like batch_size, epochs; loss means beta and gamma
 
   # Dense Training Params
-  epochs: 10 # 25
+  epochs: 25
   weight_decay: 0.0007
   batch_size: 32 # originally for batch_norm=True equal to 32
   start_lr: 0.001

@@ -498,7 +498,7 @@ def evaluate(config: dict,
         )
 
         # CKA analysis
-        if config["model"].get("use_prototypes", False):
+        if hasattr(model, "proto_layer") and model.proto_layer is not None:
             cka_metrics = compute_cka_analysis(
                 model=model,
                 dense_model=dense_model,
@@ -531,7 +531,7 @@ def evaluate(config: dict,
 
         else:
             print(
-                "\nModel does not use prototypes, skipping CKA analysis and prototype similarity metrics.")
+                "\nModel has no prototype layer, skipping CKA analysis and prototype similarity metrics.")
 
     if projection_info_path is not None:
         if isinstance(projection_info_path, str):

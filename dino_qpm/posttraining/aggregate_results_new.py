@@ -56,9 +56,8 @@ CONFIG_KEYS_OF_INTEREST: list = [
                   "no_b", "no_r", "mode", "model_type"]},
 ]
 
-# Keys to ignore when ``use_prototypes`` is False in the config.
-# These are prototype-specific parameters that are irrelevant when
-# prototypes are disabled.  Uses dot-notation (``section.key``).
+# Prototype-specific keys excluded from hash/comparison. Uses dot-notation
+# (``section.key``).
 IGNORE_WHEN_NO_PROTOTYPES: list[str] = [
     "dense.cofs_weight", "dense.cofs_k",
     "finetune.cofs_weight", "finetune.cofs_k",
@@ -67,7 +66,7 @@ IGNORE_WHEN_NO_PROTOTYPES: list[str] = [
     "dense.per_prototype", "model.init_method", "model.n_prototypes",
     "model.pooling_type", "model.proto_init_strat", "model.proto_method",
     "model.proto_similarity_method", "model.proto_softmax_tau", "model.proto_use_feat_vec",
-    "model.use_prototypes", "model.apply_relu", "model.proto_pre_pooling_mode"
+    "model.apply_relu", "model.proto_pre_pooling_mode"
 ]
 
 
@@ -123,35 +122,27 @@ def _extract_keys_of_interest(
                 top_level.add(entry)
         # silently skip anything else
 
-    # --- IGNORE_WHEN_NO_PROTOTYPES: inject exclusions BEFORE extraction
-    #     so they take precedence over CONFIG_KEYS_OF_INTEREST ----------
-    use_proto = config.get("use_prototypes", False)
-    if not use_proto:
-        dense_cfg = config.get("dense", {})
-        if isinstance(dense_cfg, dict):
-            use_proto = dense_cfg.get("use_prototypes", False)
-    if not use_proto:
-        for dotted in IGNORE_WHEN_NO_PROTOTYPES:
-            parts = dotted.split(".", 1)
-            if len(parts) == 2:
-                sec, leaf = parts
-                # If the section is a full include, demote it to
-                # an exclude-map entry so we can drop the leaf.
-                if sec in top_level:
-                    top_level.discard(sec)
-                    exclude_map.setdefault(sec, set()).add(leaf)
-                elif sec in exclude_map:
-                    exclude_map[sec].add(leaf)
-                else:
-                    # Section was included via sub_keys; remove the leaf
-                    if sec in sub_keys:
-                        sub_keys[sec].discard(leaf)
-                        if not sub_keys[sec]:
-                            del sub_keys[sec]
-            elif len(parts) == 1:
-                top_level.discard(parts[0])
-                exclude_map.pop(parts[0], None)
-                sub_keys.pop(parts[0], None)
+    for dotted in IGNORE_WHEN_NO_PROTOTYPES:
+        parts = dotted.split(".", 1)
+        if len(parts) == 2:
+            sec, leaf = parts
+            # If the section is a full include, demote it to
+            # an exclude-map entry so we can drop the leaf.
+            if sec in top_level:
+                top_level.discard(sec)
+                exclude_map.setdefault(sec, set()).add(leaf)
+            elif sec in exclude_map:
+                exclude_map[sec].add(leaf)
+            else:
+                # Section was included via sub_keys; remove the leaf
+                if sec in sub_keys:
+                    sub_keys[sec].discard(leaf)
+                    if not sub_keys[sec]:
+                        del sub_keys[sec]
+        elif len(parts) == 1:
+            top_level.discard(parts[0])
+            exclude_map.pop(parts[0], None)
+            sub_keys.pop(parts[0], None)
 
     extracted: Dict = {}
 

@@ -49,8 +49,7 @@ general_config = load_general_config()
 def build_conf_filename(dataset: str = None,
                         sldd_mode: str = None,
                         arch: str = None,
-                        mlp: bool = None,
-                        use_prototypes: bool | None = None) -> str:
+                        mlp: bool = None) -> str:
     """Build config filename from provided values or fall back to general_config."""
     dataset = dataset or general_config.get("dataset", "")
     sldd_mode = sldd_mode or general_config.get("sldd_mode", "")
@@ -58,25 +57,9 @@ def build_conf_filename(dataset: str = None,
     if mlp is None:
         mlp = general_config.get("mlp", True)
 
-    if use_prototypes is None:
-        use_prototypes = general_config.get("use_prototypes", None)
-        if use_prototypes is None:
-            model_cfg = general_config.get("model", {})
-            if isinstance(model_cfg, dict):
-                use_prototypes = model_cfg.get("use_prototypes", False)
-            else:
-                use_prototypes = False
-
     # For dinov2 with mlp=False, use dinov2_no_mlp.yaml
     if "dino" in arch and not mlp:
         arch = f"{arch}_no_mlp"
-
-    # Prefer prototype-specific config files when prototypes are enabled.
-    # Fallback to the base arch config if no dedicated proto file exists.
-    if use_prototypes:
-        proto_filename = f"{sldd_mode}/{arch}_proto.yaml"
-        if get_conf_path(proto_filename).exists():
-            return proto_filename
 
     return f"{sldd_mode}/{arch}.yaml"
 
@@ -113,13 +96,6 @@ def load_config(filename: str = None) -> dict:
     # Merge general_config into the loaded config (general_config values take precedence)
     for key, value in general_config.items():
         config[key] = value
-
-    # Keep backward-compatible top-level switch in sync with runtime checks.
-    # Most training/eval code reads config["model"]["use_prototypes"].
-    if "use_prototypes" in config:
-        if "model" not in config or config["model"] is None:
-            config["model"] = {}
-        config["model"]["use_prototypes"] = config["use_prototypes"]
 
     return config
 

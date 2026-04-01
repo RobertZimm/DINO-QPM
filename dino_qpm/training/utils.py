@@ -784,7 +784,7 @@ def get_prototype_training_logs(
     """
     logs = {}
 
-    if not getattr(model, 'use_prototypes', False) or model.proto_layer is None:
+    if not hasattr(model, 'proto_layer') or model.proto_layer is None:
         return logs
 
     # Basic prototype information

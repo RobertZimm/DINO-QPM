@@ -630,8 +630,8 @@ def vis_pair(
         plt.subplots_adjust(wspace=0, hspace=0)
 
         # Add curly brace annotations for feature/prototype groupings
-        feature_label = "Prototypes" if getattr(
-            model, 'use_prototypes', False) else "Features"
+        feature_label = "Prototypes" if hasattr(
+            model, 'proto_layer') and model.proto_layer is not None else "Features"
         n_cols = len(visualizations) + 1  # +1 for image column
 
         # Calculate column positions (offset by 1 for image column)
@@ -899,7 +899,7 @@ def run_cls_comparison(folder: str | Path,
         pairs_with_info = [(list(pair), None) for pair in pairs]
 
     for pair, pair_info in pairs_with_info:
-        if model.use_prototypes:
+        if hasattr(model, 'proto_layer') and model.proto_layer is not None:
             if "projection" in str(folder):
                 prot_info_pth = folder / "prototype_info.json"
             else:
