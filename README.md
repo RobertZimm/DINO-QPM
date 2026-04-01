@@ -33,6 +33,18 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 </table>
 <br>
 
+## Results
+
+<p align="center">
+  <img src="res/table_sota.svg" alt="Pipeline Diagram" width="100%">
+</p>
+
+<div align="center">
+
+*Comparison with state-of-the-art interpretable models. We report Accuracy, Plausibility, SID@5, Class-Independence, and Contrastiveness (all metrics in %). Features of a model are localised if they have a direct connection to the feature vector used for classification. The Plausibility metric is evaluated only on CUB-2011 due to the availability of segmentation masks. Dense* $\boldsymbol{F}^{\text{froz}}$ *is the dense model of DINO-QPM and DINOv2* $\boldsymbol{f}_{\text{CLS}}^{\text{froz}}$ *Linear Probe is a linear probe trained on top of the frozen `CLS` representation. For DINO-SLDD and DINO-QSENN, we employ a pipeline closely resembling our proposed method, with the exception of the feature selection mechanisms, which follow prior work. [^1][^2]*
+
+</div>
+
 ## DINO-QPM: A Global Interpretability Adapter
 
 <p align="center">
@@ -41,16 +53,13 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 
 <div align="center">
 
-*Comparison of a Brewer's Blackbird image with a Rusty Blackbird image. From the selected features* $\mathcal{F}^{\ast}$, $N_f^{\hat{c}}=5$ *utilised features were selected for both classes using the QP; the corresponding feature maps from* $\boldsymbol{F}$ *are visualised as saliency maps. Both classes share 4 out of the 5 features and can thus be distinguished by the non-shared features. Notably, the model differentiates the Brewer's Blackbird using feature 24, which localises the beak. This aligns perfectly with established ornithological expertise, where beak morphology is considered a primary diagnostic trait.*
+*Comparison of a Brewer's Blackbird image with a Rusty Blackbird image. From the selected features* $\mathcal{F}^{\ast}$, $N_f^{\hat{c}}=5$ *utilised features were selected for both classes using the QP; the corresponding feature maps from* $\boldsymbol{F}$ *are visualised as saliency maps. Both classes share 4 out of the 5 features and can thus be distinguished by the non-shared features. Notably, the model differentiates the Brewer's Blackbird using feature 24, which localises the beak. This aligns perfectly with established ornithological expertise, where beak morphology is considered a primary diagnostic trait.[^3][^4]*
 
 </div>
 
 ## Code
 
-### Prerequisite
-
-- A Conda distribution must be installed first (Anaconda or Miniconda).
-- Installation instructions: https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+Before being able to run the installation a Conda distribution must be installed (Anaconda or Miniconda).[^5]
 
 ### Installation
 
@@ -61,13 +70,6 @@ conda env create -f environment.yml
 conda activate DINO-QPM
 python -m pip install --upgrade pip
 python -m pip install -e .
-```
-
-Quick sanity checks:
-
-```bash
-python -c "import dino_qpm; print('ok')"
-python main.py --help 2>/dev/null || true
 ```
 
 ### Dataset Setup
@@ -188,4 +190,8 @@ Image Classification},
 }
 ```
 
-[^1]: 
+[^1]: Norrenbrock, Thomas, Marco Rudolph, and Bodo Rosenhahn. *Q-senn: Quantized self-explaining neural networks*. Proceedings of the AAAI Conference on Artificial Intelligence. Vol. 38. No. 19. 2024.
+[^2]: Norrenbrock, Thomas, Marco Rudolph, and Bodo Rosenhahn. *Take 5: Interpretable Image Classification with a Handful of Features*.
+[^3]: Rusty Blackbird Identification, *All About Birds*, Cornell Lab of Ornithology. https://www.allaboutbirds.org/guide/Rusty_Blackbird/id
+[^4]: Carl Savignac. *COSEWIC Assessment and Status Report on the Rusty Blackbird, Euphagus Carolinus, in Canada*. Committee on the Status of Endangered Wildlife in Canada, Ottawa, 2006.
+[^5]: [Anaconda Installation Instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
