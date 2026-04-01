@@ -14,7 +14,6 @@ from tqdm import trange
 
 from dino_qpm.training.losses.FeatureGroundlingLoss import get_feature_grounding_loss
 from dino_qpm.training.losses.RepresentativePrototypeLoss import get_repr_prot_loss
-from dino_qpm.architectures.qpm_dino.load_model import load_model as load_backbone_model
 from dino_qpm.architectures.registry import is_vision_foundation_model
 
 
