@@ -375,7 +375,8 @@ def evaluate(config: dict,
 
     if save_features:
         num_classes = dataset_constants[dataset]["num_classes"]
-        resolved_seed = int(config.get("added_params", {}).get("seed", 383534468))
+        resolved_seed = int(config.get(
+            "added_params", {}).get("seed", 383534468))
         save_feat_loaders(
             seed=resolved_seed,
             log_folder=base_log_dir if mode == "dense" else base_log_dir / "ft",
