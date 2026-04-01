@@ -68,7 +68,36 @@ Expected dataset folders:
 For `CUB200`, the code expects the standard `CUB_200_2011` substructure (e.g. `images`, `images.txt`, `train_test_split.txt`).
 For `StanfordCars`, it expects dataset artifacts such as `car_devkit` and `cars_train`.
 
-### Configuration
+### Run the Code
+
+Entry point:
+
+- `main.py`
+
+Supported subcommands:
+
+- `train`
+- `inference`
+- `evaluate`
+
+### 1. Training
+
+<p align="center">
+  <img src="res/qpm_pipeline.svg" alt="Pipeline Diagram" width="60%">
+  <br>
+  <em>An overview of the DINO-QPM training pipeline</em>
+</p>
+
+Note: `train` runs evaluation by default.
+It evaluates the dense model after dense training and, when finetuning is enabled, evaluates the finetuned model as well.
+
+Minimal run using defaults:
+
+```bash
+python main.py train
+```
+
+#### Configuration
 
 Configuration is resolved in two steps:
 
@@ -88,8 +117,6 @@ Typical parameters to check first:
 - `model_type`
 - `sldd_mode`
 - Train/finetune hyperparameters in the corresponding config files
-
-### Frozen Backbone Output Strategies
 
 There are multiple strategies for how frozen backbone outputs are processed before classification. These are implemented in the code and can be switched via config.
 
@@ -111,61 +138,6 @@ Where to look in code:
 - Backbone data handling and precompute/on-the-fly logic: `dino_qpm/dataset_classes/data/data_loaders.py`
 - Adapter feature processing combinations: `dino_qpm/architectures/qpm_dino/dino_model.py`
 - Training/eval forward path that uses these settings: `dino_qpm/training/train.py`, `dino_qpm/evaluation/utils.py`, `dino_qpm/inference/main.py`
-
-Example config snippet:
-
-```yaml
-load_pre_computed: true
-
-data:
-  layer_num: 0
-
-model:
-  arch_type: normal
-  feat_vec_type: avg_pooling
-```
-
-### Run the Code
-
-Entry point:
-
-- `main.py`
-
-Supported subcommands:
-
-- `train`
-- `inference`
-- `evaluate`
-
-Global option (before subcommand):
-
-- `--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}`
-
-### 1. Training
-
-<p align="center">
-  <img src="res/qpm_pipeline.svg" alt="Pipeline Diagram" width="80%">
-  <br>
-  <em>An overview of the DINO-QPM training pipeline</em>
-</p>
-
-Note: `train` runs evaluation by default.
-It evaluates the dense model after dense training and, when finetuning is enabled, evaluates the finetuned model as well.
-
-```bash
-python main.py train --seed 504405 --run_number 0
-```
-
-Common optional args:
-
-- `--log_dir <path>`
-- `--multi-seed`
-
-Minimal run using defaults:
-
-```bash
-python main.py train
-```
 
 ### 2. Inference
 
@@ -207,28 +179,6 @@ Useful options:
 - `--config-file /path/to/config.yaml`
 - `--dataset <dataset_name>`
 - `--save-features`
-
-## Code Usage: Switching Frozen-Backbone Strategies
-
-Typical workflow:
-
-1. Edit `dino_qpm/configs/main_training.yaml` to choose `dataset`, `arch`, `model_type`, and `sldd_mode`.
-2. Set top-level strategy switches in `dino_qpm/configs/main_training.yaml` (for example `load_pre_computed`).
-3. Edit the selected model config (for example `dino_qpm/configs/models/qpm/dinov2.yaml`) to set strategy keys like `data.layer_num`, `model.arch_type`, and `model.feat_vec_type`.
-4. Run `python main.py train` and compare results/interpretability artifacts under the generated run directory.
-
-Example strategy toggles:
-
-- Fast iteration with cached frozen features: `load_pre_computed: true`
-- Strict live frozen-backbone execution: `load_pre_computed: false`
-- Classic pooling path: `arch_type: normal`, `feat_vec_type: avg_pooling`
-- Concat fusion path: `arch_type: concat`, `feat_vec_type: avg_pooling` or `max_pooling`
-
-Re-run editable install from repo root:
-
-```bash
-python -m pip install -e .
-```
 
 ## Citation
 
