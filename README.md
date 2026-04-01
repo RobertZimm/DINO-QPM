@@ -29,6 +29,15 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 </table>
 <br>
 
+## DINO-QPM: A Global Interpretality Adapter
+
+<p align="center">
+  <img src="res/class_comp_ink.svg" alt="Pipeline Diagram" width="100%">
+  <br>
+  <em>Comparison of a Brewer's Blackbird image with a Rusty Blackbird image. From the selected features $\mathcal{F}^{*}$, $N_f^{\hat{c}}=5$ utilised features were selected for both classes using the QP; the corresponding feature maps from $\boldsymbol{F}$ are visualised as saliency maps. Both classes share 4 out of the 5 features and can thus be distinguished by the non-shared features. Notably, the model differentiates the Brewer's Blackbird using feature 24, which localises the beak. This aligns perfectly with established ornithological expertise, where beak morphology is considered a primary diagnostic trait. </em>
+</p>
+
+
 ## Code
 
 ### Prerequisite
@@ -110,42 +119,19 @@ python main.py train
 Configuration is resolved in two steps:
 
 1. General config (`dino_qpm/configs/main_training.yaml`)
-2. Model config selected by `(sldd_mode, arch[, mlp])`, e.g. `qpm/dinov2.yaml`
+2. Model config in `dino_qpm/configs/models` selected by `(sldd_mode, arch[, mlp])`, e.g. `qpm/dinov2.yaml`
 
-Notes:
+Although our primary DINO-QPM configuration only utilises the patch embeddings from the frozen backbone, the codebase supports several alternative strategies. These can be configured via `model.arch_type` and `model.feat_vec_type`, which dictate exactly which features are extracted from the backbone and how they are processed following the MLP.
 
-- `mlp: false` on DINO variants routes to the corresponding `_no_mlp` model config.
-- `dataset` is configured at top level (not nested under `data`).
-- `load_pre_computed` is a top-level setting in `dino_qpm/configs/main_training.yaml` and is meaningful for vision foundation model pipelines.
+`model.arch_type`: Specifies whether the embedding of the CLS token returned by the frozen backbone is immediately concatenated with each of the patch embeddings (`concat`) or not (`normal`).
+Note: `concat` is only compatible with `model.feat_vec_type=avg_pooling` and `model.feat_vec_type=max_pooling`.
 
-Typical parameters to check first:
+`model.feat_vec_type`: Specifies what we demand the frozen backbone to return for downstream usage.
 
-- `dataset`
-- `arch`
-- `model_type`
-- `sldd_mode`
-- Train/finetune hyperparameters in the corresponding config files
-
-There are multiple strategies for how frozen backbone outputs are processed before classification. These are implemented in the code and can be switched via config.
-
-Key strategy knobs:
-
-- `load_pre_computed` (top level, in `main_training.yaml`): use precomputed maps/vectors from disk vs on-the-fly frozen-backbone forward passes.
-- `data.layer_num`: choose which late backbone layer output is used.
-- `model.feat_vec_type`: choose feature vector construction (`normal`, `avg_pooling`, `max_pooling`, `mean_avg_pooling`).
-- `model.arch_type`: adapter fusion style (`normal` vs `concat`).
-
-Global-vector usage note:
-
-- `model.feat_vec_type: normal` uses the backbone global vector directly.
-- `model.feat_vec_type: mean_avg_pooling` combines global-vector and pooled-patch information.
-- `model.feat_vec_type: avg_pooling` derives the adapter feature vector from patch embeddings.
-
-Where to look in code:
-
-- Backbone data handling and precompute/on-the-fly logic: `dino_qpm/dataset_classes/data/data_loaders.py`
-- Adapter feature processing combinations: `dino_qpm/architectures/qpm_dino/dino_model.py`
-- Training/eval forward path that uses these settings: `dino_qpm/training/train.py`, `dino_qpm/evaluation/utils.py`, `dino_qpm/inference/main.py`
+- `model.feat_vec_type=normal` uses the embedding of the CLS token for classification; patch embeddings are only used for visualisation purposes.
+- `model.feat_vec_type=mean_avg_pooling` .
+- `model.feat_vec_type=avg_pooling` derives the adapter feature vector from patch embeddings (DINO-QPM).
+- `model.feat_vec_type=max_pooling` derives the adapter feature vector from patch embeddings (DINO-QPM).
 
 ### 2. Inference
 
@@ -153,23 +139,7 @@ Where to look in code:
 python main.py inference \
   --model-path /path/to/model_checkpoint.pth \
   --image-path /path/to/image_or_folder \
-  --batch-size 32 \
-  --top-k 5 \
   --output-json /path/to/predictions.json
-```
-
-Optional visualization flags:
-
-```bash
---visualize-feature-maps
---viz-dir /path/to/viz_output
---viz-max-features 8
-```
-
-To disable feature-map visualizations explicitly:
-
-```bash
-python main.py inference --model-path /path/to/model_checkpoint.pth --image-path /path/to/images --no-visualize-feature-maps
 ```
 
 ### 3. Evaluation
@@ -181,12 +151,6 @@ python main.py evaluate \
   --eval-mode all \
   --output-json /path/to/eval_results.json
 ```
-
-Useful options:
-
-- `--config-file /path/to/config.yaml`
-- `--dataset <dataset_name>`
-- `--save-features`
 
 ## Citation
 
