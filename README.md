@@ -20,7 +20,7 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 
 ## Code
 
-## Installation (Conda + Editable Install)
+## Installation 
 
 From the repository root:
 
