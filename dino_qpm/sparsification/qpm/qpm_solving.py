@@ -10,7 +10,6 @@ from dino_qpm.sparsification.qpm.clique_utils import find_minimum_viable_thresho
 from dino_qpm.sparsification.qpm.iterativeConstraints.BalancedAssignment import ClassSparsity
 from dino_qpm.sparsification.qpm.iterativeConstraints.Iterator import Iterator
 from dino_qpm.sparsification.qpm.iterativeConstraints.deduplication import DeDuplipication
-from dino_qpm.sparsification.qpm.clean_iterated_assignment import calculate_assignment_solution_iterated
 
 
 def solve_qp(mat_a: np.ndarray | torch.Tensor,
@@ -27,34 +26,15 @@ def solve_qp(mat_a: np.ndarray | torch.Tensor,
     results_dict = {}
     start_time = time.perf_counter()
 
-    if config is not None:
-        start_point = config["finetune"].get("start_point", 20)
-        min_per_feat = config["finetune"].get("min_per_feat", 0)
-
-    else:
-        start_point = 20
-        min_per_feat = 0
-
     if mode == "large_n_iter":
-        selected_edge_tensor, selected_features, obj_val, correlation_punish, feature_criterion, counter_sim, rest = calculate_assignment_solution_iterated(target_features=n_features,
-                                                                                                                                                            features_per_class=n_features_per_class,
-                                                                                                                                                            similarity_measurement_matrix=mat_a,
-                                                                                                                                                            cross_feature_similarity=mat_r,
-                                                                                                                                                            feature_bias=b,
-                                                                                                                                                            start_point=start_point,
-                                                                                                                                                            min_per_feat=min_per_feat)
-
-        end_time = time.perf_counter()
-        runtime = end_time - start_time
-
-        results_dict["Runtime"] = runtime
-        results_dict["MainObjectiveValue"] = obj_val
-        results_dict["CorrelationPunish"] = correlation_punish
-        results_dict["FeatureCriterion"] = feature_criterion
-        results_dict["CounterSim"] = counter_sim.item()
-        results_dict["GapOfSolution"] = rest["GapOfSolution"]
-
-        return selected_features, selected_edge_tensor.T, results_dict
+        raise ValueError(
+            "QPM mode 'large_n_iter' has been removed and is not supported. "
+            "Use 'iterative'."
+        )
+    if mode != "iterative":
+        raise ValueError(
+            f"Mode '{mode}' is not supported for QPM. Use 'iterative'."
+        )
 
     else:
         n_classes = mat_a.shape[1]
@@ -295,142 +275,6 @@ def solve_qp(mat_a: np.ndarray | torch.Tensor,
 
             print("Sparsest Feature", min_n_class_per_fea)
             print("Log of QP", results_dict)
-
-        # Threw some array copy error
-        # but w.e it either way took forever
-        elif mode == "linearised":
-            # Add Variables: alpha, beta, gamma as addVars, s as addMVar
-            # alpha for all c,k in n_classes; d in n_orig_features
-            alpha = opt_model.addVars(n_classes, n_classes, n_orig_features,
-                                      vtype=GRB.BINARY, name="alpha")
-
-            # beta for all d,e in n_orig_features
-            beta = opt_model.addVars(n_orig_features, n_orig_features,
-                                     vtype=GRB.BINARY, name="beta")
-
-            # gamma for all d in n_orig_features; c in n_classes;
-            gamma = opt_model.addVars(n_orig_features, n_classes,
-                                      vtype=GRB.BINARY, name="gamma")
-
-            # s as MVar (array-like) for feature selection (d in n_orig_features)
-            # Shape (n_orig_features, 1) allows s[d, 0] indexing
-            s = opt_model.addMVar((n_orig_features, 1),
-                                  vtype=GRB.BINARY, name="s")
-
-            # Add Constraints and Objective Function
-
-            # --- Objective Function ---
-            # Objective term for Z_A (uses addVars gamma)
-            z_a = gp.quicksum(mat_a[d, c] * gamma[d, c]
-                              for d in range(n_orig_features)
-                              for c in range(n_classes))
-
-            z_a_scaling = 1000 / (n_features_per_class * n_classes)
-            obj = z_a_scaling * z_a
-
-            # Objective term for Z_B (uses MVar s)
-            if b is not None:
-                # Use s[d, 0] indexing for MVar s
-                # Assuming b is indexable like b[d] (e.g., 1D numpy array)
-                z_b = gp.quicksum(b[d] * s[d, 0]
-                                  for d in range(n_orig_features))
-                obj += z_b
-
-            # Objective term for Z_R (uses addVars beta)
-            if mat_r is not None:
-                # Create a copy to avoid modifying the original array
-                mat_r_copy = mat_r.copy()
-                # Zero out the diagonal
-                mat_r_copy[np.eye(mat_r_copy.shape[0], dtype=bool)] = 0
-
-                z_r = gp.quicksum(mat_r_copy[d, e] * beta[d, e]
-                                  for d in range(n_orig_features)
-                                  for e in range(n_orig_features))
-                obj -= z_r
-
-            opt_model.setObjective(obj, GRB.MAXIMIZE)
-
-            # --- Constraints ---
-            # Constraint 1: Total number of selected features (using MVar s.sum())
-            # This uses MVar's built-in sum, which is generally efficient
-            opt_model.addConstr(s.sum() == n_features,
-                                name="Number_of_Selected_Features")
-
-            # Constraint 2: Number of selected features per class (using addVars gamma)
-            # This uses quicksum over gamma variables, usually fine with addConstrs
-            opt_model.addConstrs((gp.quicksum(gamma[d, c] for d in range(n_orig_features)) == n_features_per_class
-                                  for c in range(n_classes)),
-                                 name="Number_of_Selected_Features_per_Class")
-
-            # Constraint 3: Limit cross-class features (using addVars alpha)
-            # This uses quicksum over alpha variables, usually fine with addConstrs
-            opt_model.addConstrs((gp.quicksum(alpha[c, k, d] for d in range(n_orig_features)) <= n_features_per_class - 1
-                                  for c in range(n_classes)
-                                  for k in range(n_classes)
-                                  if c != k),
-                                 name="Limit_CrossClass_Features")
-
-            # --- Linearisation Constraints ---
-            # Alpha Binary Auxiliary Variables Definition
-            # alpha <= gamma (only involves addVars variables alpha and gamma)
-            opt_model.addConstrs((alpha[c, k, d] <= gamma[d, c]
-                                  for c in range(n_classes)
-                                  for k in range(n_classes)
-                                  for d in range(n_orig_features)
-                                  if c != k),
-                                 name="Alpha_Binary_Auxiliary1")
-
-            # alpha <= mat_w (involves NumPy access -> use loop with addConstr)
-            # Progress indicator
-            print("Adding Alpha Auxiliary 2 constraints...")
-            for c in range(n_classes):
-                for k in range(n_classes):
-                    if c == k:
-                        continue
-                    for d in range(n_orig_features):
-                        # Direct access to mat_w[d, k]
-                        opt_model.addConstr(alpha[c, k, d] <= mat_w[d, k],
-                                            name=f"Alpha_Binary_Auxiliary2_c{c}_k{k}_d{d}")
-
-            # Beta Binary Auxiliary Variables Definition (Correct Linearization for beta[d,e] = s[d,0]*s[e,0])
-            # Involves MVar s -> use loop with addConstr
-            # Progress indicator
-            print("Adding Beta Linearization constraints...")
-            for d in range(n_orig_features):
-                for e in range(n_orig_features):
-                    # Access s[d, 0] and s[e, 0]
-                    opt_model.addConstr(beta[d, e] <= s[d, 0],
-                                        name=f"Beta_Linearization_Upper1_d{d}_e{e}")
-                    opt_model.addConstr(beta[d, e] <= s[e, 0],
-                                        name=f"Beta_Linearization_Upper2_d{d}_e{e}")
-                    opt_model.addConstr(beta[d, e] >= s[d, 0] + s[e, 0] - 1,
-                                        name=f"Beta_Linearization_Lower_d{d}_e{e}")
-
-            # Gamma Binary Auxiliary Variables Definition
-            # gamma <= mat_w (involves NumPy access -> use loop with addConstr)
-            # Progress indicator
-            print("Adding Gamma Auxiliary 1 constraints...")
-            for c in range(n_classes):
-                for d in range(n_orig_features):
-                    # Direct access to mat_w[d, c]
-                    opt_model.addConstr(gamma[d, c] <= mat_w[d, c],
-                                        name=f"Gamma_Binary_Auxiliary1_c{c}_d{d}")
-
-            # gamma <= s (involves MVar s -> use loop with addConstr)
-            # Progress indicator
-            print("Adding Gamma Auxiliary 2 constraints...")
-            for c in range(n_classes):
-                for d in range(n_orig_features):
-                    # Access s[d, 0]
-                    opt_model.addConstr(gamma[d, c] <= s[d, 0],
-                                        name=f"Gamma_Binary_Auxiliary2_c{c}_d{d}")
-
-            # --- Solve model ---
-            print("Starting optimization...")
-            opt_model.optimize()
-
-            edge_tensor, selected_features, selected_edge_tensor = get_edge_features(mat_w,
-                                                                                     s)
 
         else:
             raise NotImplementedError(f"Mode {mode} not implemented")

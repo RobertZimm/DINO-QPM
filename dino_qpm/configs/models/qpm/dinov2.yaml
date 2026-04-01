@@ -174,13 +174,13 @@ dense:
 finetune:
   # Mode, no_b, no_r only relevant for qpm
   # no_b and no_r only relevant for iterative mode
-  mode: iterative # options: large_n_iter, iterative, linearised
+  mode: iterative # options: iterative
   no_b: True
   no_r: False
   n_features: 50 # 50
   n_per_class: 5 # 5
 
-  # Only for large_n_iter mode
+  # Deprecated parameters from removed large_n_iter mode; ignored.
   start_point: 20
   min_per_feat: 3
 
