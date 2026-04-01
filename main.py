@@ -8,28 +8,26 @@ def main(argv: list[str] | None = None) -> None:
     global_args, command_argv = parse_global_args(raw_argv)
 
     setup_logging(level=global_args.log_level)
-    configure_datasets_root_env()
-
     cmd, forwarded_argv = split_command(command_argv)
+    configure_datasets_root_env(cmd)
 
-    if cmd == "inference":
-        from dino_qpm.inference.main import inference_cli
-        inference_cli(forwarded_argv)
-        return
+    command_handlers = {
+        "inference": "dino_qpm.inference.main:inference_cli",
+        "evaluate": "dino_qpm.evaluation.main:evaluation_cli",
+        "train": "dino_qpm.training.main:main_cli",
+    }
 
-    elif cmd == "evaluate":
-        from dino_qpm.evaluation.main import evaluation_cli
-        evaluation_cli(forwarded_argv)
-        return
+    handler_path = command_handlers.get(cmd)
+    if handler_path is None:
+        raise ValueError(
+            f"Unknown command '{cmd}'. Expected one of: train, inference, evaluate"
+        )
 
-    elif cmd == "train":
-        from dino_qpm.training.main import main_cli
-        main_cli(forwarded_argv)
-        return
-
-    raise ValueError(
-        f"Unknown command '{cmd}'. Expected one of: train, inference, evaluate"
-    )
+    module_path, handler_name = handler_path.split(":", maxsplit=1)
+    module = __import__(module_path, fromlist=[handler_name])
+    handler = getattr(module, handler_name)
+    handler(forwarded_argv)
+    return
 
 
 if __name__ == "__main__":

@@ -83,7 +83,8 @@ def create_log_dir_path(config: dict,
             if not log_dir.exists():
                 logger.warning("Log directory %s does not exist.", log_dir)
                 logger.warning("Wildcard '*' was used in log_dir.")
-                logger.warning("Stopping execution as requested for wildcard reruns.")
+                logger.warning(
+                    "Stopping execution as requested for wildcard reruns.")
                 sys.exit(0)
 
         else:
@@ -155,7 +156,6 @@ def init_dense_params(config: dict,
     mode = "dense"
     sys.setrecursionlimit(10000)
 
-    job_name = "local_run"
     job_id = "local_test_run"
     array_job_id = "local_test_run"
     task_id = "0"
@@ -175,7 +175,7 @@ def init_dense_params(config: dict,
         dataset_key += "_crop"
 
     return (is_rerun,
-            dataset_key, arch, mode, job_name, job_id,
+            dataset_key, arch, mode, job_id,
             array_job_id, task_id, run_number, n_classes, seed)
 
 
@@ -186,7 +186,7 @@ def init_ft_params(input_ft_dir: str | None,
                    seed: int | None,
                    is_rerun: bool,
                    multi_seed: bool,
-                   ) -> None:
+                   ) -> tuple:
     mode = "finetune"
     file_ext = f'{config["sldd_mode"]}_{config["finetune"]["n_features"]}_{config["finetune"]["n_per_class"]}_FinetunedModel'
 
@@ -194,9 +194,6 @@ def init_ft_params(input_ft_dir: str | None,
         ft_dir = log_dir / "ft"
     else:
         ft_dir = Path(input_ft_dir)
-
-    qpm_cst_dir = ft_dir / "qpm_constants_saved"
-    feat_dir = ft_dir / "features"
 
     if multi_seed and is_rerun and input_ft_dir is None and not os.path.exists(ft_dir):
         # If multi-seed, we need to create a new directory for each seed
@@ -206,45 +203,19 @@ def init_ft_params(input_ft_dir: str | None,
 
         ft_dir = ft_dir / "runs" / str(seed)
 
-    # Expects qpm_constants_saved to exist
-    # if is_rerun and input_ft_dir is None and os.path.exists(ft_dir):
-    #     ft_dir = ft_dir / str(run_number)
-
-    #     # Handling creation of qpm_constants for reruns
-    #     if os.path.exists(qpm_cst_dir):
-    #         print("Copying qpm_constants_saved from previous run")
-    #         shutil.copytree(qpm_cst_dir, ft_dir / "qpm_constants_saved",
-    #                         dirs_exist_ok=True)
-
-    #     else:
-    #         print(f"qpm_constants_saved directory does not exist at {qpm_cst_dir}. "
-    #               f"Skipping copying. ")
-
-    #     if os.path.exists(feat_dir):
-    #         print("Copying features from previous run")
-    #         shutil.copytree(feat_dir, ft_dir / "features",
-    #                         dirs_exist_ok=True)
-    #     else:
-    #         print("No features directory found, skipping copy")
-
     if input_ft_dir is None:
         ft_dir.mkdir(parents=True, exist_ok=True)
-
-    partition = "gpu" if torch.cuda.is_available() else "cpu"
 
     ft_model_path = ft_dir / f'{file_ext}.pth'
 
     logger.info("Finetuning run number: %s", run_number)
 
-    return (mode, file_ext, ft_dir, qpm_cst_dir,
-            is_rerun, multi_seed, partition, ft_model_path)
+    return mode, file_ext, ft_dir, ft_model_path
 
 
 def phase1_dense(config: dict,
                  log_dir: Path,
-                 arch: str,
                  dataset: str,
-                 seed: int | None,
                  mode: str,
                  n_classes: int,) -> None:
     optimization_schedule = get_scheduler_for_model(model_type=config["sldd_mode"],
@@ -264,15 +235,12 @@ def phase1_dense(config: dict,
 
 
 def phase2_ft(config: dict,
-              log_dir: Path,
-              arch: str,
               dataset: str,
               seed: int | None,
               run_number: int,
               mode: str,
               ft_dir: str | Path,
               n_classes: int,
-              crop: bool,
               model: torch.nn.Module,
               file_ext: str) -> None:
     optimization_schedule = get_scheduler_for_model(model_type=config["sldd_mode"],
@@ -307,13 +275,15 @@ def move_files_for_rerun(ft_dir: Path,
                                    f'Results_{file_ext}.json')):
         shutil.move(os.path.join(ft_dir,
                                  f'Results_{file_ext}.json'), new_path / f"Results_{file_ext}.json")
-        logger.info("Moved %s to %s", os.path.join(ft_dir, f"Results_{file_ext}.json"), new_path)
+        logger.info("Moved %s to %s", os.path.join(
+            ft_dir, f"Results_{file_ext}.json"), new_path)
 
     # Copy old config
     if os.path.exists(os.path.join(ft_dir, "config.yaml")):
         shutil.copy(os.path.join(ft_dir, "config.yaml"),
                     new_path / "config.yaml")
-        logger.info("Copied %s to %s", os.path.join(ft_dir, "config.yaml"), new_path)
+        logger.info("Copied %s to %s", os.path.join(
+            ft_dir, "config.yaml"), new_path)
 
 
 def get_namespace(argv: list[str] | None = None) -> Namespace:

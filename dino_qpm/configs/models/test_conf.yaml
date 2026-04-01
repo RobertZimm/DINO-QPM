@@ -173,9 +173,6 @@ dense:
 
 # Parameters related to the finetuning
 finetune:
-  # Parameters related to the model
-  # optimizing for interpretability
-  model_type: qsenn # choices: ["qsenn","sldd","qpm"]
   # Mode, no_b, no_r only relevant for qpm
   # no_b and no_r only relevant for iterative mode
   mode: iterative
@@ -221,8 +218,6 @@ finetune:
   cofs_weight: 0 # 5
 
   cofs_k: 32
-
-  per_prototype: False
 
   # Uses fdl but always with average of feature maps as feature vector
   beta_avg: 0

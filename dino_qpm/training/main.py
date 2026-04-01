@@ -33,7 +33,7 @@ def main(config: dict,
 
     # Initialize parameters
     (is_rerun,
-     dataset_key, arch, mode, job_name, job_id,
+     dataset_key, arch, mode, job_id,
         array_job_id, task_id, run_number, n_classes, seed) = init_dense_params(dataset=dataset,
                                                                                 config=config,
                                                                                 seed=seed,
@@ -44,7 +44,8 @@ def main(config: dict,
     # For reruns (log_dir set in config), the seed comes from --seed or params.txt.
     if not is_rerun and seed is None:
         seed = DEFAULT_SEED
-        logger.info("No seed provided. Using default seed = %s. Pass --seed to override.", seed)
+        logger.info(
+            "No seed provided. Using default seed = %s. Pass --seed to override.", seed)
 
     log_dir = create_log_dir(input_ft_dir=input_ft_dir,
                              config=config,
@@ -66,9 +67,7 @@ def main(config: dict,
     if not os.path.exists(log_dir / "Trained_DenseModel.pth"):
         phase1_dense(config=config,
                      log_dir=log_dir,
-                     arch=arch,
                      dataset=dataset,
-                     seed=seed,
                      mode=mode,
                      n_classes=n_classes,)
 
@@ -112,15 +111,13 @@ def main(config: dict,
 
     # FINETUNING
     # Initialize finetuning parameters
-    (mode, file_ext, ft_dir, qpm_cst_dir,
-     is_rerun, multi_seed, partition,
-     ft_model_path) = init_ft_params(input_ft_dir=input_ft_dir,
-                                     config=config,
-                                     log_dir=log_dir,
-                                     run_number=run_number,
-                                     seed=seed,
-                                     is_rerun=is_rerun,
-                                     multi_seed=multi_seed,)
+    mode, file_ext, ft_dir, ft_model_path = init_ft_params(input_ft_dir=input_ft_dir,
+                                                           config=config,
+                                                           log_dir=log_dir,
+                                                           run_number=run_number,
+                                                           seed=seed,
+                                                           is_rerun=is_rerun,
+                                                           multi_seed=multi_seed,)
 
     # Save adjusted config for run number
     # but if not adjusted save it anyways to have it ready
@@ -137,15 +134,12 @@ def main(config: dict,
 
     if (not os.path.exists(ft_model_path) or config["retrain"]) and config["model"].get("n_layers", 1) > 0:
         phase2_ft(config=config,
-                  log_dir=log_dir,
-                  arch=arch,
                   dataset=dataset,
                   seed=seed,
                   run_number=run_number,
                   mode=mode,
                   ft_dir=ft_dir,
                   n_classes=n_classes,
-                  crop=crop,
                   model=model,
                   file_ext=file_ext)
 

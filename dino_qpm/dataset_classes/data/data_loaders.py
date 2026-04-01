@@ -50,7 +50,8 @@ class DinoData(Dataset):
             raise ValueError(
                 "At least one of ret_feat_vec or ret_maps must be True")
 
-        self.logger.info("Initializing DinoData (mode=%s)", 'train' if train else 'test')
+        self.logger.info("Initializing DinoData (mode=%s)",
+                         'train' if train else 'test')
 
         self.ret_img_path = ret_img_path
         self.loader_norm = config["data"].get("loader_norm", False)
@@ -150,7 +151,8 @@ class DinoData(Dataset):
 
         # 2. Check / Generate Features & LMDB (skip if not using pre-computed)
         if not self.load_pre_computed:
-            self.logger.info("On-the-fly feature generation enabled; skipping pre-computation")
+            self.logger.info(
+                "On-the-fly feature generation enabled; skipping pre-computation")
         elif self.use_lmdb:
             should_create = False
 
@@ -173,10 +175,12 @@ class DinoData(Dataset):
                                          num_entries, len(self.data))
                         should_create = True
                     else:
-                        self.logger.info("Using existing LMDB at %s", self.lmdb_path)
+                        self.logger.info(
+                            "Using existing LMDB at %s", self.lmdb_path)
 
                 except Exception as e:
-                    self.logger.warning("Failed to inspect LMDB (%s); rebuilding", e)
+                    self.logger.warning(
+                        "Failed to inspect LMDB (%s); rebuilding", e)
                     should_create = True
 
             if should_create or rerun_data_gen:
@@ -251,7 +255,8 @@ class DinoData(Dataset):
                 # Get the last successful key (e.g. "1000000")
                 last_key = int(cursor.key().decode('ascii'))
                 start_idx = last_key + 1
-                self.logger.info("Resuming LMDB build from index %s", start_idx)
+                self.logger.info(
+                    "Resuming LMDB build from index %s", start_idx)
             else:
                 self.logger.info("Creating new LMDB")
 

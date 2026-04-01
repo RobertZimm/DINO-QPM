@@ -8,7 +8,7 @@ _VALID_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
 
 def setup_logging(level: str | None = None, force: bool = False) -> None:
     """Configure process-wide logging with a concise console format."""
-    log_level = (level or os.getenv("DINO_QPM_LOG_LEVEL", "DEBUG")).upper()
+    log_level = (level or os.getenv("DINO_QPM_LOG_LEVEL", "INFO")).upper()
     if log_level not in _VALID_LEVELS:
         raise ValueError(
             f"Invalid log level '{log_level}'. Expected one of: {sorted(_VALID_LEVELS)}"
@@ -16,7 +16,7 @@ def setup_logging(level: str | None = None, force: bool = False) -> None:
 
     # Persist selected level so later setup_logging(force=True) calls keep it.
     os.environ["DINO_QPM_LOG_LEVEL"] = log_level
-    numeric_level = getattr(logging, log_level, logging.DEBUG)
+    numeric_level = getattr(logging, log_level, logging.INFO)
 
     logging.basicConfig(
         level=numeric_level,

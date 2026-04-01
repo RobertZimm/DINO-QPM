@@ -211,8 +211,6 @@ finetune:
 
   cofs_k: 32
 
-  per_prototype: False
-
   # Uses fdl but always with average of feature maps as feature vector
   beta_avg: 0
 

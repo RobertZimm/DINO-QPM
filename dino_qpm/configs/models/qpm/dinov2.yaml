@@ -177,10 +177,6 @@ finetune:
   n_features: 50 # 50
   n_per_class: 5 # 5
 
-  # Deprecated parameters from removed large_n_iter mode; ignored.
-  start_point: 20
-  min_per_feat: 3
-
   # time_limit and mip_gap 
   # are only used for qpm
   mip_gap: 5.0e-3 # not in percent; default 1e-4
@@ -218,8 +214,6 @@ finetune:
   cofs_weight: 0 # 5
 
   cofs_k: 32
-
-  per_prototype: False
 
   # Uses fdl but always with average of feature maps as feature vector
   beta_avg: 0

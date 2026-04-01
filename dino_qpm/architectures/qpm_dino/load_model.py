@@ -198,7 +198,7 @@ def load_qpm_feature_selection_and_assignment(log_dir: str | Path):
 
     if (os.path.exists(save_folder / "sel.pt")
             and os.path.exists(save_folder / "weight.pt")):
-        logger.info("Loading selection and weight matrix from %s", save_folder)
+        print(f"Loading selection and weight matrix from {save_folder}")
         feature_sel = torch.load(save_folder / "sel.pt",
                                  map_location=torch.device('cpu'),
                                  weights_only=False)

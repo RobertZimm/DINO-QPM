@@ -22,9 +22,6 @@ optimizer: sgd
 
 # Parameters related to the data coming from dino
 data:
-  # Dataset to use
-  dataset: CUB2011 # \in [CUB2011, StanfordCars]
-
   img_size: 224
 
   crop: False
@@ -96,5 +93,3 @@ finetune:
 loss:
   # whether to use a mask for the fdl
   mask_type: null # options: segmentations, null
-
-added_params: {}

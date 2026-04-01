@@ -25,9 +25,6 @@ optimizer: adamw_schedulefree
 
 # Parameters related to the data coming from dino
 data:
-  # Dataset to use
-  dataset: CUB2011 # \in [CUB2011, StanfordCars]
-
   # img_size of the input image
   # doesnt change input data
   # so dont change it
@@ -170,9 +167,6 @@ dense:
 
 # Parameters related to the finetuning
 finetune:
-  # Parameters related to the model
-  # optimizing for interpretability
-  model_type: sldd # choices: ["qsenn","sldd","qpm"]
   # Mode, no_b, no_r only relevant for qpm
   # no_b and no_r only relevant for iterative mode
   mode: iterative
