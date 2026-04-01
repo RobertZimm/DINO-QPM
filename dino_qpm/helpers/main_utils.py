@@ -41,7 +41,7 @@ def create_log_dir_path(config: dict,
 
     Rerun path (config["log_dir"] is set):
       ~/tmp / [custom_global_prefix /] arch / dataset / sldd_mode / model_type / config["log_dir"]
-      (* in log_dir is replaced with run_number for sweep reruns)
+            (* in log_dir is replaced with run_number for reruns)
     """
     print(">>> Generating <log_dir> string")
     log_dir_prefix = config.get("log_dir_prefix", None)
@@ -69,7 +69,7 @@ def create_log_dir_path(config: dict,
             log_dir = log_dir / custom_folder
         log_dir = log_dir / str(seed)
 
-        # Append run_number as a descriptive key-value label for HP-sweep array tasks
+        # Append run_number for repeated runs.
         if run_number is not None and run_number != -1:
             log_dir = log_dir / str(run_number)
 
@@ -210,9 +210,8 @@ def init_ft_params(input_ft_dir: str | None,
         ft_dir = ft_dir / "runs" / str(seed)
 
     # Expects qpm_constants_saved to exist
-    # if is_rerun and is_sweep and input_ft_dir is None and os.path.exists(ft_dir):
-    #     ft_dir = ft_dir / \
-    #         f"sweep-{'-'.join(sweep_param_names)}" / str(run_number)
+    # if is_rerun and input_ft_dir is None and os.path.exists(ft_dir):
+    #     ft_dir = ft_dir / str(run_number)
 
     #     # Handling creation of qpm_constants for reruns
     #     if os.path.exists(qpm_cst_dir):
@@ -337,7 +336,7 @@ def get_namespace(argv: list[str] | None = None) -> Namespace:
                         help="Path to the log directory")
 
     parser.add_argument("--multi-seed", default=False, action="store_true",
-                        help="Indicates whether the run is part of a multi-seed sweep", )
+                        help="Indicates whether the run is part of a multi-seed setup", )
 
     return parser.parse_args(argv)
 

@@ -1,6 +1,5 @@
 from pathlib import Path
 import os
-from typing import List, Dict, Any, Optional
 import yaml
 from dino_qpm.configs.core.runtime_paths import get_tmp_root
 
@@ -47,124 +46,6 @@ def load_general_config() -> dict:
 
 
 general_config = load_general_config()
-
-
-def get_sweep_combinations() -> List[Dict[str, Any]]:
-    """
-    Get all sweep combinations from general_config.
-
-    Returns a list of dicts, where each dict contains the parameter values
-    for that sweep combination. If no sweep is defined, returns [{}].
-
-    Example:
-        If sweep:
-          params: [dataset, arch]
-          combinations:
-            - [CUB2011, dinov2]
-            - [StanfordCars, dinov2]
-
-        Returns: [
-            {dataset: CUB2011, arch: dinov2},
-            {dataset: StanfordCars, arch: dinov2},
-        ]
-    """
-    sweep_config = general_config.get("sweep", None)
-
-    if sweep_config is None or not sweep_config:
-        return [{}]
-
-    params = sweep_config.get("params", [])
-    combinations_list = sweep_config.get("combinations", [])
-
-    combinations = []
-    for values in combinations_list:
-        if len(values) != len(params):
-            raise ValueError(
-                f"Sweep combination {values} has {len(values)} values but {len(params)} params defined"
-            )
-        values_dict = dict(zip(params, values))
-        combinations.append(values_dict)
-
-    return combinations if combinations else [{}]
-
-
-def get_sweep_seed_groups() -> Optional[List[List[int]]]:
-    """
-    Get seed groups from sweep config.
-
-    Seed groups define which combinations share the same seeds.
-    Each group is a list of combination indices.
-
-    Example:
-        If sweep:
-          combinations:
-            - [resnet50, qpm]   # 0
-            - [dinov2, qpm]     # 1
-            - [dinov2, sldd]    # 2
-            - [dino, qpm]       # 3
-          seeds: [[0, 1], [2, 3]]  # 0&1 share seeds, 2&3 share seeds
-
-    Returns:
-        List of seed groups, or None if not specified (each combo gets unique seeds)
-
-    Raises:
-        ValueError if seeds doesn't cover all combination indices exactly once
-    """
-    sweep_config = general_config.get("sweep", None)
-
-    if sweep_config is None or not sweep_config:
-        return None
-
-    seed_groups = sweep_config.get("seeds", None)
-    if seed_groups is None:
-        return None
-
-    combinations_list = sweep_config.get("combinations", [])
-    num_combos = len(combinations_list)
-
-    # Validate that all indices are covered exactly once
-    all_indices = set()
-    for group in seed_groups:
-        for idx in group:
-            if idx < 0 or idx >= num_combos:
-                raise ValueError(
-                    f"Seed group index {idx} out of range [0, {num_combos-1}]"
-                )
-            if idx in all_indices:
-                raise ValueError(
-                    f"Seed group index {idx} appears multiple times"
-                )
-            all_indices.add(idx)
-
-    expected_indices = set(range(num_combos))
-    if all_indices != expected_indices:
-        missing = expected_indices - all_indices
-        raise ValueError(
-            f"Seed groups missing combination indices: {sorted(missing)}"
-        )
-
-    return seed_groups
-
-
-def apply_sweep_to_general_config(sweep_values: Dict[str, Any], config_path: Path) -> None:
-    """
-    Apply sweep values to a main training config file.
-
-    Args:
-        sweep_values: Dict of parameter names and values to set
-        config_path: Path to the config file to modify
-    """
-    if not sweep_values:
-        return
-
-    with open(config_path, "r") as f:
-        config = yaml.safe_load(f)
-
-    for key, value in sweep_values.items():
-        config[key] = value
-
-    with open(config_path, "w") as f:
-        yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
 
 def build_conf_filename(dataset: str = None,
@@ -263,4 +144,4 @@ def load_config(filename: str = None) -> dict:
 
 
 if __name__ == "__main__":
-    print(general_config.get("sweep_log_dir", []))
+    print(conf_filename())

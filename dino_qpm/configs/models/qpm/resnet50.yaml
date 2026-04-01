@@ -10,8 +10,6 @@ custom_folder: null
 # folder must be in tmp/<arch>/<dataset>
 log_dir: null
 
-sweep_log_dir: # [1857436, 1857437, 1857438, 1857439, 1857440] # specify log_dirs for sweep runs; if null, will be generated automatically
-
 # Specify whether to finetune# after dense training or not
 ft: True
 

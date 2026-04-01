@@ -30,8 +30,6 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from dino_qpm.helpers.hp_sweep import prod_combined_vals, process_param_names
-from dino_qpm.configs.core.hp_sweep_params import full_vals, reduced_vals, param_mapping
 from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
 
@@ -564,62 +562,6 @@ def expand_changed_parameters(df: pd.DataFrame) -> pd.DataFrame:
         print(
             f"Info: Parsed 'changed_parameters' into columns: {param_df.columns.tolist()}")
     return df
-
-
-def _format_param_val_to_str_list(param: str, val, applied_in_mode: str = "all") -> List[str]:
-    prefix = "" if applied_in_mode == "all" else f"{applied_in_mode}."
-    if param == "approach":
-        return [f"{prefix}arch_type={val[0]}", f"{prefix}feat_vec_type={val[1]}"]
-    return [f"{prefix}{param}={val}"]
-
-
-def generate_run_to_params_mapping(
-    param_names: List[str],
-    density_mode: str,
-    comb_strat: str,
-) -> Dict[int, str]:
-    if not param_names or param_names == [None]:
-        return {}
-
-    param_names, applied_in_modes = process_param_names(param_names)
-    combined_vals, params, applied_in_modes = prod_combined_vals(
-        param_names=param_names,
-        density_mode=density_mode,
-        comb_strat=comb_strat,
-        applied_in_modes=applied_in_modes,
-    )
-
-    run_mappings: Dict[int, str] = {}
-    for run_number, current_val in enumerate(combined_vals):
-        param_strings: List[str] = []
-        if comb_strat == "cross":
-            for param, val, mode in zip(param_names, current_val, applied_in_modes):
-                param_strings.extend(
-                    _format_param_val_to_str_list(param, val, mode))
-        elif comb_strat == "single":
-            if params is not None:
-                param = params[run_number]
-                val = current_val
-                mode = (
-                    applied_in_modes[run_number]
-                    if isinstance(applied_in_modes, list)
-                    else applied_in_modes
-                )
-                if isinstance(param, list):
-                    if isinstance(mode, list):
-                        for sp, sv, sm in zip(param, val, mode):
-                            param_strings.extend(
-                                _format_param_val_to_str_list(sp, sv, sm))
-                    else:
-                        for sp, sv in zip(param, val):
-                            param_strings.extend(
-                                _format_param_val_to_str_list(sp, sv, mode))
-                else:
-                    param_strings.extend(
-                        _format_param_val_to_str_list(param, val, mode))
-        run_mappings[run_number] = ", ".join(param_strings)
-
-    return run_mappings
 
 
 # ---------------------------------------------------------------------------

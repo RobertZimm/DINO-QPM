@@ -22,23 +22,4 @@ load_pre_computed: True
 
 log_dir_prefix: DINO-QPM
 
-default_save_dir: /home/zimmerro/tmp/saveCCR
-
-# Sweep configuration for training runs
-# Format:
-#   sweep:
-#     params: [param1, param2, ...]      # List of parameter names
-#     combinations:                       # List of value tuples (in same order as params)
-#       - [val1, val2, ...]
-#       - [val1, val2, ...]
-#     seeds: [[0, 1], [2, 3, 4, 5]]       # Optional: indices of combos that share seeds
-#                                         # If omitted, each combo gets unique seeds
-
-sweep: null
-# sweep:
-#   params: ["arch", "sldd_mode"] # List of parameter names to sweep; if no sweep set to null
-#   combinations: # List of value tuples (in same order as params); if no sweep set to null
-#     - ["dinov2", "qpm"]     # 2
-#     - ["dinov2", "qsenn"]
-#     - ["dinov2", "sldd"]
-#   seeds: [[0, 1, 2,]]
+default_save_dir: /home/zimmerro/tmp/saveCCR                                  

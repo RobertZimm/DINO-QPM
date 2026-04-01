@@ -10,8 +10,6 @@ custom_folder: null
 # folder must be in tmp/<arch>/<dataset>
 log_dir: null
 
-sweep_log_dir: null
-
 # Specify whether to finetune after dense training or not
 ft: True
 
