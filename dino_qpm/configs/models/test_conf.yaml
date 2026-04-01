@@ -2,7 +2,7 @@ arch: dinov2 # options: dino, dinov2, dinov3, resnet50
 
 model_type: small_reg
 
-dataset: CUB2011 # \in [CUB2011, StanfordCars, Fitzpatrick17k]
+dataset: CUB2011 # \in [CUB2011, StanfordCars]
 
 # custom folder name for storing files
 # no custom folder if none
@@ -30,7 +30,6 @@ optimizer: adamw_schedulefree
 
 # Parameters related to the data coming from dino
 data:
-  fitzpatrick_split: random
 
   # img_size of the input image
   # doesnt change input data

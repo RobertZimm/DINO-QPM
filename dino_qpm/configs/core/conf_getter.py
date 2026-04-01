@@ -5,7 +5,7 @@ import yaml
 from dino_qpm.configs.core.runtime_paths import get_tmp_root
 
 
-GENERAL_CONFIG_FILENAME = "models/main_training.yaml"
+GENERAL_CONFIG_FILENAME = "main_training.yaml"
 SEEDS_CONFIG_FILENAME = "core/seeds.yaml"
 NUM_SEEDS = 10  # fixed pool size
 

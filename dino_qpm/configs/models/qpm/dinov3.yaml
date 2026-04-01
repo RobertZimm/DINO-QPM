@@ -24,7 +24,6 @@ optimizer: adamw_schedulefree
 
 # Parameters related to the data coming from dino
 data:
-  fitzpatrick_split: random
 
   # img_size of the input image
   # doesnt change input data

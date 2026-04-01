@@ -120,37 +120,7 @@ def get_data(dataset: str,
     else:
         raise ValueError(f"Dataset {dataset} is currently not supported.")
 
-    if config["data"].get("fitzpatrick_split", "not-random") == "random" and dataset == "Fitzpatrick17k":
-        # Get labels for each sample in the training set
-        try:
-            # Assumes the dataset class has a .get_labels() method
-            targets = train_dataset.get_labels()
-        except AttributeError:
-            # Fallback for torchvision-style .targets attribute
-            targets = train_dataset.targets
-
-        targets = torch.tensor(targets, dtype=torch.long)
-
-        # Compute counts for each class
-        class_counts = torch.bincount(targets)
-
-        # Compute weight for each class as 1 / count
-        class_weights = 1.0 / class_counts.float()
-
-        # Assign a weight to every sample based on its class
-        sample_weights = class_weights[targets]
-
-        # Create the sampler
-        sampler = torch.utils.data.WeightedRandomSampler(
-            weights=sample_weights,
-            num_samples=len(sample_weights),
-            replacement=True
-        )
-
-        sampler = None
-
-    else:
-        sampler = None
+    sampler = None
 
     # With batched backbone extraction in training loop, we CAN use workers
     # for image loading since backbone runs in main process after collation

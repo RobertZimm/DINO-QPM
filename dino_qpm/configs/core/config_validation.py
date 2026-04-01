@@ -19,6 +19,8 @@ def validate_config(config: dict) -> None:
 
     if str(config["dataset"]).strip().lower() == "imagenet":
         raise ValueError("ImageNet is currently not supported.")
+    if str(config["dataset"]).strip().lower() == "fitzpatrick17k":
+        raise ValueError("Fitzpatrick17k is currently not supported.")
 
     if config["arch"] not in ARCH_REGISTRY:
         raise ValueError(

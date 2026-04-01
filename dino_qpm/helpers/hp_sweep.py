@@ -19,9 +19,6 @@ def update_config(config: dict,
     elif param == "model_type":
         config["model_type"] = val
 
-    elif param == "fitzpatrick_split":
-        config["data"][param] = val
-
     elif param == "best_approaches":
         config["model"]["arch_type"] = val[0]
         config["model"]["feat_vec_type"] = val[1]

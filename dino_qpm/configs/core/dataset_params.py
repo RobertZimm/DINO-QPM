@@ -7,7 +7,6 @@ dataset_constants = {
     "TravelingBirds": {"num_classes": 200},
     "StanfordCars": {"num_classes": 196},
     "FGVCAircraft": {"num_classes": 100},
-    "Fitzpatrick17k": {"num_classes": 114},
 }
 
 normalize_params = {
@@ -22,9 +21,6 @@ normalize_params = {
 
     "FGVCAircraft": {'mean': torch.tensor([0.4827, 0.5130, 0.5352]),
                      'std': torch.tensor([0.2236, 0.2170, 0.2478]), },
-    "Fitzpatrick17k": {'mean': torch.tensor([0.485, 0.456, 0.406]),
-                       # Normalization from original paper
-                       'std': torch.tensor([0.229, 0.224, 0.225])},
 }
 
 dense_batch_size = EvaluatedDict({False: 16, True: 1024, },

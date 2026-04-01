@@ -40,8 +40,6 @@ full_vals = {
     "n_layers": [1, 2, 3, 4],
     "activation": ["relu", "gelu", "sigmoid"],  # "sigmoid", "leaky_relu",
     "on_off": [True, False],
-    "fitzpatrick_split": ['verified', 'random', 'source_a', 'source_b',
-                          'fitz_3-6', 'fitz_1-2_5-6', 'fitz_1-4'],
     "proto_pre_pooling_mode": [None, "softmax_temp", "softmax_conv_norm"],
     "temperature": [0.2, 0.5, 0.7, 1.0, 1.2, 1.5, 2.0, 5.0],
     "pooling_type": ["avg", "max", ("smooth_max", "max"), ("smooth_max", "avg"),

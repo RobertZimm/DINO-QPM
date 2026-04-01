@@ -18,7 +18,6 @@ from dino_qpm.dataset_classes.cub200 import CUB200Class
 from dino_qpm.dataset_classes.data.generate_maps import generate_features, extract_maps
 from dino_qpm.helpers.img_tensor_arrays import prep_img
 from dino_qpm.architectures.qpm_dino.load_model import load_model
-from dino_qpm.dataset_classes.fitzpatrick import FitzpatrickDataset
 from dino_qpm.configs.core.runtime_paths import get_datasets_root
 
 try:
@@ -59,8 +58,6 @@ class DinoData(Dataset):
         self.use_norm = config["data"].get("use_norm", True)
         self.layer_num = config["data"].get("layer_num", 0)
         self.dataset_name = config["dataset"]
-        self.fitzpatrick_split = config["data"].get(
-            "fitzpatrick_split", "random")
         self.crop = config["data"].get(
             "crop", False)  # For CUB200 cropped images
 
@@ -82,8 +79,6 @@ class DinoData(Dataset):
                 self.root_dataset = os.path.join(self.root, "CUB200")
         elif self.dataset_name == "StanfordCars":
             self.root_dataset = os.path.join(self.root, "StanfordCars")
-        elif self.dataset_name == "Fitzpatrick17k":
-            self.root_dataset = os.path.join(self.root, "Fitzpatrick17k")
         else:
             raise ValueError(f"Dataset {self.dataset_name} is not supported")
 
@@ -392,34 +387,8 @@ class DinoData(Dataset):
             self._load_data_cub()
         elif self.dataset_name == "StanfordCars":
             self._load_data_stanford()
-        elif self.dataset_name == "Fitzpatrick17k":
-            self._load_data_fitzpatrick()
         else:
             raise ValueError(f"Dataset {self.dataset_name} is not supported")
-
-    def _load_data_fitzpatrick(self):
-        self.data = pd.DataFrame(
-            columns=["img_path", "label", "folderpath", "is_training_img"])
-
-        self.targets = []
-
-        for train in [True, False]:
-            dataset = FitzpatrickDataset(
-                train=train,
-                split_method=self.fitzpatrick_split)
-
-            tmp_data = dataset.to_dataframe()
-
-            tmp_data["folderpath"] = tmp_data["img_path"].apply(
-                lambda x: os.path.relpath(x, self.root_dataset).removesuffix(".jpg"))
-
-            self.data = pd.concat(
-                [self.data, tmp_data], ignore_index=True)
-
-            self.targets.extend(dataset.get_labels())
-            self.fitzpatrick_col = dataset.fitzpatrick_col
-
-        self.data["img_id"] = self.data.index + 1
 
     def _load_data_stanford(self):
         self.data = pd.DataFrame(
