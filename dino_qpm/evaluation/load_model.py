@@ -3,11 +3,11 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import torch
-from CleanCodeRelease.architectures.qpm_dino.load_model import load_qpm_feature_selection_and_assignment
-from CleanCodeRelease.architectures.model_mapping import get_model_thomas, get_model
-from CleanCodeRelease.configs.dataset_params import dataset_constants
-from CleanCodeRelease.dataset_classes.get_data import get_data
-from CleanCodeRelease.saving.utils import json_save
+from dino_qpm.architectures.qpm_dino.load_model import load_qpm_feature_selection_and_assignment
+from dino_qpm.architectures.model_mapping import get_model_thomas, get_model
+from dino_qpm.configs.dataset_params import dataset_constants
+from dino_qpm.dataset_classes.get_data import get_data
+from dino_qpm.saving.utils import json_save
 
 
 def extract_sel_mean_std_bias_assignemnt(state_dict):

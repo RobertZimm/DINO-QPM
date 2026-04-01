@@ -1,11 +1,11 @@
 import numpy as np
 import torch
-from CleanCodeRelease.evaluation.metrics.CUBSegmentationOverlap import get_overlap_score
-from CleanCodeRelease.evaluation.metrics.ClassIndependence import compute_real_gt_max
-from CleanCodeRelease.evaluation.metrics.Contrastiveness import gmm_overlap_per_feature
-from CleanCodeRelease.evaluation.metrics.Correlation import get_correlation
-from CleanCodeRelease.evaluation.metrics.StructuralGrounding import get_structural_grounding_for_weight_matrix
-from CleanCodeRelease.evaluation.diversity import MultiKCrossChannelMaxPooledSum
+from dino_qpm.evaluation.metrics.CUBSegmentationOverlap import get_overlap_score
+from dino_qpm.evaluation.metrics.ClassIndependence import compute_real_gt_max
+from dino_qpm.evaluation.metrics.Contrastiveness import gmm_overlap_per_feature
+from dino_qpm.evaluation.metrics.Correlation import get_correlation
+from dino_qpm.evaluation.metrics.StructuralGrounding import get_structural_grounding_for_weight_matrix
+from dino_qpm.evaluation.diversity import MultiKCrossChannelMaxPooledSum
 
 
 def eval_qpm_metrics(features_train,

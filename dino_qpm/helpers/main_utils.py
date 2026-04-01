@@ -18,6 +18,9 @@ from dino_qpm.helpers.optimize import optimize_finetune, optimize_dense
 from dino_qpm.configs.core.conf_getter import load_config
 from dino_qpm.configs.core.config_validation import validate_config
 from dino_qpm.configs.core.runtime_paths import get_tmp_root
+from dino_qpm.helpers.logging_utils import get_logger, setup_logging
+
+logger = get_logger(__name__)
 
 DEFAULT_SEED = 383534468
 
@@ -44,7 +47,7 @@ def create_log_dir_path(config: dict,
       ~/tmp / [custom_global_prefix /] arch / dataset / sldd_mode / model_type / config["log_dir"]
             (* in log_dir is replaced with run_number for reruns)
     """
-    print(">>> Generating <log_dir> string")
+    logger.info("Resolving log directory path")
     log_dir_prefix = config.get("log_dir_prefix", None)
 
     # Static base: tmp_root / [prefix /] arch / dataset / sldd_mode / model_type [/ no_mlp]
@@ -78,10 +81,9 @@ def create_log_dir_path(config: dict,
             log_dir = base / config["log_dir"].replace("*", str(run_number))
 
             if not log_dir.exists():
-                print(
-                    f"Log directory {log_dir} does not exist.\n"
-                    f" Ran the script using wildcard '*' in log_dir.\n"
-                    f" Stopping execution as this is the desired behaviour in this case.")
+                logger.warning("Log directory %s does not exist.", log_dir)
+                logger.warning("Wildcard '*' was used in log_dir.")
+                logger.warning("Stopping execution as requested for wildcard reruns.")
                 sys.exit(0)
 
         else:
@@ -108,7 +110,7 @@ def create_log_dir(input_ft_dir: str | None,
                    sldd_mode: str,
                    model_type: str,
                    seed: int | None = None) -> Path:
-    print("--- Creating log directory ---")
+    logger.info("Creating log directory")
 
     if input_ft_dir is None:
         log_dir = create_log_dir_path(config=config,
@@ -130,12 +132,12 @@ def create_log_dir(input_ft_dir: str | None,
     if input_ft_dir is None:
         log_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f">>> Saving all files to log_dir {log_dir}")
+    logger.info("Saving outputs to %s", log_dir)
 
     _ = Tee(log_dir / "log.txt")  # save log to file
+    setup_logging(force=True)
 
-    print(
-        f">>> Log file created at {log_dir / 'log.txt'} mirroring full stdout and stderr\n")
+    logger.info("Log file: %s", log_dir / "log.txt")
 
     return log_dir
 
@@ -144,7 +146,7 @@ def init_dense_params(config: dict,
                       dataset: str,
                       seed: int | None,
                       run_number: int | None,) -> tuple:
-    print("\n--- Initialization of dense parameters ---")
+    logger.info("Initializing dense training parameters")
 
     is_rerun = config["log_dir"] is not None
     dataset_key = config["dataset"]
@@ -161,7 +163,7 @@ def init_dense_params(config: dict,
     if run_number == -1:
         run_number = 0
 
-    print(">>> Current run number:", run_number)
+    logger.info("Run number: %s", run_number)
 
     if arch == "dinov2":
         if dataset not in dino_supported_datasets:
@@ -232,7 +234,7 @@ def init_ft_params(input_ft_dir: str | None,
 
     ft_model_path = ft_dir / f'{file_ext}.pth'
 
-    print("Current run number for finetuning:", run_number)
+    logger.info("Finetuning run number: %s", run_number)
 
     return (mode, file_ext, ft_dir, qpm_cst_dir,
             is_rerun, multi_seed, partition, ft_model_path)
@@ -299,21 +301,19 @@ def move_files_for_rerun(ft_dir: Path,
 
     if os.path.exists(ft_model_path):
         shutil.move(ft_model_path, new_path / f"{file_ext}.pth")
-        print(f"Moved {ft_model_path} to {new_path}")
+        logger.info("Moved %s to %s", ft_model_path, new_path)
 
     if os.path.exists(os.path.join(ft_dir,
                                    f'Results_{file_ext}.json')):
         shutil.move(os.path.join(ft_dir,
                                  f'Results_{file_ext}.json'), new_path / f"Results_{file_ext}.json")
-        print(
-            f"Moved {os.path.join(ft_dir, f'Results_{file_ext}.json')} to {new_path}")
+        logger.info("Moved %s to %s", os.path.join(ft_dir, f"Results_{file_ext}.json"), new_path)
 
     # Copy old config
     if os.path.exists(os.path.join(ft_dir, "config.yaml")):
         shutil.copy(os.path.join(ft_dir, "config.yaml"),
                     new_path / "config.yaml")
-        print(
-            f"Copied {os.path.join(ft_dir, 'config.yaml')} to {new_path}")
+        logger.info("Copied %s to %s", os.path.join(ft_dir, "config.yaml"), new_path)
 
 
 def get_namespace(argv: list[str] | None = None) -> Namespace:
@@ -345,14 +345,14 @@ def handle_seed(log_dir: Path,
                 seed_line = f.readline().strip()
                 seed = int(seed_line.split("=")[1])
 
-            print(f"Loading seed {seed} from params.txt")
+            logger.info("Loading seed %s from params.txt", seed)
 
         else:
             seed = DEFAULT_SEED
-            print(
-                f"No seed provided and params.txt not found. "
-                f"Using default seed = {seed}. "
-                "Pass --seed to override.")
+            logger.info(
+                "No seed provided and params.txt not found. Using default seed = %s. Pass --seed to override.",
+                seed,
+            )
 
             # Save seed to params.txt
             with open(log_dir / "params.txt", "w") as f:
@@ -360,19 +360,19 @@ def handle_seed(log_dir: Path,
 
     else:
         if not os.path.exists(log_dir / "params.txt"):
-            print(f"Using provided seed: {seed}")
+            logger.info("Using provided seed: %s", seed)
 
             with open(log_dir / "params.txt", "w") as f:
                 f.write(f"seed={seed}\n")
 
         else:
-            print(
-                f"Seed provided: {seed}, but params.txt already exists. Using seed from params.txt.")
+            logger.warning(
+                "Seed provided (%s), but params.txt already exists. Using seed from params.txt.", seed)
             with open(log_dir / "params.txt", "r") as f:
                 seed_line = f.readline().strip()
                 seed = int(seed_line.split("=")[1])
 
-            print(f"Loading seed {seed} from params.txt")
+            logger.info("Loading seed %s from params.txt", seed)
 
     random.seed(seed)
     np.random.seed(seed)

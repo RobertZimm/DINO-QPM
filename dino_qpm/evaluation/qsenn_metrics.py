@@ -1,9 +1,9 @@
 import numpy as np
 import torch
 
-from CleanCodeRelease.evaluation.metrics.Dependence import compute_contribution_top_feature
-from CleanCodeRelease.evaluation.metrics.cub_Alignment import get_cub_alignment_from_features
-from CleanCodeRelease.evaluation.diversity import MultiKCrossChannelMaxPooledSum
+from dino_qpm.evaluation.metrics.Dependence import compute_contribution_top_feature
+from dino_qpm.evaluation.metrics.cub_Alignment import get_cub_alignment_from_features
+from dino_qpm.evaluation.diversity import MultiKCrossChannelMaxPooledSum
 
 
 def eval_qsenn_metrics(features_train: torch.Tensor,

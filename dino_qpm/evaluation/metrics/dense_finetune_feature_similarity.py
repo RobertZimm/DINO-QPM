@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from CleanCodeRelease.sparsification.feature_helpers import load_and_prepare_features
+from dino_qpm.sparsification.feature_helpers import load_and_prepare_features
 import numpy as np
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-from CleanCodeRelease.dataset_classes.cub200 import CUB200Class
+from dino_qpm.dataset_classes.cub200 import CUB200Class
 
 
 def get_cub_alignment_from_features(features_train_sorted):

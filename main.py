@@ -1,12 +1,16 @@
 import sys
-from dino_qpm.helpers.entrypoint import configure_datasets_root_env, split_command
+from dino_qpm.helpers.entrypoint import configure_datasets_root_env, parse_global_args, split_command
+from dino_qpm.helpers.logging_utils import setup_logging
 
 
 def main(argv: list[str] | None = None) -> None:
+    raw_argv = list(sys.argv[1:] if argv is None else argv)
+    global_args, command_argv = parse_global_args(raw_argv)
+
+    setup_logging(level=global_args.log_level)
     configure_datasets_root_env()
 
-    cmd, forwarded_argv = split_command(
-        list(sys.argv[1:] if argv is None else argv))
+    cmd, forwarded_argv = split_command(command_argv)
 
     if cmd == "inference":
         from dino_qpm.inference.main import inference_cli

@@ -4,10 +4,10 @@ from pathlib import Path
 import torch
 import yaml
 
-from CleanCodeRelease.architectures.model_mapping import get_model
-from CleanCodeRelease.architectures.qpm_dino.load_model import load_final_model
-from CleanCodeRelease.configs.dataset_params import dataset_constants
-from CleanCodeRelease.evaluation.utils import evaluate
+from dino_qpm.architectures.model_mapping import get_model
+from dino_qpm.architectures.qpm_dino.load_model import load_final_model
+from dino_qpm.configs.dataset_params import dataset_constants
+from dino_qpm.evaluation.utils import evaluate
 
 
 def _parse_args(argv: list[str] | None = None):

@@ -9,6 +9,9 @@ from dino_qpm.evaluation.utils import evaluate
 from dino_qpm.architectures.model_mapping import get_model
 from dino_qpm.architectures.qpm_dino.load_model import load_final_model
 from dino_qpm.helpers.main_utils import handle_seed
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 DEFAULT_SEED = 383534468
 
@@ -41,8 +44,7 @@ def main(config: dict,
     # For reruns (log_dir set in config), the seed comes from --seed or params.txt.
     if not is_rerun and seed is None:
         seed = DEFAULT_SEED
-        print(f"No seed provided. Using default seed = {seed}. "
-              "Pass --seed to override.")
+        logger.info("No seed provided. Using default seed = %s. Pass --seed to override.", seed)
 
     log_dir = create_log_dir(input_ft_dir=input_ft_dir,
                              config=config,
@@ -71,8 +73,8 @@ def main(config: dict,
                      n_classes=n_classes,)
 
     else:
-        print(
-            f">>> Dense Model already trained, skipping. Model pth is in {log_dir / f'Trained_DenseModel.pth'}")
+        logger.info("Dense model already trained; skipping (%s)",
+                    log_dir / "Trained_DenseModel.pth")
 
     if os.path.exists(log_dir / "Trained_DenseModel.pth"):
         model = get_model(num_classes=n_classes,
@@ -100,12 +102,12 @@ def main(config: dict,
                  save_path=os.path.join(log_dir, f"Results_DenseModel.json"))
 
     else:
-        print(
-            f">>> Dense Model already evaluated, skipping. Results are in {log_dir / f'Results_DenseModel.json'}")
+        logger.info("Dense model already evaluated; skipping (%s)",
+                    log_dir / "Results_DenseModel.json")
 
     if not config["ft"]:
-        print(">>> Skipping finetuning as specified in config.yaml.")
-        print(">>> Done with dense execution")
+        logger.info("Finetuning disabled by config")
+        logger.info("Dense execution completed")
         sys.exit(0)
 
     # FINETUNING
@@ -148,12 +150,11 @@ def main(config: dict,
                   file_ext=file_ext)
 
     elif config["model"].get("n_layers", 1) == 0:
-        print(
-            f"\n>>> Skipping finetuning as n_layers is 0. ")
+        logger.info("Skipping finetuning because n_layers is 0")
 
     else:
-        print(
-            f"\n>>> Finetuned Model already exists at {ft_dir / f'{file_ext}.pth'}, skipping finetuning")
+        logger.info("Finetuned model already exists; skipping (%s)",
+                    ft_dir / f"{file_ext}.pth")
 
     # Read new config
     with open(conf_pth, "r") as f:
@@ -187,14 +188,13 @@ def main(config: dict,
                  model_path=ft_model_path.parent)
 
     elif config["model"].get("n_layers", 1) == 0:
-        print(">>> Skipping evaluation as n_layers is 0 and therefore no finetuned model was created.")
+        logger.info("Skipping finetuned evaluation because n_layers is 0")
 
     else:
-        print(
-            f">>> Results already exist at {ft_dir / f'Results_{file_ext}.json'}, skipping evaluation")
+        logger.info("Finetuned results already exist; skipping (%s)",
+                    ft_dir / f"Results_{file_ext}.json")
 
-    print(
-        f"\n--- Done with {config['sldd_mode'].upper()} execution ---")
+    logger.info("%s execution completed", config["sldd_mode"].upper())
 
 
 def main_cli(argv: list[str] | None = None) -> None:

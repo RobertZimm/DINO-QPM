@@ -6,7 +6,7 @@ dynamically, eliminating the need for individual boolean parameters for each met
 """
 
 from typing import Dict, List, Optional, Type, Any
-from CleanCodeRelease.evaluation.metrics.batch_metrics import (
+from dino_qpm.evaluation.metrics.batch_metrics import (
     MetricAccumulator,
     AccuracyAccumulator,
     CorrelationAccumulator,

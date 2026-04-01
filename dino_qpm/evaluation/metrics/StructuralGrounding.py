@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from CleanCodeRelease.dataset_classes.cub200 import CUB200Class
+from dino_qpm.dataset_classes.cub200 import CUB200Class
 
 
 def get_structural_grounding_for_weight_matrix(rel_weight):

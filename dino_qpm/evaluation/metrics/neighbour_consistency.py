@@ -8,10 +8,10 @@ import yaml
 from tqdm import tqdm
 from torch.utils.data import ConcatDataset, DataLoader
 
-# Import from CleanCodeRelease
-from CleanCodeRelease.evaluation.metrics.batch_metrics import MetricAccumulator
-from CleanCodeRelease.dataset_classes.get_data import get_data
-from CleanCodeRelease.configs.conf_getter import get_default_save_dir
+# Local project imports
+from dino_qpm.evaluation.metrics.batch_metrics import MetricAccumulator
+from dino_qpm.dataset_classes.get_data import get_data
+from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
 # Define unified results file path
 DEFAULT_SAVE_DIR = get_default_save_dir() / "metrics"

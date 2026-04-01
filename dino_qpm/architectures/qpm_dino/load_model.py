@@ -9,7 +9,9 @@ from dino_qpm.ext_models.dinov2.models.vision_transformer import vit_large, vit_
 from dino_qpm.architectures.qpm_dino.dino_model import Dino2Div
 from dino_qpm.architectures.model_mapping import get_model
 from dino_qpm.configs.core.dataset_params import dataset_constants
+from dino_qpm.helpers.logging_utils import get_logger
 
+logger = get_logger(__name__)
 BACKBONE_ARCHS = {
     "small": "vits",
     "base": "vitb",
@@ -35,17 +37,17 @@ def load_neco_model(model_type: str,
         torch.nn.Module, torch.device]:
     if force_cpu:
         device = torch.device("cpu")
-        print(">>> Forced to use CPU. Therefore running on CPU.")
+        logger.info("Forced to use CPU")
 
     else:
         device = torch.device(
             "cuda") if torch.cuda.is_available() else torch.device("cpu")
 
         if device.type == "cuda":
-            print(">>> Running on GPU since GPU is available.")
+            logger.info("Device: CUDA")
 
         elif device.type == "cpu":
-            print(">>> Running on CPU since no GPU is available.")
+            logger.info("Device: CPU")
 
         else:
             raise ValueError(f"Unsupported device: {device}")
@@ -98,7 +100,7 @@ def load_model(model_type: str = "large",
                config_path: str = None,
                force_cpu: bool = False, ):
     if model_path is None:
-        print(f">>> Loading model {model_type}")
+        logger.info("Loading model %s", model_type)
         if model_type == "sinder":
             model, device = load_sinder_model(force_cpu=force_cpu)
 
@@ -196,7 +198,7 @@ def load_qpm_feature_selection_and_assignment(log_dir: str | Path):
 
     if (os.path.exists(save_folder / "sel.pt")
             and os.path.exists(save_folder / "weight.pt")):
-        print(f">>> Loading Selection and Weight Matrix from {save_folder}\n")
+        logger.info("Loading selection and weight matrix from %s", save_folder)
         feature_sel = torch.load(save_folder / "sel.pt",
                                  map_location=torch.device('cpu'),
                                  weights_only=False)
@@ -340,10 +342,10 @@ def load_backbone(model_type: str,
             "cuda") if torch.cuda.is_available() else torch.device("cpu")
 
         if device.type == "cuda":
-            print(">>> GPU available with CUDA support. Working on GPU. ")
+            logger.info("Device: CUDA")
 
         elif device.type == "cpu":
-            print(">>> No GPU with fitting CUDA support available. Working on CPU. ")
+            logger.info("Device: CPU")
 
         else:
             raise ValueError(
@@ -351,7 +353,7 @@ def load_backbone(model_type: str,
     else:
         device = torch.device("cpu")
 
-        print(">>> Working on CPU since it has been forced")
+        logger.info("Working on CPU (forced)")
 
     if arch == "dinov2":
         backbone_model = load_bb_dinov2(model_type=model_type, n_regs=n_regs)
@@ -432,4 +434,4 @@ def load_bb_dinov2(model_type: str, n_regs: int = 0):
 if __name__ == "__main__":
     # Example usage
     model, device = load_model(model_type="neco_base_reg", arch="dinov2")
-    print(model)
+    logger.info("Model loaded for smoke test")

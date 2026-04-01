@@ -11,6 +11,7 @@ import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
 import gc
+from dino_qpm.helpers.logging_utils import get_logger
 
 # Import your existing helper modules
 from dino_qpm.dataset_classes.stanfordcars import StanfordCarsClass
@@ -32,6 +33,7 @@ except ImportError:
 class DinoData(Dataset):
     root = get_datasets_root()
     root_dino = os.path.join(root, "dino_data")
+    logger = get_logger(__name__)
 
     def __init__(self,
                  train: bool,
@@ -48,8 +50,7 @@ class DinoData(Dataset):
             raise ValueError(
                 "At least one of ret_feat_vec or ret_maps must be True")
 
-        print(
-            f"--- Initializing DinoData for mode '{'train' if train else 'test'}' ---")
+        self.logger.info("Initializing DinoData (mode=%s)", 'train' if train else 'test')
 
         self.ret_img_path = ret_img_path
         self.loader_norm = config["data"].get("loader_norm", False)
@@ -149,7 +150,7 @@ class DinoData(Dataset):
 
         # 2. Check / Generate Features & LMDB (skip if not using pre-computed)
         if not self.load_pre_computed:
-            print(">>> On-the-fly feature generation enabled. Skipping pre-computation.")
+            self.logger.info("On-the-fly feature generation enabled; skipping pre-computation")
         elif self.use_lmdb:
             should_create = False
 
@@ -168,14 +169,14 @@ class DinoData(Dataset):
                     env.close()
 
                     if num_entries < len(self.data):
-                        print(
-                            f">>> LMDB is incomplete ({num_entries} / {len(self.data)} samples). Resuming generation...")
+                        self.logger.info("LMDB incomplete (%s/%s); resuming generation",
+                                         num_entries, len(self.data))
                         should_create = True
                     else:
-                        print(f">>> Found complete LMDB at {self.lmdb_path}")
+                        self.logger.info("Using existing LMDB at %s", self.lmdb_path)
 
                 except Exception as e:
-                    print(f">>> Error checking LMDB ({e}). Re-creating...")
+                    self.logger.warning("Failed to inspect LMDB (%s); rebuilding", e)
                     should_create = True
 
             if should_create or rerun_data_gen:
@@ -196,7 +197,7 @@ class DinoData(Dataset):
         # 3. Handle Masks
         if self.mask_types is not None and "dino" in self.mask_types:
             if not os.path.exists(Path(self.root_dino) / self.mask_path):
-                print(f">>> Generating masks...")
+                self.logger.info("Generating masks")
                 run_masking(img_paths=img_paths,
                             mask_path=Path(self.root_dino) / self.mask_path,
                             metrics_retrieval=(self.dataset_name == "CUB2011"),
@@ -224,7 +225,7 @@ class DinoData(Dataset):
             self.calc_std()
             del self.x
 
-        print("")
+        self.logger.info("DinoData initialization complete")
 
     def _create_lmdb(self):
         """
@@ -250,10 +251,9 @@ class DinoData(Dataset):
                 # Get the last successful key (e.g. "1000000")
                 last_key = int(cursor.key().decode('ascii'))
                 start_idx = last_key + 1
-                print(
-                    f">>> Found existing DB. Resuming from index {start_idx}...")
+                self.logger.info("Resuming LMDB build from index %s", start_idx)
             else:
-                print(f">>> Creating new LMDB...")
+                self.logger.info("Creating new LMDB")
 
         BATCH_SIZE = 1000
         txn = env.begin(write=True)
@@ -270,10 +270,10 @@ class DinoData(Dataset):
 
             except (EOFError, RuntimeError, pickle.UnpicklingError) as e:
                 # --- CORRUPTION HANDLER ---
-                print(
-                    f"\n[!] Corrupted file found at index {idx}: {row['folderpath']}")
-                print(f"    Error: {e}")
-                print("    > Regenerating this file now...")
+                self.logger.warning("Corrupted feature file at index %s: %s",
+                                    idx, row['folderpath'])
+                self.logger.warning("Error while reading feature file: %s", e)
+                self.logger.info("Regenerating corrupted sample")
 
                 # Delete bad files if they exist
                 vec_path = os.path.join(
@@ -636,8 +636,9 @@ class DinoData(Dataset):
                     raise RuntimeError(
                         f"feat_map unexpected shape: {feat_map.shape}")
             except Exception as e:
-                print(e)
-                exit(1)
+                raise RuntimeError(
+                    f"Failed to concatenate feature map/vector for sample {sample.folderpath}"
+                ) from e
 
         if self.loader_norm:
             x = self.normalize(x)

@@ -2,17 +2,20 @@ import torch
 from dino_qpm.architectures.resnet import resnet50, resnet34, resnet18
 from dino_qpm.architectures.qpm_dino.dino_model import Dino2Div
 from dino_qpm.architectures.registry import get_arch_spec
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_model(num_classes: int,
               config: dict,
               changed_strides: bool = True):
-    print("\n--- Initializing model ---")
+    logger.info("Initializing model")
 
     if torch.cuda.is_available():
-        print(">>> CUDA available. Running on GPU. ")
+        logger.info("Device: CUDA")
     else:
-        print(">>> CUDA not available. Running on CPU. ")
+        logger.info("Device: CPU")
 
     spec = get_arch_spec(config["arch"])
 
@@ -27,8 +30,6 @@ def get_model(num_classes: int,
 
     else:
         raise ValueError(f"Unknown architecture: {config['arch']}")
-
-    print("")
 
     return model
 

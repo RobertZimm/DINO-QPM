@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from CleanCodeRelease.architectures.qpm_dino.similarity_functions import compute_similarity
+from dino_qpm.architectures.qpm_dino.similarity_functions import compute_similarity
 
 
 def _sample_indices(n_total_samples: int, k: int) -> np.ndarray:

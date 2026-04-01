@@ -9,8 +9,8 @@ import torch
 from typing import Dict
 from tqdm import tqdm
 
-from CleanCodeRelease.helpers.data import select_mask
-from CleanCodeRelease.architectures.registry import is_vision_foundation_model
+from dino_qpm.helpers.data import select_mask
+from dino_qpm.architectures.registry import is_vision_foundation_model
 
 
 def compute_cub_metrics(
@@ -49,9 +49,9 @@ def compute_cub_metrics(
     dict
         Dictionary containing legacy metrics
     """
-    from CleanCodeRelease.evaluation.metrics.CUBSegmentationOverlap import get_overlap_score
-    from CleanCodeRelease.evaluation.metrics.StructuralGrounding import get_structural_grounding_for_weight_matrix
-    from CleanCodeRelease.evaluation.metrics.cub_Alignment import get_cub_alignment_from_features
+    from dino_qpm.evaluation.metrics.CUBSegmentationOverlap import get_overlap_score
+    from dino_qpm.evaluation.metrics.StructuralGrounding import get_structural_grounding_for_weight_matrix
+    from dino_qpm.evaluation.metrics.cub_Alignment import get_cub_alignment_from_features
 
     results = {}
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

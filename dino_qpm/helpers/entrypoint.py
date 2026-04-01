@@ -1,6 +1,10 @@
+import argparse
 import getpass
 import os
 from pathlib import Path
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def dataset_subpath_for_dataset(dataset: str | None) -> Path:
@@ -44,13 +48,8 @@ def configure_datasets_root_env() -> None:
     use_local = dataset_path_is_ready(dataset_name, local_candidate)
     selected_root = local_base if use_local else tmp_base
     os.environ["CCR_DATASETS_ROOT"] = str(selected_root)
-
-    print("[PathDebug] Dataset root resolution")
-    print(f"[PathDebug]   dataset={dataset_name}")
-    print(f"[PathDebug]   local_candidate={local_candidate}")
-    print(f"[PathDebug]   fallback_candidate={fallback_candidate}")
-    print(f"[PathDebug]   local_ready={use_local}")
-    print(f"[PathDebug]   CCR_DATASETS_ROOT={selected_root}")
+    logger.info("Dataset root: %s (dataset=%s, local_ready=%s)",
+                selected_root, dataset_name, use_local)
 
 
 def split_command(argv: list[str]) -> tuple[str, list[str]]:
@@ -67,3 +66,15 @@ def split_command(argv: list[str]) -> tuple[str, list[str]]:
     raise ValueError(
         f"Unknown command '{argv[0]}'. Expected one of: train, inference, evaluate"
     )
+
+
+def parse_global_args(argv: list[str]) -> tuple[argparse.Namespace, list[str]]:
+    """Parse global CLI args and leave command-specific args untouched."""
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        default=None,
+        help="Global logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+    )
+    return parser.parse_known_args(argv)

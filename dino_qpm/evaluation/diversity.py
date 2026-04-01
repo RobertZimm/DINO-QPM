@@ -1,6 +1,6 @@
 import torch
 
-from CleanCodeRelease.evaluation.helpers import softmax_feature_maps
+from dino_qpm.evaluation.helpers import softmax_feature_maps
 
 
 class MultiKCrossChannelMaxPooledSum:

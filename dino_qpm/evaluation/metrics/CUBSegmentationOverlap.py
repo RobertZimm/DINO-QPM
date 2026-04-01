@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from CleanCodeRelease.helpers.img_tensor_arrays import dilate_mask
+from dino_qpm.helpers.img_tensor_arrays import dilate_mask
 from pathlib import Path
 from typing import Optional
 from tqdm import tqdm
@@ -241,11 +241,11 @@ def _load_model_and_data(
         Tuple of (model, config, dataset, is_vit_model, data_loader, linear_matrix, device)
     """
     import yaml
-    from CleanCodeRelease.dataset_classes.get_data import get_data
-    from CleanCodeRelease.evaluation.load_model import load_model
-    from CleanCodeRelease.architectures.model_mapping import get_model
-    from CleanCodeRelease.configs.dataset_params import dataset_constants
-    from CleanCodeRelease.architectures.registry import is_vision_foundation_model
+    from dino_qpm.dataset_classes.get_data import get_data
+    from dino_qpm.evaluation.load_model import load_model
+    from dino_qpm.architectures.model_mapping import get_model
+    from dino_qpm.configs.dataset_params import dataset_constants
+    from dino_qpm.architectures.registry import is_vision_foundation_model
 
     folder = Path(folder)
 
@@ -366,10 +366,10 @@ def run_visualization_pipeline(
     Returns:
         List of matplotlib figures
     """
-    from CleanCodeRelease.configs.dataset_params import normalize_params
-    from CleanCodeRelease.configs.conf_getter import get_default_save_dir
-    from CleanCodeRelease.helpers.data import select_mask
-    from CleanCodeRelease.posttraining.visualisation.model_related.visualize_per_class import get_class_names
+    from dino_qpm.configs.dataset_params import normalize_params
+    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.helpers.data import select_mask
+    from dino_qpm.posttraining.visualisation.model_related.visualize_per_class import get_class_names
 
     folder = Path(folder)
 
@@ -607,8 +607,8 @@ def run_border_activation_pipeline(
     Returns:
         List of matplotlib figures for the top n_samples
     """
-    from CleanCodeRelease.configs.conf_getter import get_default_save_dir
-    from CleanCodeRelease.helpers.data import select_mask
+    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.helpers.data import select_mask
     from posttraining.visualisation.model_related.visualize_per_class import get_class_names
 
     folder = Path(folder)
@@ -724,7 +724,7 @@ def run_border_activation_pipeline(
                 vit_fetch_indices.append(idx)
 
             else:
-                from CleanCodeRelease.configs.dataset_params import normalize_params
+                from dino_qpm.configs.dataset_params import normalize_params
 
                 if isinstance(batch_data, (list, tuple)):
                     samples = batch_data[0].unsqueeze(0).to(device)

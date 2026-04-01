@@ -12,8 +12,8 @@ from pathlib import Path
 from typing import Optional, Tuple, Dict
 from tqdm import tqdm
 
-from CleanCodeRelease.architectures.qpm_dino.load_model import load_model, load_backbone
-from CleanCodeRelease.helpers.img_tensor_arrays import prep_img
+from dino_qpm.architectures.qpm_dino.load_model import load_model, load_backbone
+from dino_qpm.helpers.img_tensor_arrays import prep_img
 
 
 def compute_attention_entropy(attention: torch.Tensor,
@@ -322,8 +322,8 @@ class DinoAttentionData(Dataset):
         """Load image paths and labels from the dataset."""
         import pandas as pd
         import os
-        from CleanCodeRelease.dataset_classes.cub200 import CUB200Class
-        from CleanCodeRelease.dataset_classes.stanfordcars import StanfordCarsClass
+        from dino_qpm.dataset_classes.cub200 import CUB200Class
+        from dino_qpm.dataset_classes.stanfordcars import StanfordCarsClass
 
         if self.dataset_name == "CUB2011":
             dataset = CUB200Class(train=self.train, transform=None, crop=False)
@@ -666,7 +666,7 @@ def load_attention_entropy_results(results_path: Path = None) -> Dict:
     import json
 
     if results_path is None:
-        from CleanCodeRelease.configs.conf_getter import get_attention_entropy_results_path
+        from dino_qpm.configs.conf_getter import get_attention_entropy_results_path
         results_path = get_attention_entropy_results_path()
 
     if not results_path.exists():
@@ -690,7 +690,7 @@ def save_attention_entropy_results(results: Dict, results_path: Path = None) -> 
     import json
 
     if results_path is None:
-        from CleanCodeRelease.configs.conf_getter import get_attention_entropy_results_path
+        from dino_qpm.configs.conf_getter import get_attention_entropy_results_path
         results_path = get_attention_entropy_results_path()
 
     # Ensure directory exists

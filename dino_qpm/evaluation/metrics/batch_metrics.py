@@ -259,7 +259,7 @@ class ContrastivenessAccumulator(MetricAccumulator):
             print(f"⚠️  Contrastiveness metric: no samples processed")
             return None
 
-        from CleanCodeRelease.evaluation.metrics.Contrastiveness import gmm_overlap_per_feature
+        from dino_qpm.evaluation.metrics.Contrastiveness import gmm_overlap_per_feature
 
         # Concatenate all accumulated features
         features = np.vstack(self.all_features)
@@ -289,7 +289,7 @@ class DiversityAccumulator(MetricAccumulator):
             linear_matrix: Weight matrix (num_classes, num_features)
             top_k_range: Range of k values for diversity computation
         """
-        from CleanCodeRelease.evaluation.diversity import MultiKCrossChannelMaxPooledSum
+        from dino_qpm.evaluation.diversity import MultiKCrossChannelMaxPooledSum
         self.diversity_calculator = MultiKCrossChannelMaxPooledSum(
             top_k_range, linear_matrix, None, func="SumNMax"
         )
@@ -514,7 +514,7 @@ class StructuralGroundingAccumulator(MetricAccumulator):
         if self._computed:
             return self._result
 
-        from CleanCodeRelease.evaluation.metrics.StructuralGrounding import (
+        from dino_qpm.evaluation.metrics.StructuralGrounding import (
             get_structural_grounding_for_weight_matrix
         )
 
@@ -551,7 +551,7 @@ class CUBAlignmentAccumulator(MetricAccumulator):
             print("⚠️  CUB Alignment: no features accumulated")
             return None
 
-        from CleanCodeRelease.evaluation.metrics.cub_Alignment import (
+        from dino_qpm.evaluation.metrics.cub_Alignment import (
             get_cub_alignment_from_features
         )
 
@@ -614,7 +614,7 @@ class CUBSegmentationOverlapAccumulator(MetricAccumulator):
     def _process_sample(self, feat_map: torch.Tensor, gt_mask: torch.Tensor,
                         pred_class: torch.Tensor):
         """Process a single sample and update all metric sums at once."""
-        from CleanCodeRelease.helpers.img_tensor_arrays import dilate_mask
+        from dino_qpm.helpers.img_tensor_arrays import dilate_mask
 
         # Get weights for predicted class: (n_features,)
         weights = self.linear_matrix[pred_class]

@@ -5,8 +5,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
-from CleanCodeRelease.sparsification.feature_helpers import load_features_with_labels
-from CleanCodeRelease.helpers.cub_attributes import (
+from dino_qpm.sparsification.feature_helpers import load_features_with_labels
+from dino_qpm.helpers.cub_attributes import (
     load_attribute_mapping, get_cbm_feature_indices, is_present_attributes)
 from tqdm import tqdm
 import json
