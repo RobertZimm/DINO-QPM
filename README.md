@@ -4,15 +4,19 @@
 
 <p align="center">
   <img src="res/cover_figure_ink.svg" alt="Pipeline Diagram" width="100%">
-  <br>
-  <em>Overview of our proposed DINO-QPM. The pipeline processes the (a) input image using the frozen backbone to produce patch embeddings, which are transformed by the interpretability adapter to obtain a globally interpretable image classification. We compare the diffuse saliency map of (b) DINO GradCAM, extracted from a linear probed DINO model, with our (c) DINO-QPM local explanation. The local explanation can be further decomposed into its (d) class-independent diverse features. Compared to the baseline, we observe a drastic increase in localisation quality, showcasing how our interpretability adapter successfully isolates semantically meaningful features.</em>
 </p>
+
+<div align="center">
+
+<em>Overview of our proposed DINO-QPM. The pipeline processes the (a) input image using the frozen backbone to produce patch embeddings, which are transformed by the interpretability adapter to obtain a globally interpretable image classification. We compare the diffuse saliency map of (b) DINO GradCAM, extracted from a linear probed DINO model, with our (c) DINO-QPM local explanation. The local explanation can be further decomposed into its (d) class-independent diverse features. Compared to the baseline, we observe a drastic increase in localisation quality, showcasing how our interpretability adapter successfully isolates semantically meaningful features.</em>
+
+</div>
 
 ## Abstract
 
-Although visual foundation models like DINOv2 provide state-of-the-art performance as feature extractors, their complex, high-dimensional representations create substantial hurdles for interpretability. This work proposes DINO-QPM, which converts these powerful but entangled features into contrastive, class-independent representations that are interpretable by humans. DINO-QPM is a lightweight interpretability adapter that pursues globally interpretable image classification, adapting the Quadratic Programming Enhanced Model (QPM) to operate on strictly frozen DINO backbones. While classification with visual foundation models typically relies on the CLS token, we deliberately diverge from this standard. By leveraging average-pooling, we directly connect the patch embeddings to the model's features and therefore enable spatial localisation of DINO-QPM's globally interpretable features within the input space. Furthermore, we apply a sparsity loss to minimise spatial scatter and background noise, ensuring that explanations are grounded in relevant object parts. With DINO-QPM we make the level of interpretability of QPM available as an adapter while exceeding the accuracy of DINOv2 linear probe. Evaluated through an introduced Plausbility metric and other interpretability metrics, extensive experiments demonstrate that DINO-QPM is superior to other applicable methods for frozen visual foundation models in both classification accuracy and explanation quality.
+Although visual foundation models like DINOv2 provide state-of-the-art performance as feature extractors, their complex, high-dimensional representations create substantial hurdles for interpretability. This work proposes DINO-QPM, which converts these powerful but entangled features into contrastive, class-independent representations that are interpretable by humans. DINO-QPM is a lightweight interpretability adapter that pursues globally interpretable image classification, adapting the Quadratic Programming Enhanced Model (QPM) to operate on strictly frozen DINO backbones. While classification with visual foundation models typically relies on the CLS token, we deliberately diverge from this standard. By leveraging average-pooling, we directly connect the patch embeddings to the model's features and therefore enable spatial localisation of DINO-QPM's globally interpretable features within the input space. Furthermore, we apply a sparsity loss to minimise spatial scatter and background noise, ensuring that explanations are grounded in relevant object parts. With DINO-QPM we make the level of interpretability of QPM available as an adapter while exceeding the accuracy of DINOv2 linear probe. Evaluated through an introduced Plausibility metric and other interpretability metrics, extensive experiments demonstrate that DINO-QPM is superior to other applicable methods for frozen visual foundation models in both classification accuracy and explanation quality.
 
-## DINO-QPM Pipeline
+## Architecture
 
 <table width="100%">
   <tr valign="middle">
@@ -29,14 +33,17 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 </table>
 <br>
 
-## DINO-QPM: A Global Interpretality Adapter
+## DINO-QPM: A Global Interpretability Adapter
 
 <p align="center">
   <img src="res/class_comp_ink.svg" alt="Pipeline Diagram" width="100%">
-  <br>
-  <em>Comparison of a Brewer's Blackbird image with a Rusty Blackbird image. From the selected features $\mathcal{F}^{*}$, $N_f^{\hat{c}}=5$ utilised features were selected for both classes using the QP; the corresponding feature maps from $\boldsymbol{F}$ are visualised as saliency maps. Both classes share 4 out of the 5 features and can thus be distinguished by the non-shared features. Notably, the model differentiates the Brewer's Blackbird using feature 24, which localises the beak. This aligns perfectly with established ornithological expertise, where beak morphology is considered a primary diagnostic trait. </em>
 </p>
 
+<div align="center">
+
+<em>Comparison of a Brewer's Blackbird image with a Rusty Blackbird image. From the selected features $\mathcal{F}^{*}$, $N_f^{\hat{c}}=5$ utilised features were selected for both classes using the QP; the corresponding feature maps from $\boldsymbol{F}$ are visualised as saliency maps. Both classes share 4 out of the 5 features and can thus be distinguished by the non-shared features. Notably, the model differentiates the Brewer's Blackbird using feature 24, which localises the beak. This aligns perfectly with established ornithological expertise, where beak morphology is considered a primary diagnostic trait.</em>
+
+</div>
 
 ## Code
 
@@ -45,7 +52,7 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 - A Conda distribution must be installed first (Anaconda or Miniconda).
 - Installation instructions: https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
-### Installation 
+### Installation
 
 From the repository root:
 
@@ -129,9 +136,9 @@ Note: `concat` is only compatible with `model.feat_vec_type=avg_pooling` and `mo
 `model.feat_vec_type`: Specifies what we demand the frozen backbone to return for downstream usage.
 
 - `model.feat_vec_type=normal` uses the embedding of the CLS token for classification; patch embeddings are only used for visualisation purposes.
-- `model.feat_vec_type=mean_avg_pooling` .
-- `model.feat_vec_type=avg_pooling` derives the adapter feature vector from patch embeddings (DINO-QPM).
-- `model.feat_vec_type=max_pooling` derives the adapter feature vector from patch embeddings (DINO-QPM).
+- `model.feat_vec_type=mean_avg_pooling`: Both CLS token and patch embeddings are processed by the MLP separately. Afterwards the results are each average-pooled; the feature vector results as the mean of both.
+- `model.feat_vec_type=avg_pooling` derives the adapter feature vector from patch embeddings as an average-pooling over the patch embeddings processed by the MLP (DINO-QPM).
+- `model.feat_vec_type=max_pooling` derives the adapter feature vector from patch embeddings as a max-pooling of the patch embeddings processed by the MLP.
 
 ### 2. Inference
 
@@ -180,3 +187,5 @@ Image Classification},
   year      = {2026}
 }
 ```
+
+[^1]: 
