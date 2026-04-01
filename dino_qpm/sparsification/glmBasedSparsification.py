@@ -88,7 +88,7 @@ def fit_glm(log_dir, mean, std, feature_loaders,  num_classes,   select_features
                           n_classes=num_classes,
                           checkpoint=str(output_folder),
                           verbose=200,
-                          tol=1e-4,  # Change for ImageNet
+                          tol=1e-4,  # Change for large datasets
                           lookbehind=5,
                           lr_decay_factor=1,
                           group=False,

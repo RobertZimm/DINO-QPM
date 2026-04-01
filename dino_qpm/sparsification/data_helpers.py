@@ -16,8 +16,6 @@
 #
 #
 # def get_label_mapping(dataset_name):
-#     if dataset_name == 'imagenet':
-#         return CLASS_DICT['ImageNet']
 #     elif dataset_name in ['places-10', "places365"]:
 #         return CD_PLACES
 #     elif dataset_name == "CIFAR-10":

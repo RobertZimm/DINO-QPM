@@ -12,12 +12,12 @@ use_prototypes: False
 
 sldd_mode: qpm # options: qsenn, sldd, qpm
 
-dataset: ImageNet # \in [CUB2011, StanfordCars, ImageNet, Fitzpatrick17k]
+dataset: CUB2011 # \in [CUB2011, StanfordCars, Fitzpatrick17k]
 
 # Whether to load pre-computed feature maps/vectors from disk.
 # If False, the frozen backbone is run live during training instead.
 # Used for VFM datasets handled through DinoData (CUB2011, StanfordCars,
-# ImageNet, Fitzpatrick17k). Ignored for non-VFM architectures (e.g. resnet50).
+# Fitzpatrick17k). Ignored for non-VFM architectures (e.g. resnet50).
 load_pre_computed: False
 
 log_dir_prefix: DINO-QPM

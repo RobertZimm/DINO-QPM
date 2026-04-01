@@ -100,13 +100,14 @@ def get_log_dir(args):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--dataset', default="CUB2011", type=str, help='dataset name',
-                        choices=["CUB2011", "ImageNet", "TravelingBirds", "StanfordCars"])
+                        choices=["CUB2011", "TravelingBirds", "StanfordCars"])
     parser.add_argument('--arch', default="resnet50", type=str, help='Backbone Feature Extractor',
                         choices=["resnet50", "resnet18"])
     parser.add_argument('--model_type', default="qpm", type=str,
                         help='Type of Model', choices=["qsenn", "sldd", "qpm"])
     parser.add_argument('--seed', default=504405, type=int,
-                        help='seed, used for naming the folder and random processes. Could be useful to set to have multiple finetune runs (e.g. Q-SENN and SLDD) on the same dense model')  # 769567, 552629
+                        # 769567, 552629
+                        help='seed, used for naming the folder and random processes. Could be useful to set to have multiple finetune runs (e.g. Q-SENN and SLDD) on the same dense model')
     parser.add_argument('--cropGT', default=True, type=bool,
                         help='Whether to crop CUB/TravelingBirds based on GT Boundaries')
     parser.add_argument('--n_features', default=50, type=int,

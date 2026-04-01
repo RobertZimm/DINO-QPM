@@ -372,9 +372,9 @@ if __name__ == "__main__":
 
     configs_dir = Path(__file__).parent.parent / "configs"
 
-    # Collect all yaml config files from imagenet and other folders
+    # Collect all yaml config files from supported config folders
     config_files = []
-    for folder in ["imagenet", "other"]:
+    for folder in ["other"]:
         folder_path = configs_dir / folder
         if folder_path.exists():
             for yaml_file in folder_path.rglob("*.yaml"):

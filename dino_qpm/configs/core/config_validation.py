@@ -17,6 +17,9 @@ def _require_keys(config: dict, required_keys: list[str]) -> None:
 def validate_config(config: dict) -> None:
     _require_keys(config, ["arch", "dataset", "sldd_mode", "model", "data"])
 
+    if str(config["dataset"]).strip().lower() == "imagenet":
+        raise ValueError("ImageNet is currently not supported.")
+
     if config["arch"] not in ARCH_REGISTRY:
         raise ValueError(
             f"Unsupported arch '{config['arch']}'. "

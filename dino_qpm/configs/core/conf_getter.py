@@ -188,7 +188,7 @@ def build_conf_filename(dataset: str = None,
             else:
                 use_prototypes = False
 
-    dataset_folder = "imagenet" if dataset.lower() == "imagenet" else "other"
+    dataset_folder = "other"
 
     # For dinov2 with mlp=False, use dinov2_no_mlp.yaml
     if "dino" in arch and not mlp:

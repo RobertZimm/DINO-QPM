@@ -187,7 +187,7 @@ def compute_features(loader: torch.utils.data.DataLoader,
         shuffle (bool): Whether or not to shuffle output data loaoder
         device (str): Device on which to keep the model
         filename (str):Optional file to cache computed feature. Recommended
-            for large dataset_classes like ImageNet.
+            for large datasets.
         chunk_threshold (int): Size of shard while caching
         balance (bool): Whether or not to balance output data loader
             (only relevant for some language model)
@@ -478,7 +478,7 @@ def calculate_metadata(loader,
         loader : torch data loader
         num_classes (int): Number of classes in the dataset
         filename (str): Optional filepath to cache metadata. Recommended
-            for large dataset_classes like ImageNet.
+            for large datasets.
 
     Returns:
         metadata (dict): Dictionary with desired statistics.

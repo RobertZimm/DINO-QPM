@@ -840,7 +840,7 @@ def run_cls_comparison(folder: str | Path,
                        show_row_labels: bool | None = None) -> None:
     parser = ArgumentParser()
     parser.add_argument('--dataset', default="CUB2011", type=str, help='dataset name',
-                        choices=["CUB2011", "ImageNet", "TravelingBirds", "StanfordCars"])
+                        choices=["CUB2011", "TravelingBirds", "StanfordCars"])
     parser.add_argument('--arch', default="dinov2", type=str, help='Backbone Feature Extractor',
                         choices=["resnet50", "resnet18, dinov2"])
     parser.add_argument('--model_type', default="qpm", type=str,

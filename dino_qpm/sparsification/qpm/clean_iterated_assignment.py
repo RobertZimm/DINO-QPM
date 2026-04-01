@@ -40,7 +40,8 @@ def calculate_assignment_solution_iterated(target_features,
     gp.setParam("NodefileDir", "/data/norrenbr/tmp/GurobiFiles")
     n_classes = similarity_measurement_matrix.shape[1]
     if n_classes == 1000:
-        print("Setting timelimit to 10 hours to hopefully get a solution for imagenet")
+        print(
+            "Setting timelimit to 10 hours to hopefully get a solution for large datasets")
         # Roughly what glm_saga would have needed in this dumb sparse case
         m.setParam('TimeLimit', 10 * 60 * 60)
         m.setParam("Threads", 10)

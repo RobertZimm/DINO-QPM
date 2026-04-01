@@ -16,12 +16,6 @@ def _dataset_subpath_for_dataset(dataset: str | None) -> Path:
 
 def _dataset_path_is_ready(dataset: str | None, candidate_path: Path) -> bool:
     """Check whether dataset-specific candidate path is ready for use."""
-    key = str(dataset or "").strip().lower()
-
-    if key == "imagenet":
-        # Avoid selecting partially copied local trees.
-        return (candidate_path / "train").is_dir() and (candidate_path / "val").is_dir()
-
     return candidate_path.exists()
 
 
@@ -35,7 +29,7 @@ def _configure_datasets_root_env() -> None:
     user = getpass.getuser()
 
     dataset_name = None
-    
+
     from dino_qpm.configs.core.conf_getter import load_config
     cfg = load_config()
     dataset_name = cfg.get("dataset")

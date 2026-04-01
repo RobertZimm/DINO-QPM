@@ -36,39 +36,3 @@ def get_datasets_root(config: dict | None = None) -> Path:
         return cfg_val
 
     return get_tmp_root(config) / "Datasets"
-
-
-def get_torchvision_imagenet_root(config: dict | None = None) -> Path:
-    env_val = _as_path(os.getenv("CCR_TORCHVISION_IMAGENET_ROOT"))
-    if env_val is not None:
-        return env_val
-
-    cfg_val = _config_path(config, "torchvision_imagenet_root")
-    if cfg_val is not None:
-        return cfg_val
-
-    return get_datasets_root(config) / "imagenet"
-
-
-def get_imagenet_cls_loc_root(config: dict | None = None) -> Path:
-    env_val = _as_path(os.getenv("CCR_IMAGENET_CLSLOC_ROOT"))
-    if env_val is not None:
-        return env_val
-
-    cfg_val = _config_path(config, "imagenet_clsloc_root")
-    if cfg_val is not None:
-        return cfg_val
-
-    return get_datasets_root(config) / "ImageNet" / "ILSVRC" / "Data" / "CLS-LOC"
-
-
-def get_imagenet_lmdb_root(config: dict | None = None) -> Path:
-    env_val = _as_path(os.getenv("CCR_IMAGENET_LMDB_ROOT"))
-    if env_val is not None:
-        return env_val
-
-    cfg_val = _config_path(config, "imagenet_lmdb_root")
-    if cfg_val is not None:
-        return cfg_val
-
-    return get_tmp_root(config) / "ImageNet"

@@ -324,7 +324,6 @@ class DinoAttentionData(Dataset):
         import os
         from CleanCodeRelease.dataset_classes.cub200 import CUB200Class
         from CleanCodeRelease.dataset_classes.stanfordcars import StanfordCarsClass
-        from CleanCodeRelease.dataset_classes.imagenet import ImageNetDataset
 
         if self.dataset_name == "CUB2011":
             dataset = CUB200Class(train=self.train, transform=None, crop=False)
@@ -340,13 +339,6 @@ class DinoAttentionData(Dataset):
         elif self.dataset_name == "StanfordCars":
             dataset = StanfordCarsClass(train=self.train, transform=None)
             # StanfordCars uses samples list of (path, target) tuples
-            self.data = pd.DataFrame({
-                'img_path': [s[0] for s in dataset.samples],
-                'label': [s[1] for s in dataset.samples]
-            })
-        elif self.dataset_name == "ImageNet":
-            split = "train" if self.train else "val"
-            dataset = ImageNetDataset(split=split)
             self.data = pd.DataFrame({
                 'img_path': [s[0] for s in dataset.samples],
                 'label': [s[1] for s in dataset.samples]
@@ -736,7 +728,7 @@ def run_attention_entropy_experiment(
     Args:
         model_type: Model type (e.g., "base", "large_reg", "neco_small")
         arch: Architecture (e.g., "dinov2", "dino", "dinov3")
-        dataset: Dataset name (e.g., "CUB2011", "ImageNet")
+        dataset: Dataset name (e.g., "CUB2011", "StanfordCars")
         split: "train", "test", or "both" (default: "both")
         save_results: Whether to save results to JSON
         results_path: Custom path for results JSON
