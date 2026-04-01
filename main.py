@@ -7,12 +7,8 @@ from pathlib import Path
 def _dataset_subpath_for_dataset(dataset: str | None) -> Path:
     """Return dataset-specific relative path used to probe local storage."""
     mapping = {
-        "imagenet": Path("ImageNet") / "ILSVRC" / "Data" / "CLS-LOC",
         "cub2011": Path("CUB200"),
         "stanfordcars": Path("StanfordCars"),
-        "fgvcaircraft": Path("FGVCAircraft"),
-        "fitzpatrick17k": Path("Fitzpatrick17k"),
-        "travelingbirds": Path("TravelingBirds"),
     }
     key = str(dataset or "").strip().lower()
     return mapping.get(key, Path(key) if key else Path())
