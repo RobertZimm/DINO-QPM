@@ -225,11 +225,6 @@ def get_seeds() -> list:
     return load_seeds_config()["seeds"]
 
 
-def get_slurm_seeds() -> list:
-    """Backward-compatible alias for the shared seed pool."""
-    return get_seeds()
-
-
 def get_default_save_dir() -> Path:
     """Get the default save directory from general_config."""
     save_dir = general_config.get("default_save_dir", None)

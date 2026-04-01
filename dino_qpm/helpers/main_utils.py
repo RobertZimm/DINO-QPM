@@ -12,11 +12,9 @@ from argparse import Namespace
 from dino_qpm.training.optim import get_scheduler_for_model
 from dino_qpm.helpers.file_system import get_folder_count, find_file_in_hierarchy
 from dino_qpm.configs.core.architecture_params import dino_supported_datasets
-from dino_qpm.slurmscripts.python.slurmFunctions import get_slurm_key
 from dino_qpm.configs.core.dataset_params import dataset_constants
 from dino_qpm.saving.logging import Tee
 from dino_qpm.helpers.optimize import optimize_finetune, optimize_dense
-from dino_qpm.slurmscripts.python.slurmFunctions import is_in_slurm
 from dino_qpm.configs.core.conf_getter import load_config
 from dino_qpm.configs.core.config_validation import validate_config
 from dino_qpm.configs.core.runtime_paths import get_tmp_root
@@ -145,24 +143,6 @@ def create_log_dir(input_ft_dir: str | None,
     return log_dir
 
 
-def create_dense_log(slurm_log: str,
-                     log_dir: str | Path,
-                     mode: str,) -> None:
-    if os.path.lexists(slurm_log):
-        if os.path.lexists(log_dir / f"{mode}_slurm.log"):
-            print(
-                f"SLURM log file {slurm_log} already exists, skipping symlink creation")
-
-        else:
-            os.symlink(slurm_log, log_dir / f"{mode}_slurm.log")
-            print(
-                f"Created symlink for SLURM log file {slurm_log} at {log_dir / f'{mode}_slurm.log'}")
-
-    else:
-        print(
-            f"SLURM log file {slurm_log} does not exist, cannot create symlink")
-
-
 def init_dense_params(config: dict,
                       dataset: str,
                       seed: int | None,
@@ -178,26 +158,13 @@ def init_dense_params(config: dict,
 
     sys.setrecursionlimit(10000)
 
-    if is_in_slurm():
-        job_name = get_slurm_key('JOB_NAME')
-        job_id = get_slurm_key("JOB_ID")
-        array_job_id = get_slurm_key("ARRAY_JOB_ID")
-        task_id = get_slurm_key("ARRAY_TASK_ID")
+    job_name = "local_run"
+    job_id = "local_test_run"
+    array_job_id = "local_test_run"
+    task_id = "0"
 
-        print("SLURM PARAMS")
-        print(f"    JOB_NAME: {job_name}")
-        print(f"    SLURM_JOB_ID: {job_id}")
-        print(f"    SLURM_ARRAY_JOB_ID: {array_job_id}")
-        print(f"    SLURM_ARRAY_TASK_ID: {task_id}")
-
-    else:
-        job_name = "local_run"
-        job_id = "local_test_run"
-        array_job_id = "local_test_run"
-        task_id = "0"
-
-        if run_number == -1:
-            run_number = 0
+    if run_number == -1:
+        run_number = 0
 
     print(">>> Current run number:", run_number)
 
@@ -267,11 +234,7 @@ def init_ft_params(input_ft_dir: str | None,
     if input_ft_dir is None:
         ft_dir.mkdir(parents=True, exist_ok=True)
 
-    if not is_in_slurm():
-        partition = "gpu"
-
-    else:
-        partition = get_slurm_key("JOB_PARTITION")
+    partition = "gpu" if torch.cuda.is_available() else "cpu"
 
     ft_model_path = ft_dir / f'{file_ext}.pth'
 
@@ -331,35 +294,6 @@ def phase2_ft(config: dict,
                       file_ext=file_ext)
 
 
-def symlink_gpu_ft(job_name: str,
-                   job_id: str,
-                   array_job_id: str,
-                   run_number: int,
-                   ft_dir: str | Path) -> None:
-    try:
-        pth = Path.home() / "tmp" / "slurmOutputsScripts"
-        ext = f"{job_name}-{job_id}-out.txt"
-
-        if os.path.exists(pth / ext):
-            log_pt = pth / ext
-
-        else:
-            log_pt = pth / \
-                f"{job_name}-{array_job_id}_{run_number}-out.txt"
-
-        if os.path.exists(log_pt):
-            os.symlink(
-                log_pt,
-                ft_dir / f"finetune_gpu_slurm.log")
-
-        else:
-            print(
-                f"Target {log_pt} does not exist, cannot create symlink")
-
-    except FileExistsError:
-        pass
-
-
 def move_files_for_rerun(ft_dir: Path,
                          mode: str,
                          file_ext: str) -> None:
@@ -379,13 +313,6 @@ def move_files_for_rerun(ft_dir: Path,
                                  f'Results_{file_ext}.json'), new_path / f"Results_{file_ext}.json")
         print(
             f"Moved {os.path.join(ft_dir, f'Results_{file_ext}.json')} to {new_path}")
-
-    if os.path.lexists(os.path.join(ft_dir,
-                                    f"{mode}_gpu_slurm.log")):
-        shutil.move(os.path.join(ft_dir,
-                                 f"{mode}_gpu_slurm.log"), new_path / f"{mode}_gpu_slurm.log")
-        print(
-            f"Moved {os.path.join(ft_dir, f'{mode}_gpu_slurm.log')} to {new_path}")
 
     # Copy old config
     if os.path.exists(os.path.join(ft_dir, "config.yaml")):
@@ -411,9 +338,6 @@ def get_namespace(argv: list[str] | None = None) -> Namespace:
 
     parser.add_argument("--multi-seed", default=False, action="store_true",
                         help="Indicates whether the run is part of a multi-seed sweep", )
-
-    parser.add_argument("--slurm_log", default=None, type=str,
-                        help="Path to the slurm log file. If not provided, it will be created in the log directory")
 
     return parser.parse_args(argv)
 

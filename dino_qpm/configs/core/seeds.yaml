@@ -1,9 +1,9 @@
 # Permanently stored seeds for reproducible experiments.
 # Edit this file to change the seed pool; do NOT generate new seeds at runtime.
 #
-# seeds : shared default pool for both local and slurm entrypoints.
+# seeds : shared default pool for local entrypoints.
 #   - running main.py directly without --seed falls back to seeds[0]
-#   - slurm_master.py --num-seeds N uses seeds[0..N-1]
+#   - use seeds[0..N-1] when selecting N seeds for batched runs
 #   Maximum N = 10.
 
 seeds:

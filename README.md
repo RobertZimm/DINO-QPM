@@ -88,7 +88,6 @@ Common optional args:
 
 - `--log_dir <path>`
 - `--multi-seed`
-- `--slurm_log <path>` (can still be passed locally if your workflow expects it)
 
 ### 2. Inference
 

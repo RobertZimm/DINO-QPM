@@ -192,9 +192,6 @@ def get_default_args():
     parser.add_argument("--run_number", type=int, default=-1)
     parser.add_argument("--custom_folder", type=str, default=None)
 
-    parser.add_argument("--slurm_log", type=str, default=None,
-                        help="Path to the slurm log file, if applicable")
-
     parser.add_argument("--log_dir", default=None, type=str,
                         help="Path to the log directory")
 

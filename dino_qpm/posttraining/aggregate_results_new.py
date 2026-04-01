@@ -14,7 +14,7 @@ This module replaces the folder-name-dependent grouping of the original
    pre-computed ``changed_parameters``.
 
 This eliminates the dependency on folder-name conventions like
-``<slurm_id>_<run_number>/`` entirely.  Grouping is based solely on
+``<job_id>_<run_number>/`` entirely.  Grouping is based solely on
 config content.  The public API (``process_folder``,
 ``load_results_dataframe``, ``load_results_dataframes``) is preserved.
 """

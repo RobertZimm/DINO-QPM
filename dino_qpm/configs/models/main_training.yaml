@@ -24,7 +24,7 @@ log_dir_prefix: DINO-QPM
 
 default_save_dir: /home/zimmerro/tmp/saveCCR
 
-# Sweep configuration for slurm_master.py
+# Sweep configuration for training runs
 # Format:
 #   sweep:
 #     params: [param1, param2, ...]      # List of parameter names

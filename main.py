@@ -35,13 +35,10 @@ def _configure_datasets_root_env() -> None:
     user = getpass.getuser()
 
     dataset_name = None
-    try:
-        from dino_qpm.configs.core.conf_getter import load_config
-        cfg = load_config()
-        dataset_name = cfg.get("dataset")
-    except Exception:
-        # Keep startup robust: fallback to generic datasets root probing.
-        dataset_name = None
+    
+    from dino_qpm.configs.core.conf_getter import load_config
+    cfg = load_config()
+    dataset_name = cfg.get("dataset")
 
     specific_dataset_path = _dataset_subpath_for_dataset(dataset_name)
 

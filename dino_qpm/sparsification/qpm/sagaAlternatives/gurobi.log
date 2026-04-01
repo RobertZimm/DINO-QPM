@@ -1,6 +1,0 @@
-
-Gurobi 9.1.2 (linux64, Python) logging started Fri Apr 14 09:55:32 2023
-
-Using license file /prog/gurobi/gurobi.lic
-Set parameter TokenServer to value neptun,poseidon
-Set parameter LogFile to value gurobi.log

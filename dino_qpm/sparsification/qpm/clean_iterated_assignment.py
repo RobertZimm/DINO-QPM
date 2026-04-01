@@ -1,13 +1,13 @@
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
+import os
 
 import numpy as np
 import torch
 import gurobipy as gp
 # from fastcluster import linkage
 from gurobipy import GRB
-from dino_qpm.slurmscripts.python.slurmFunctions import is_in_slurm, get_slurm_key
 from dino_qpm.sparsification.qpm.sagaAlternatives.almostSame.forcingEquals import get_list_of_almost_same
 from dino_qpm.sparsification.qpm.sagaAlternatives.hierachy.ideal import find_pairs_of_4_shares
 from dino_qpm.sparsification.qpm.sagaAlternatives.hierachy.test import get_test_hiera
@@ -54,12 +54,12 @@ def calculate_assignment_solution_iterated(target_features,
         print("Setting MIPGap to 0.01")
         bound = 0.005
         m.setParam('TimeLimit', 180 * 60)
-        print("Setting RAM Limit to slurm limit")
-        if is_in_slurm():
-            slurmlimit = get_slurm_key("MEM_PER_NODE")
-            slurmlimit = int(slurmlimit) / 2 ** 10
-            print("Which is: ", slurmlimit)
-            m.setParam("SoftMemLimit", int(slurmlimit))
+        print("Setting RAM limit from MEM_PER_NODE when available")
+        mem_per_node = os.getenv("MEM_PER_NODE")
+        if mem_per_node is not None:
+            soft_mem_limit = int(mem_per_node) / 2 ** 10
+            print("Which is: ", soft_mem_limit)
+            m.setParam("SoftMemLimit", int(soft_mem_limit))
     if bound is not None and target_features != similarity_measurement_matrix.shape[0]:
         m.setParam('MIPGap', bound)
     if isinstance(similarity_measurement_matrix, torch.Tensor):

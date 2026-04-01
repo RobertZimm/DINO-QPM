@@ -6,7 +6,6 @@ import numpy as np
 import torch.utils.data
 import yaml
 from dino_qpm.saving.utils import json_save
-from dino_qpm.slurmscripts.python.slurmFunctions import is_in_slurm, queue_new_job, get_slurm_key, get_run_dir
 from dino_qpm.sparsification.qpm.qpm_solving import solve_qp
 from dino_qpm.sparsification.qpm_constants.compute_A import compute_feat_class_corr_matrix
 from dino_qpm.sparsification.qpm_constants.compute_B import compute_locality_bias
@@ -68,56 +67,7 @@ def compute_qpm_feature_selection_and_assignment(model: torch.nn.Module,
                            weights_only=False)
 
     else:
-        from dino_qpm.slurmscripts.python.slurmFunctions import is_in_slurm
-
-        if not is_in_slurm():
-            partition = "cpu"
-
-        else:
-            partition = get_slurm_key("JOB_PARTITION") or "cpu"
-
-        if config["ft"] and "cpu" not in partition:
-            queue_new_job(ressource_type="cpu",
-                          config=config,
-                          seed=seed,
-                          log_dir=log_dir,
-                          run_number=run_number,
-                          mode="ft",
-                          run_dir=get_run_dir())
-
-        elif "cpu" in partition:
-            print("Running finetuning, without starting new job, already on cpu")
-
-            job_name = get_slurm_key("JOB_NAME")
-            job_id = get_slurm_key("JOB_ID")
-            array_job_id = get_slurm_key("SLURM_ARRAY_TASK_ID")
-
-            try:
-                target = (Path.home() / "tmp" / "slurmOutputsScripts" /
-                          f"{job_name}-{job_id}-out.txt")
-
-                if not os.path.exists(target):
-                    target = (Path.home() / "tmp" / "slurmOutputsScripts" /
-                              f"{job_name}-{array_job_id}_{run_number}-out.txt")
-
-                if os.path.exists(target):
-                    os.symlink(target,
-                               log_dir / "finetune_cpu_slurm.log")
-
-                else:
-                    print(
-                        f">>> Target {target} does not exist, cannot create symlink")
-
-            except FileExistsError:
-                print("Slurm log already exists")
-
-        else:
-            print("Skipping finetuning")
-            # Save config in use to log dir
-            with open(log_dir / "config.yaml", "w") as f:
-                yaml.dump(config, f)
-
-            sys.exit(0)
+        print("Running QPM constant computation in local mode")
 
         a_matrix = compute_feat_class_corr_matrix(full_train_dataset_loader)
         a_matrix = a_matrix / np.abs(a_matrix).max()
@@ -193,23 +143,7 @@ def compute_qpm_feature_selection_and_assignment(model: torch.nn.Module,
                   results_dict)
 
         if not torch.cuda.is_available():
-            print("No GPU available, starting new job with gpu")
-            queue_new_job(ressource_type="gpu",
-                          config=config,
-                          seed=seed,
-                          log_dir=log_dir,
-                          run_number=run_number,
-                          mode="ft",
-                          run_dir=get_run_dir())
-
-            try:
-                os.symlink(
-                    Path.home() / "tmp" / "slurmOutputsScripts" /
-                    f"{get_slurm_key('JOB_NAME')}-{get_slurm_key('JOB_ID')}-out.txt",
-                    log_dir / f"finetune_gpu_slurm.log")
-
-            except FileExistsError:
-                pass
+            print("No GPU available; skipping any job-queue handoff in local-only mode.")
 
     mean, std = metadata["X"]['mean'], metadata["X"]['std']
 
