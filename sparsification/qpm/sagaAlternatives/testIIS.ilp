@@ -1,0 +1,225 @@
+\ Model assignment_copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+Maximize
+ 
+Subject To
+ R410328: similar_class_26[26] = 0
+ R410329: similar_class_26[0] + similar_class_26[1] + similar_class_26[2]
+   + similar_class_26[3] + similar_class_26[4] + similar_class_26[5]
+   + similar_class_26[6] + similar_class_26[7] + similar_class_26[8]
+   + similar_class_26[9] + similar_class_26[10] + similar_class_26[11]
+   + similar_class_26[12] + similar_class_26[13] + similar_class_26[14]
+   + similar_class_26[15] + similar_class_26[16] + similar_class_26[17]
+   + similar_class_26[18] + similar_class_26[19] + similar_class_26[20]
+   + similar_class_26[21] + similar_class_26[22] + similar_class_26[23]
+   + similar_class_26[24] + similar_class_26[25] + similar_class_26[26]
+   + similar_class_26[27] + similar_class_26[28] + similar_class_26[29]
+   + similar_class_26[30] + similar_class_26[31] + similar_class_26[32]
+   + similar_class_26[33] + similar_class_26[34] + similar_class_26[35]
+   + similar_class_26[36] + similar_class_26[37] + similar_class_26[38]
+   + similar_class_26[39] + similar_class_26[40] + similar_class_26[41]
+   + similar_class_26[42] + similar_class_26[43] + similar_class_26[44]
+   + similar_class_26[45] + similar_class_26[46] + similar_class_26[47]
+   + similar_class_26[48] + similar_class_26[49] + similar_class_26[50]
+   + similar_class_26[51] + similar_class_26[52] + similar_class_26[53]
+   + similar_class_26[54] + similar_class_26[55] + similar_class_26[56]
+   + similar_class_26[57] + similar_class_26[58] + similar_class_26[59]
+   + similar_class_26[60] + similar_class_26[61] + similar_class_26[62]
+   + similar_class_26[63] + similar_class_26[64] + similar_class_26[65]
+   + similar_class_26[66] + similar_class_26[67] + similar_class_26[68]
+   + similar_class_26[69] + similar_class_26[70] + similar_class_26[71]
+   + similar_class_26[72] + similar_class_26[73] + similar_class_26[74]
+   + similar_class_26[75] + similar_class_26[76] + similar_class_26[77]
+   + similar_class_26[78] + similar_class_26[79] + similar_class_26[80]
+   + similar_class_26[81] + similar_class_26[82] + similar_class_26[83]
+   + similar_class_26[84] + similar_class_26[85] + similar_class_26[86]
+   + similar_class_26[87] + similar_class_26[88] + similar_class_26[89]
+   + similar_class_26[90] + similar_class_26[91] + similar_class_26[92]
+   + similar_class_26[93] + similar_class_26[94] + similar_class_26[95]
+   + similar_class_26[96] + similar_class_26[97] + similar_class_26[98]
+   + similar_class_26[99] >= 1
+ R425430: - 4 similar_class_26[0] + similarity_across_classes_26[0] >= 0
+ R425431: - 4 similar_class_26[1] + similarity_across_classes_26[1] >= 0
+ R425432: - 4 similar_class_26[2] + similarity_across_classes_26[2] >= 0
+ R425433: - 4 similar_class_26[3] + similarity_across_classes_26[3] >= 0
+ R425434: - 4 similar_class_26[4] + similarity_across_classes_26[4] >= 0
+ R425435: - 4 similar_class_26[5] + similarity_across_classes_26[5] >= 0
+ R425436: - 4 similar_class_26[6] + similarity_across_classes_26[6] >= 0
+ R425437: - 4 similar_class_26[7] + similarity_across_classes_26[7] >= 0
+ R425438: - 4 similar_class_26[8] + similarity_across_classes_26[8] >= 0
+ R425439: - 4 similar_class_26[9] + similarity_across_classes_26[9] >= 0
+ R425440: - 4 similar_class_26[10] + similarity_across_classes_26[10] >= 0
+ R425441: - 4 similar_class_26[11] + similarity_across_classes_26[11] >= 0
+ R425442: - 4 similar_class_26[12] + similarity_across_classes_26[12] >= 0
+ R425443: - 4 similar_class_26[13] + similarity_across_classes_26[13] >= 0
+ R425444: - 4 similar_class_26[14] + similarity_across_classes_26[14] >= 0
+ R425445: - 4 similar_class_26[15] + similarity_across_classes_26[15] >= 0
+ R425446: - 4 similar_class_26[16] + similarity_across_classes_26[16] >= 0
+ R425447: - 4 similar_class_26[17] + similarity_across_classes_26[17] >= 0
+ R425448: - 4 similar_class_26[18] + similarity_across_classes_26[18] >= 0
+ R425449: - 4 similar_class_26[19] + similarity_across_classes_26[19] >= 0
+ R425450: - 4 similar_class_26[20] + similarity_across_classes_26[20] >= 0
+ R425451: - 4 similar_class_26[21] + similarity_across_classes_26[21] >= 0
+ R425452: - 4 similar_class_26[22] + similarity_across_classes_26[22] >= 0
+ R425453: - 4 similar_class_26[23] + similarity_across_classes_26[23] >= 0
+ R425454: - 4 similar_class_26[24] + similarity_across_classes_26[24] >= 0
+ R425455: - 4 similar_class_26[25] + similarity_across_classes_26[25] >= 0
+ R425456: - 4 similar_class_26[27] + similarity_across_classes_26[27] >= 0
+ R425457: - 4 similar_class_26[28] + similarity_across_classes_26[28] >= 0
+ R425458: - 4 similar_class_26[29] + similarity_across_classes_26[29] >= 0
+ R425459: - 4 similar_class_26[30] + similarity_across_classes_26[30] >= 0
+ R425460: - 4 similar_class_26[31] + similarity_across_classes_26[31] >= 0
+ R425461: - 4 similar_class_26[32] + similarity_across_classes_26[32] >= 0
+ R425462: - 4 similar_class_26[33] + similarity_across_classes_26[33] >= 0
+ R425463: - 4 similar_class_26[34] + similarity_across_classes_26[34] >= 0
+ R425464: - 4 similar_class_26[35] + similarity_across_classes_26[35] >= 0
+ R425465: - 4 similar_class_26[36] + similarity_across_classes_26[36] >= 0
+ R425466: - 4 similar_class_26[37] + similarity_across_classes_26[37] >= 0
+ R425467: - 4 similar_class_26[38] + similarity_across_classes_26[38] >= 0
+ R425468: - 4 similar_class_26[39] + similarity_across_classes_26[39] >= 0
+ R425469: - 4 similar_class_26[40] + similarity_across_classes_26[40] >= 0
+ R425470: - 4 similar_class_26[41] + similarity_across_classes_26[41] >= 0
+ R425471: - 4 similar_class_26[42] + similarity_across_classes_26[42] >= 0
+ R425472: - 4 similar_class_26[43] + similarity_across_classes_26[43] >= 0
+ R425473: - 4 similar_class_26[44] + similarity_across_classes_26[44] >= 0
+ R425474: - 4 similar_class_26[45] + similarity_across_classes_26[45] >= 0
+ R425475: - 4 similar_class_26[46] + similarity_across_classes_26[46] >= 0
+ R425476: - 4 similar_class_26[47] + similarity_across_classes_26[47] >= 0
+ R425477: - 4 similar_class_26[48] + similarity_across_classes_26[48] >= 0
+ R425478: - 4 similar_class_26[49] + similarity_across_classes_26[49] >= 0
+ R425479: - 4 similar_class_26[50] + similarity_across_classes_26[50] >= 0
+ R425480: - 4 similar_class_26[51] + similarity_across_classes_26[51] >= 0
+ R425481: - 4 similar_class_26[52] + similarity_across_classes_26[52] >= 0
+ R425482: - 4 similar_class_26[53] + similarity_across_classes_26[53] >= 0
+ R425483: - 4 similar_class_26[54] + similarity_across_classes_26[54] >= 0
+ R425484: - 4 similar_class_26[55] + similarity_across_classes_26[55] >= 0
+ R425485: - 4 similar_class_26[56] + similarity_across_classes_26[56] >= 0
+ R425486: - 4 similar_class_26[57] + similarity_across_classes_26[57] >= 0
+ R425487: - 4 similar_class_26[58] + similarity_across_classes_26[58] >= 0
+ R425488: - 4 similar_class_26[59] + similarity_across_classes_26[59] >= 0
+ R425489: - 4 similar_class_26[60] + similarity_across_classes_26[60] >= 0
+ R425490: - 4 similar_class_26[61] + similarity_across_classes_26[61] >= 0
+ R425491: - 4 similar_class_26[62] + similarity_across_classes_26[62] >= 0
+ R425492: - 4 similar_class_26[63] + similarity_across_classes_26[63] >= 0
+ R425493: - 4 similar_class_26[64] + similarity_across_classes_26[64] >= 0
+ R425494: - 4 similar_class_26[65] + similarity_across_classes_26[65] >= 0
+ R425495: - 4 similar_class_26[66] + similarity_across_classes_26[66] >= 0
+ R425496: - 4 similar_class_26[67] + similarity_across_classes_26[67] >= 0
+ R425497: - 4 similar_class_26[68] + similarity_across_classes_26[68] >= 0
+ R425498: - 4 similar_class_26[69] + similarity_across_classes_26[69] >= 0
+ R425499: - 4 similar_class_26[70] + similarity_across_classes_26[70] >= 0
+ R425500: - 4 similar_class_26[71] + similarity_across_classes_26[71] >= 0
+ R425501: - 4 similar_class_26[72] + similarity_across_classes_26[72] >= 0
+ R425502: - 4 similar_class_26[73] + similarity_across_classes_26[73] >= 0
+ R425503: - 4 similar_class_26[74] + similarity_across_classes_26[74] >= 0
+ R425504: - 4 similar_class_26[75] + similarity_across_classes_26[75] >= 0
+ R425505: - 4 similar_class_26[76] + similarity_across_classes_26[76] >= 0
+ R425506: - 4 similar_class_26[77] + similarity_across_classes_26[77] >= 0
+ R425507: - 4 similar_class_26[78] + similarity_across_classes_26[78] >= 0
+ R425508: - 4 similar_class_26[79] + similarity_across_classes_26[79] >= 0
+ R425509: - 4 similar_class_26[80] + similarity_across_classes_26[80] >= 0
+ R425510: - 4 similar_class_26[81] + similarity_across_classes_26[81] >= 0
+ R425511: - 4 similar_class_26[82] + similarity_across_classes_26[82] >= 0
+ R425512: - 4 similar_class_26[83] + similarity_across_classes_26[83] >= 0
+ R425513: - 4 similar_class_26[84] + similarity_across_classes_26[84] >= 0
+ R425514: - 4 similar_class_26[85] + similarity_across_classes_26[85] >= 0
+ R425515: - 4 similar_class_26[86] + similarity_across_classes_26[86] >= 0
+ R425516: - 4 similar_class_26[87] + similarity_across_classes_26[87] >= 0
+ R425517: - 4 similar_class_26[88] + similarity_across_classes_26[88] >= 0
+ R425518: - 4 similar_class_26[89] + similarity_across_classes_26[89] >= 0
+ R425519: - 4 similar_class_26[90] + similarity_across_classes_26[90] >= 0
+ R425520: - 4 similar_class_26[91] + similarity_across_classes_26[91] >= 0
+ R425521: - 4 similar_class_26[92] + similarity_across_classes_26[92] >= 0
+ R425522: - 4 similar_class_26[93] + similarity_across_classes_26[93] >= 0
+ R425523: - 4 similar_class_26[94] + similarity_across_classes_26[94] >= 0
+ R425524: - 4 similar_class_26[95] + similarity_across_classes_26[95] >= 0
+ R425525: - 4 similar_class_26[96] + similarity_across_classes_26[96] >= 0
+ R425526: - 4 similar_class_26[97] + similarity_across_classes_26[97] >= 0
+ R425527: - 4 similar_class_26[98] + similarity_across_classes_26[98] >= 0
+ R425528: - 4 similar_class_26[99] + similarity_across_classes_26[99] >= 0
+Bounds
+Binaries
+ similar_class_26[0] similar_class_26[1] similar_class_26[2]
+ similar_class_26[3] similar_class_26[4] similar_class_26[5]
+ similar_class_26[6] similar_class_26[7] similar_class_26[8]
+ similar_class_26[9] similar_class_26[10] similar_class_26[11]
+ similar_class_26[12] similar_class_26[13] similar_class_26[14]
+ similar_class_26[15] similar_class_26[16] similar_class_26[17]
+ similar_class_26[18] similar_class_26[19] similar_class_26[20]
+ similar_class_26[21] similar_class_26[22] similar_class_26[23]
+ similar_class_26[24] similar_class_26[25] similar_class_26[26]
+ similar_class_26[27] similar_class_26[28] similar_class_26[29]
+ similar_class_26[30] similar_class_26[31] similar_class_26[32]
+ similar_class_26[33] similar_class_26[34] similar_class_26[35]
+ similar_class_26[36] similar_class_26[37] similar_class_26[38]
+ similar_class_26[39] similar_class_26[40] similar_class_26[41]
+ similar_class_26[42] similar_class_26[43] similar_class_26[44]
+ similar_class_26[45] similar_class_26[46] similar_class_26[47]
+ similar_class_26[48] similar_class_26[49] similar_class_26[50]
+ similar_class_26[51] similar_class_26[52] similar_class_26[53]
+ similar_class_26[54] similar_class_26[55] similar_class_26[56]
+ similar_class_26[57] similar_class_26[58] similar_class_26[59]
+ similar_class_26[60] similar_class_26[61] similar_class_26[62]
+ similar_class_26[63] similar_class_26[64] similar_class_26[65]
+ similar_class_26[66] similar_class_26[67] similar_class_26[68]
+ similar_class_26[69] similar_class_26[70] similar_class_26[71]
+ similar_class_26[72] similar_class_26[73] similar_class_26[74]
+ similar_class_26[75] similar_class_26[76] similar_class_26[77]
+ similar_class_26[78] similar_class_26[79] similar_class_26[80]
+ similar_class_26[81] similar_class_26[82] similar_class_26[83]
+ similar_class_26[84] similar_class_26[85] similar_class_26[86]
+ similar_class_26[87] similar_class_26[88] similar_class_26[89]
+ similar_class_26[90] similar_class_26[91] similar_class_26[92]
+ similar_class_26[93] similar_class_26[94] similar_class_26[95]
+ similar_class_26[96] similar_class_26[97] similar_class_26[98]
+ similar_class_26[99] similarity_across_classes_26[0]
+ similarity_across_classes_26[1] similarity_across_classes_26[2]
+ similarity_across_classes_26[3] similarity_across_classes_26[4]
+ similarity_across_classes_26[5] similarity_across_classes_26[6]
+ similarity_across_classes_26[7] similarity_across_classes_26[8]
+ similarity_across_classes_26[9] similarity_across_classes_26[10]
+ similarity_across_classes_26[11] similarity_across_classes_26[12]
+ similarity_across_classes_26[13] similarity_across_classes_26[14]
+ similarity_across_classes_26[15] similarity_across_classes_26[16]
+ similarity_across_classes_26[17] similarity_across_classes_26[18]
+ similarity_across_classes_26[19] similarity_across_classes_26[20]
+ similarity_across_classes_26[21] similarity_across_classes_26[22]
+ similarity_across_classes_26[23] similarity_across_classes_26[24]
+ similarity_across_classes_26[25] similarity_across_classes_26[27]
+ similarity_across_classes_26[28] similarity_across_classes_26[29]
+ similarity_across_classes_26[30] similarity_across_classes_26[31]
+ similarity_across_classes_26[32] similarity_across_classes_26[33]
+ similarity_across_classes_26[34] similarity_across_classes_26[35]
+ similarity_across_classes_26[36] similarity_across_classes_26[37]
+ similarity_across_classes_26[38] similarity_across_classes_26[39]
+ similarity_across_classes_26[40] similarity_across_classes_26[41]
+ similarity_across_classes_26[42] similarity_across_classes_26[43]
+ similarity_across_classes_26[44] similarity_across_classes_26[45]
+ similarity_across_classes_26[46] similarity_across_classes_26[47]
+ similarity_across_classes_26[48] similarity_across_classes_26[49]
+ similarity_across_classes_26[50] similarity_across_classes_26[51]
+ similarity_across_classes_26[52] similarity_across_classes_26[53]
+ similarity_across_classes_26[54] similarity_across_classes_26[55]
+ similarity_across_classes_26[56] similarity_across_classes_26[57]
+ similarity_across_classes_26[58] similarity_across_classes_26[59]
+ similarity_across_classes_26[60] similarity_across_classes_26[61]
+ similarity_across_classes_26[62] similarity_across_classes_26[63]
+ similarity_across_classes_26[64] similarity_across_classes_26[65]
+ similarity_across_classes_26[66] similarity_across_classes_26[67]
+ similarity_across_classes_26[68] similarity_across_classes_26[69]
+ similarity_across_classes_26[70] similarity_across_classes_26[71]
+ similarity_across_classes_26[72] similarity_across_classes_26[73]
+ similarity_across_classes_26[74] similarity_across_classes_26[75]
+ similarity_across_classes_26[76] similarity_across_classes_26[77]
+ similarity_across_classes_26[78] similarity_across_classes_26[79]
+ similarity_across_classes_26[80] similarity_across_classes_26[81]
+ similarity_across_classes_26[82] similarity_across_classes_26[83]
+ similarity_across_classes_26[84] similarity_across_classes_26[85]
+ similarity_across_classes_26[86] similarity_across_classes_26[87]
+ similarity_across_classes_26[88] similarity_across_classes_26[89]
+ similarity_across_classes_26[90] similarity_across_classes_26[91]
+ similarity_across_classes_26[92] similarity_across_classes_26[93]
+ similarity_across_classes_26[94] similarity_across_classes_26[95]
+ similarity_across_classes_26[96] similarity_across_classes_26[97]
+ similarity_across_classes_26[98] similarity_across_classes_26[99]
+End
