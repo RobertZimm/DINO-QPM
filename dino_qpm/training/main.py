@@ -8,7 +8,6 @@ from dino_qpm.helpers.main_utils import (
 from dino_qpm.evaluation.utils import evaluate
 from dino_qpm.architectures.model_mapping import get_model
 from dino_qpm.architectures.qpm_dino.load_model import load_final_model
-from dino_qpm.dataset_classes.get_data import get_data
 from dino_qpm.helpers.main_utils import handle_seed
 
 DEFAULT_SEED = 383534468
@@ -33,9 +32,9 @@ def main(config: dict,
     (is_rerun,
      dataset_key, arch, mode, job_name, job_id,
         array_job_id, task_id, run_number, n_classes, seed) = init_dense_params(dataset=dataset,
-                                                                   config=config,
-                                                                   seed=seed,
-                                                                   run_number=run_number)
+                                                                                config=config,
+                                                                                seed=seed,
+                                                                                run_number=run_number)
 
     # Resolve seed before log_dir creation so it can be embedded in the path.
     # For new runs without --seed, fall back to a fixed default seed.

@@ -7,7 +7,6 @@ from dino_qpm.training.losses.general import get_acc, get_l1_loss, feature_simil
 from tqdm import tqdm
 from dino_qpm.training.utils import VariableLossLogPrinter, TrainingLogger
 
-from dino_qpm.training.losses.FeatureDiversityLoss import FeatureDiversityLoss
 from dino_qpm.training.losses.ConservationOfSimilarity import ConservationOfFeatureSimilarity
 from dino_qpm.training.optim import get_optimizer
 from tqdm import trange
