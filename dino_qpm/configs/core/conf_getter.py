@@ -5,8 +5,8 @@ import yaml
 from dino_qpm.configs.core.runtime_paths import get_tmp_root
 
 
-GENERAL_CONFIG_FILENAME = "general_config.yaml"
-SEEDS_CONFIG_FILENAME = "seeds.yaml"
+GENERAL_CONFIG_FILENAME = "models/main_training.yaml"
+SEEDS_CONFIG_FILENAME = "core/seeds.yaml"
 NUM_SEEDS = 10  # fixed pool size
 
 
@@ -14,16 +14,34 @@ def get_conf_path(filename: str = None) -> Path:
     if filename is None:
         filename = conf_filename()
 
-    if os.path.exists(f"configs/{filename}"):
-        config_file = f"configs/{filename}"
+    filename_path = Path(filename)
+    module_configs_root = Path(__file__).resolve().parents[1]
 
-    else:
-        config_file = f"../configs/{filename}"
-    return config_file
+    candidate_suffixes: list[Path] = [filename_path]
+
+    # Model configs are passed as relative paths like "other/qpm/dinov2.yaml".
+    if filename_path.parts and filename_path.parts[0] not in {"models", "core"}:
+        candidate_suffixes.append(Path("models") / filename_path)
+
+    candidate_roots = [
+        Path("dino_qpm/configs"),
+        Path("configs"),
+        Path("../configs"),
+        module_configs_root,
+    ]
+
+    for root in candidate_roots:
+        for suffix in candidate_suffixes:
+            candidate = root / suffix
+            if candidate.exists():
+                return candidate
+
+    # Return a deterministic fallback path for downstream error messages.
+    return module_configs_root / candidate_suffixes[0]
 
 
 def load_general_config() -> dict:
-    """Load the general config file."""
+    """Load the main training config file."""
     with open(get_conf_path(GENERAL_CONFIG_FILENAME), "r") as f:
         return yaml.safe_load(f)
 
@@ -130,11 +148,11 @@ def get_sweep_seed_groups() -> Optional[List[List[int]]]:
 
 def apply_sweep_to_general_config(sweep_values: Dict[str, Any], config_path: Path) -> None:
     """
-    Apply sweep values to a general_config.yaml file.
+    Apply sweep values to a main training config file.
 
     Args:
         sweep_values: Dict of parameter names and values to set
-        config_path: Path to the general_config.yaml file to modify
+        config_path: Path to the config file to modify
     """
     if not sweep_values:
         return
@@ -191,7 +209,7 @@ def conf_filename() -> str:
 
 
 def load_seeds_config() -> dict:
-    """Load the seeds config file (configs/seeds.yaml)."""
+    """Load the seeds config file (core/seeds.yaml)."""
     path = get_conf_path(SEEDS_CONFIG_FILENAME)
     with open(path, "r") as f:
         return yaml.safe_load(f)
