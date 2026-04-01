@@ -11,9 +11,10 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
       <img src="res/model-scheme_avg_pooling.svg" alt="Pipeline Diagram" width="100%">
     </td>
     <td width="50%">
-      <p><b>What the figure shows:</b> the input image is first processed by a <b>frozen backbone</b> (e.g. DINOv2), which can provide patch-level feature maps and a global vector (CLS-like token).</p>
-      <p>The depicted SVG corresponds to the <b>avg-pooling strategy</b>: the adapter builds its feature vector from pooled patch embeddings, i.e. it does <b>not</b> directly use the backbone global vector in this path.</p>
+      <p><b>Default method:</b> the input image is first processed by a <b>frozen backbone</b> (e.g. DINOv2), which can provide patch-level feature maps and a global vector (CLS-like token).</p>
+      <p>In the avg-pooling path, the adapter builds its feature vector from pooled patch embeddings, i.e. it does <b>not</b> directly use the backbone global vector.</p>
       <p>These frozen representations are transformed by the DINO-QPM adapter into class scores while preserving spatial structure for interpretability. The dense stage trains the adapter head, then the finetuning stage applies the selected sparse/interpretable mode (<b>qpm</b>, <b>qsenn</b>, or <b>sldd</b>).</p>
+      <p><b>Note:</b> other processing methods are also possible and selectable via config (for example direct global-vector usage or mixed global+pooled strategies).</p>
       <p><b>How this maps to the code path:</b> <code>main.py</code> resolves the command (<code>train</code>, <code>evaluate</code>, <code>inference</code>), configures dataset root resolution, and dispatches to the corresponding CLI. In training, dense training/evaluation runs first, optional finetuning runs second, and the final model is evaluated and saved.</p>
     </td>
   </tr>
@@ -102,7 +103,7 @@ Global-vector usage note:
 
 - `model.feat_vec_type: normal` uses the backbone global vector directly.
 - `model.feat_vec_type: mean_avg_pooling` combines global-vector and pooled-patch information.
-- The SVG shown in this README corresponds to the avg-pooling style, where the adapter feature vector is derived from patch embeddings.
+- `model.feat_vec_type: avg_pooling` derives the adapter feature vector from patch embeddings.
 
 Where to look in code:
 
