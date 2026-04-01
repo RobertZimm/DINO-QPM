@@ -19,6 +19,8 @@ from dino_qpm.configs.core.conf_getter import load_config
 from dino_qpm.configs.core.config_validation import validate_config
 from dino_qpm.configs.core.runtime_paths import get_tmp_root
 
+DEFAULT_SEED = 383534468
+
 
 def create_log_dir_path(config: dict,
                         array_job_id: str,
@@ -353,12 +355,11 @@ def handle_seed(log_dir: Path,
             print(f"Loading seed {seed} from params.txt")
 
         else:
-            from dino_qpm.configs.core.conf_getter import get_seeds
-            seed = get_seeds()[0]
+            seed = DEFAULT_SEED
             print(
                 f"No seed provided and params.txt not found. "
-                f"Using default seeds[0] = {seed}. "
-                f"Pass --seed to override or pick another value from configs/seeds.yaml.")
+                f"Using default seed = {seed}. "
+                "Pass --seed to override.")
 
             # Save seed to params.txt
             with open(log_dir / "params.txt", "w") as f:

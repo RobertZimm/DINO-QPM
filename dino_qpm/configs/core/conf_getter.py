@@ -5,8 +5,6 @@ from dino_qpm.configs.core.runtime_paths import get_tmp_root
 
 
 GENERAL_CONFIG_FILENAME = "main_training.yaml"
-SEEDS_CONFIG_FILENAME = "core/seeds.yaml"
-NUM_SEEDS = 10  # fixed pool size
 
 
 def get_conf_path(filename: str = None) -> Path:
@@ -85,23 +83,6 @@ def build_conf_filename(dataset: str = None,
 
 def conf_filename() -> str:
     return build_conf_filename()
-
-
-def load_seeds_config() -> dict:
-    """Load the seeds config file (core/seeds.yaml)."""
-    path = get_conf_path(SEEDS_CONFIG_FILENAME)
-    with open(path, "r") as f:
-        return yaml.safe_load(f)
-
-
-def get_local_test_seeds() -> list:
-    """Backward-compatible alias for the shared seed pool."""
-    return get_seeds()
-
-
-def get_seeds() -> list:
-    """Return the 10 permanently stored shared seeds."""
-    return load_seeds_config()["seeds"]
 
 
 def get_default_save_dir() -> Path:

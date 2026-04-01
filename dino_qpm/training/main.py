@@ -15,6 +15,8 @@ from dino_qpm.training.train import train_n_epochs
 from dino_qpm.helpers.convergence import ConvergenceTracker
 from dino_qpm.helpers.main_utils import handle_seed
 
+DEFAULT_SEED = 383534468
+
 
 def main(config: dict,
          seed: int,
@@ -40,13 +42,12 @@ def main(config: dict,
                                                                                              run_number=run_number)
 
     # Resolve seed before log_dir creation so it can be embedded in the path.
-    # For new runs without --seed, fall back to seeds[0].
+    # For new runs without --seed, fall back to a fixed default seed.
     # For reruns (log_dir set in config), the seed comes from --seed or params.txt.
     if not is_rerun and seed is None:
-        from dino_qpm.configs.core.conf_getter import get_seeds
-        seed = get_seeds()[0]
-        print(f"No seed provided. Using default seeds[0] = {seed}. "
-              f"Pass --seed to override or pick another value from configs/seeds.yaml.")
+        seed = DEFAULT_SEED
+        print(f"No seed provided. Using default seed = {seed}. "
+              "Pass --seed to override.")
 
     log_dir = create_log_dir(input_ft_dir=input_ft_dir,
                              config=config,
