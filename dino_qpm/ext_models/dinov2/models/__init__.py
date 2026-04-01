@@ -6,7 +6,7 @@
 
 import logging
 
-from .....ext_models.dinov2.models import vision_transformer as vits
+from . import vision_transformer as vits
 
 
 logger = logging.getLogger("dinov2")

@@ -13,8 +13,8 @@ import torch.nn as nn
 
 from dino_qpm.ext_models.dinov3.dinov3.layers.fp8_linear import convert_linears_to_fp8
 
-from ......ext_models.dinov3.dinov3.models import vision_transformer as vits
-from ......ext_models.dinov3.dinov3.models import convnext
+from . import vision_transformer as vits
+from . import convnext
 
 logger = logging.getLogger("dinov3")
 
@@ -99,7 +99,8 @@ def build_model_from_cfg(cfg, only_teacher: bool = False):
 def build_model_for_eval(
     config,
     pretrained_weights: Union[str, Path] | None,
-    shard_unsharded_model: bool = False,  # If the model is not sharded, shard it. No effect if already sharded on disk
+    # If the model is not sharded, shard it. No effect if already sharded on disk
+    shard_unsharded_model: bool = False,
 ):
     model, _ = build_model_from_cfg(config, only_teacher=True)
     if pretrained_weights is None or pretrained_weights == "":
@@ -112,11 +113,13 @@ def build_model_for_eval(
 
         moduledict = nn.ModuleDict({"backbone": model})
         # Wrap with FSDP
-        ac_compile_parallelize(moduledict, inference_only_models=[], cfg=config)
+        ac_compile_parallelize(
+            moduledict, inference_only_models=[], cfg=config)
         # Move to CUDA
         model.to_empty(device="cuda")
         # Load checkpoint
-        load_checkpoint(pretrained_weights, model=moduledict, strict_loading=True)
+        load_checkpoint(pretrained_weights, model=moduledict,
+                        strict_loading=True)
         shard_unsharded_model = False
     else:
         logger.info("PyTorch consolidated checkpoint")
@@ -124,10 +127,12 @@ def build_model_for_eval(
 
         # consolidated checkpoint codepath
         model.to_empty(device="cuda")
-        init_model_from_checkpoint_for_evals(model, pretrained_weights, "teacher")
+        init_model_from_checkpoint_for_evals(
+            model, pretrained_weights, "teacher")
     if shard_unsharded_model:
         logger.info("Sharding model")
         moduledict = nn.ModuleDict({"backbone": model})
-        ac_compile_parallelize(moduledict, inference_only_models=[], cfg=config)
+        ac_compile_parallelize(
+            moduledict, inference_only_models=[], cfg=config)
     model.eval()
     return model

@@ -19,7 +19,7 @@ def get_conf_path(filename: str = None) -> Path:
 
     candidate_suffixes: list[Path] = [filename_path]
 
-    # Model configs are passed as relative paths like "other/qpm/dinov2.yaml".
+    # Model configs are passed as relative paths like "qpm/dinov2.yaml".
     if filename_path.parts and filename_path.parts[0] not in {"models", "core"}:
         candidate_suffixes.append(Path("models") / filename_path)
 
@@ -188,8 +188,6 @@ def build_conf_filename(dataset: str = None,
             else:
                 use_prototypes = False
 
-    dataset_folder = "other"
-
     # For dinov2 with mlp=False, use dinov2_no_mlp.yaml
     if "dino" in arch and not mlp:
         arch = f"{arch}_no_mlp"
@@ -197,11 +195,11 @@ def build_conf_filename(dataset: str = None,
     # Prefer prototype-specific config files when prototypes are enabled.
     # Fallback to the base arch config if no dedicated proto file exists.
     if use_prototypes:
-        proto_filename = f"{dataset_folder}/{sldd_mode}/{arch}_proto.yaml"
-        if os.path.exists(f"configs/{proto_filename}") or os.path.exists(f"../configs/{proto_filename}"):
+        proto_filename = f"{sldd_mode}/{arch}_proto.yaml"
+        if get_conf_path(proto_filename).exists():
             return proto_filename
 
-    return f"{dataset_folder}/{sldd_mode}/{arch}.yaml"
+    return f"{sldd_mode}/{arch}.yaml"
 
 
 def conf_filename() -> str:

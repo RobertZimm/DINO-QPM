@@ -3,7 +3,7 @@ import os
 import zipfile
 
 import kaggle
-from CleanCodeRelease.helpers.file_system import cleanup_redundant_nested_folders
+from dino_qpm.helpers.file_system import cleanup_redundant_nested_folders
 
 # --- Configuration (same as before) ---
 DATASET_SLUG = 'jessicali9530/stanford-cars-dataset'  # Or your dataset

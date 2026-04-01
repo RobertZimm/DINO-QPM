@@ -13,14 +13,21 @@ from tqdm import tqdm
 import gc
 
 # Import your existing helper modules
-from CleanCodeRelease.dataset_classes.stanfordcars import StanfordCarsClass
-from CleanCodeRelease.dataset_classes.cub200 import CUB200Class
-from CleanCodeRelease.dataset_classes.data.generate_maps import generate_features, extract_maps
-from CleanCodeRelease.helpers.img_tensor_arrays import prep_img
-from CleanCodeRelease.masking.fm_attn_masking import run_masking
-from CleanCodeRelease.architectures.qpm_dino.load_model import load_model
-from CleanCodeRelease.dataset_classes.fitzpatrick import FitzpatrickDataset
-from CleanCodeRelease.configs.runtime_paths import get_datasets_root
+from dino_qpm.dataset_classes.stanfordcars import StanfordCarsClass
+from dino_qpm.dataset_classes.cub200 import CUB200Class
+from dino_qpm.dataset_classes.data.generate_maps import generate_features, extract_maps
+from dino_qpm.helpers.img_tensor_arrays import prep_img
+from dino_qpm.architectures.qpm_dino.load_model import load_model
+from dino_qpm.dataset_classes.fitzpatrick import FitzpatrickDataset
+from dino_qpm.configs.core.runtime_paths import get_datasets_root
+
+try:
+    from dino_qpm.masking.fm_attn_masking import run_masking
+except ImportError:
+    def run_masking(*args, **kwargs):
+        raise ImportError(
+            "dino_qpm.masking.fm_attn_masking is not available in this publication build."
+        )
 
 
 class DinoData(Dataset):

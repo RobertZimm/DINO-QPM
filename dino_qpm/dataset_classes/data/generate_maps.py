@@ -4,11 +4,11 @@ from pathlib import Path
 
 import torch.nn as nn
 import torchvision.transforms as tt
-from CleanCodeRelease.helpers.file_system import extract_output_dir, read_filenames
-from CleanCodeRelease.helpers.img_tensor_arrays import prep_img
-from CleanCodeRelease.helpers.mask_functions import *
-from CleanCodeRelease.architectures.qpm_dino.dino_model import Dino2Div
-from CleanCodeRelease.architectures.qpm_dino.load_model import load_model
+from dino_qpm.helpers.file_system import extract_output_dir, read_filenames
+from dino_qpm.helpers.img_tensor_arrays import prep_img
+from dino_qpm.helpers.mask_functions import *
+from dino_qpm.architectures.qpm_dino.dino_model import Dino2Div
+from dino_qpm.architectures.qpm_dino.load_model import load_model
 from sklearn.preprocessing import minmax_scale
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm

@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import torch
 from PIL import Image
-from CleanCodeRelease.dataset_classes.utils import txt_load
+from dino_qpm.dataset_classes.utils import txt_load
 from torch.utils.data import Dataset
 from torchvision.datasets.folder import default_loader
 

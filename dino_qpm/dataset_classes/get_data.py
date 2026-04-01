@@ -2,57 +2,15 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from CleanCodeRelease.configs.architecture_params import dino_supported_datasets
-from CleanCodeRelease.configs.dataset_params import normalize_params
-from CleanCodeRelease.dataset_classes.aircraft import FGVCAircraftClass
-from CleanCodeRelease.dataset_classes.cub200 import CUB200Class
-from CleanCodeRelease.dataset_classes.stanfordcars import StanfordCarsClass
-from CleanCodeRelease.dataset_classes.travelingbirds import TravelingBirds
-from CleanCodeRelease.dataset_classes.data.data_loaders import DinoData
-from CleanCodeRelease.architectures.registry import is_vision_foundation_model
+from dino_qpm.configs.core.architecture_params import dino_supported_datasets
+from dino_qpm.configs.core.dataset_params import normalize_params
+from dino_qpm.dataset_classes.aircraft import FGVCAircraftClass
+from dino_qpm.dataset_classes.cub200 import CUB200Class
+from dino_qpm.dataset_classes.stanfordcars import StanfordCarsClass
+from dino_qpm.dataset_classes.travelingbirds import TravelingBirds
+from dino_qpm.dataset_classes.data.data_loaders import DinoData
+from dino_qpm.architectures.registry import is_vision_foundation_model
 from torchvision.transforms import transforms, TrivialAugmentWide
-
-
-def get_data_thomas(dataset, crop=True, img_size=448, reduced_strides=True):
-    batchsize = 16
-    if dataset == "CUB2011":
-        train_transform = get_augmentation(
-            0.1, img_size, True, not crop, True, True, normalize_params["CUB2011"])
-        test_transform = get_augmentation(
-            0.1, img_size, False, not crop, True, True, normalize_params["CUB2011"])
-        # Stride depends on reduced_strides: 8 if True, 32 if False
-        stride = 8 if reduced_strides else 32
-        mask_size = img_size // stride
-        train_dataset = CUB200Class(True, train_transform, crop,
-                                    with_masks=True, mask_size=mask_size)
-        test_dataset = CUB200Class(False, test_transform, crop,
-                                   with_masks=True, mask_size=mask_size)
-    elif dataset == "TravelingBirds":
-        train_transform = get_augmentation(0.1, img_size, True, not crop, True, True,
-                                           normalize_params["TravelingBirds"])
-        test_transform = get_augmentation(0.1, img_size, False, not crop, True, True,
-                                          normalize_params["TravelingBirds"])
-        train_dataset = TravelingBirds(True, train_transform, crop)
-        test_dataset = TravelingBirds(False, test_transform, crop)
-
-    elif dataset == "StanfordCars":
-        train_transform = get_augmentation(
-            0.1, img_size, True, True, True, True, normalize_params["StanfordCars"])
-        test_transform = get_augmentation(
-            0.1, img_size, False, True, True, True, normalize_params["StanfordCars"])
-        train_dataset = StanfordCarsClass(True, train_transform)
-        test_dataset = StanfordCarsClass(False, test_transform)
-    elif dataset == "FGVCAircraft":
-        raise NotImplementedError
-
-    else:
-        raise ValueError(f"Dataset {dataset} is currently not supported.")
-
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=batchsize, shuffle=True, num_workers=8)
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=batchsize, shuffle=False, num_workers=8)
-    return train_loader, test_loader
 
 
 def get_data(dataset: str,

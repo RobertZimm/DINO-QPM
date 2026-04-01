@@ -1,27 +1,27 @@
 import json
 import torch
-from CleanCodeRelease.helpers.data import select_mask
-from CleanCodeRelease.helpers.img_tensor_arrays import dilate_mask
+from dino_qpm.helpers.data import select_mask
+from dino_qpm.helpers.img_tensor_arrays import dilate_mask
 from tqdm import tqdm
 from pathlib import Path
 import numpy as np
 import yaml
 from typing import List, Dict, Any, Optional, Union
 
-from CleanCodeRelease.evaluation.metrics.dense_finetune_feature_similarity import eval_feat_comp
-from CleanCodeRelease.evaluation.metrics.DinoSimilarityCKA import bootstrapped_sampled_linear_cka, bootstrapped_sampled_proto_consistency
-from CleanCodeRelease.architectures.qpm_dino.layers import create_prototype_projection_dataloader
-from CleanCodeRelease.architectures.qpm_dino.similarity_functions import compute_similarity
-from CleanCodeRelease.sparsification.feature_helpers import load_full_features
-from CleanCodeRelease.sparsification.utils import save_feat_loaders
-from CleanCodeRelease.saving.utils import json_save
-from CleanCodeRelease.dataset_classes.get_data import get_data
-from CleanCodeRelease.architectures.model_mapping import get_model
-from CleanCodeRelease.configs.dataset_params import dataset_constants
-from CleanCodeRelease.architectures.qpm_dino.load_model import load_final_model
-from CleanCodeRelease.evaluation.metric_registry import MetricRegistry
-from CleanCodeRelease.evaluation.metrics.batch_metrics import MetricAggregator
-from CleanCodeRelease.architectures.registry import is_vision_foundation_model
+from dino_qpm.evaluation.metrics.dense_finetune_feature_similarity import eval_feat_comp
+from dino_qpm.evaluation.metrics.DinoSimilarityCKA import bootstrapped_sampled_linear_cka, bootstrapped_sampled_proto_consistency
+from dino_qpm.architectures.qpm_dino.layers import create_prototype_projection_dataloader
+from dino_qpm.architectures.qpm_dino.similarity_functions import compute_similarity
+from dino_qpm.sparsification.feature_helpers import load_full_features
+from dino_qpm.sparsification.utils import save_feat_loaders
+from dino_qpm.saving.utils import json_save
+from dino_qpm.dataset_classes.get_data import get_data
+from dino_qpm.architectures.model_mapping import get_model
+from dino_qpm.configs.core.dataset_params import dataset_constants
+from dino_qpm.architectures.qpm_dino.load_model import load_final_model
+from dino_qpm.evaluation.metric_registry import MetricRegistry
+from dino_qpm.evaluation.metrics.batch_metrics import MetricAggregator
+from dino_qpm.architectures.registry import is_vision_foundation_model
 
 
 def compute_proto_overlap(

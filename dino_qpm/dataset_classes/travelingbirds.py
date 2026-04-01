@@ -5,8 +5,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from CleanCodeRelease.dataset_classes.cub200 import CUB200Class
-from CleanCodeRelease.dataset_classes.utils import index_list_with_sorting, mask_list
+from dino_qpm.dataset_classes.cub200 import CUB200Class
+from dino_qpm.dataset_classes.utils import index_list_with_sorting, mask_list
 
 
 class TravelingBirds(CUB200Class):
@@ -36,10 +36,12 @@ class TravelingBirds(CUB200Class):
 
     def _load_metadata(self):
         train_test_split = pd.read_csv(
-            os.path.join(Path(self.root).parent / "CUB200", 'CUB_200_2011', 'train_test_split.txt'),
+            os.path.join(Path(self.root).parent / "CUB200",
+                         'CUB_200_2011', 'train_test_split.txt'),
             sep=' ', names=['img_id', 'is_training_img'])
         data = pd.read_csv(
-            os.path.join(Path(self.root).parent / "CUB200", 'CUB_200_2011', 'images.txt'),
+            os.path.join(Path(self.root).parent / "CUB200",
+                         'CUB_200_2011', 'images.txt'),
             sep=' ', names=['img_id', "path"])
         img_dict = {x[1]: x[0] for x in data.values}
         # TravelingBirds has all train+test images in both folders, just with different backgrounds.

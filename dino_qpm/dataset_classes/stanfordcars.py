@@ -3,7 +3,7 @@ import pathlib
 from typing import Callable, Optional, Any, Tuple
 
 import numpy as np
-from CleanCodeRelease.dataset_classes.data.download_kaggle import download_and_unzip_kaggle_dataset
+from dino_qpm.dataset_classes.data.download_kaggle import download_and_unzip_kaggle_dataset
 from PIL import Image
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.utils import download_and_extract_archive, download_url
