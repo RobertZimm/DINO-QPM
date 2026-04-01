@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import torch
-from dino_qpm.configs.qpm_training_params import OptimizationScheduler
-from dino_qpm.configs.qsenn_training_params import QSENNScheduler
+from dino_qpm.configs.core.qpm_training_params import OptimizationScheduler
+from dino_qpm.configs.core.qsenn_training_params import QSENNScheduler
 from dino_qpm.finetuning.base import FinetuneResult
 from dino_qpm.training.train import train_n_epochs
 from dino_qpm.sparsification.qpm_sparsification import compute_qpm_feature_selection_and_assignment

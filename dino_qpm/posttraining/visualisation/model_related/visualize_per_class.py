@@ -16,7 +16,7 @@ import yaml
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from dino_qpm.configs.dataset_params import normalize_params
+from dino_qpm.configs.core.dataset_params import normalize_params
 from dino_qpm.dataset_classes.cub200 import load_cub_class_mapping
 from dino_qpm.dataset_classes.stanfordcars import load_stanford_cars_class_mapping
 from dino_qpm.dataset_classes.get_data import get_data

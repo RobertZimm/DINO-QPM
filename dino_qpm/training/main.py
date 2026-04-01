@@ -45,7 +45,7 @@ def main(config: dict,
     # defaults use the same seed pool.
     # For reruns (log_dir set in config), the seed comes from --seed or params.txt.
     if not is_rerun and seed is None:
-        from dino_qpm.configs.conf_getter import get_seeds
+        from dino_qpm.configs.core.conf_getter import get_seeds
         seed = get_seeds()[0]
         print(f"No seed provided. Using default seeds[0] = {seed}. "
               f"Pass --seed to override or pick another value from configs/seeds.yaml.")

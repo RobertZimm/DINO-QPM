@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from typing import Optional, Union
-from dino_qpm.configs.conf_getter import get_default_save_dir
+from dino_qpm.configs.core.conf_getter import get_default_save_dir
 from dino_qpm.posttraining.aggregate_results import load_results_dataframe
 
 DEFAULT_SAVE_DIR = get_default_save_dir() / "compacteness_plots"

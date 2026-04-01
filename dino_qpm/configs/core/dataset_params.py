@@ -1,6 +1,6 @@
 import torch
 
-from dino_qpm.configs.optim_params import EvaluatedDict
+from dino_qpm.configs.core.optim_params import EvaluatedDict
 
 dataset_constants = {
     "CUB2011": {"num_classes": 200},

@@ -546,7 +546,7 @@ def _get_display_image(
             img = img.astype(np.uint8)
         return img
 
-    from dino_qpm.configs.dataset_params import normalize_params
+    from dino_qpm.configs.core.dataset_params import normalize_params
     batch_data, _ = dataset[idx]
     raw = batch_data[0] if isinstance(
         batch_data, (list, tuple)) else batch_data
@@ -612,7 +612,7 @@ def _produce_gradcam_image(
 ) -> tuple[np.ndarray, int]:
     """Run GradCAM for a single sample and return ``(viz_array, pred_class)``."""
     from dino_qpm.helpers.data import select_mask
-    from dino_qpm.configs.dataset_params import normalize_params
+    from dino_qpm.configs.core.dataset_params import normalize_params
     from dino_qpm.posttraining.visualisation.model_related.backbone.gradcam_segmentation_viz import (
         visualize_gradcam,
     )
@@ -706,7 +706,7 @@ def _produce_features_image(
         feature-map columns.
     """
     from dino_qpm.helpers.data import select_mask
-    from dino_qpm.configs.dataset_params import normalize_params
+    from dino_qpm.configs.core.dataset_params import normalize_params
     from dino_qpm.architectures.qpm_dino.dino_model import Dino2Div
     from dino_qpm.posttraining.visualisation.model_related.backbone.single_image_viz import (
         visualize_single_image,
@@ -828,7 +828,7 @@ def _produce_combined_heatmap_image(
         HWC uint8 image, or ``None`` if the class has no features.
     """
     from dino_qpm.helpers.data import select_mask
-    from dino_qpm.configs.dataset_params import normalize_params
+    from dino_qpm.configs.core.dataset_params import normalize_params
     from dino_qpm.architectures.qpm_dino.dino_model import Dino2Div
     from dino_qpm.posttraining.visualisation.model_related.backbone.single_image_viz import (
         compute_combined_feature_heatmap,
@@ -1068,7 +1068,7 @@ def run_paired_visualization(
     list[tuple[np.ndarray, Figure | None]]
         ``(gradcam_array, feature_figure)`` for each sample.
     """
-    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.configs.core.conf_getter import get_default_save_dir
     from dino_qpm.posttraining.visualisation.model_related.visualize_per_class import (
         get_class_names,
     )

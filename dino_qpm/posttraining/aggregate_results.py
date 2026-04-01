@@ -7,8 +7,8 @@ import numpy as np
 import yaml
 from typing import Dict, List, Any, Optional
 from dino_qpm.helpers.hp_sweep import prod_combined_vals, process_param_names
-from dino_qpm.configs.hp_sweep_params import full_vals, reduced_vals, param_mapping
-from dino_qpm.configs.conf_getter import get_default_save_dir
+from dino_qpm.configs.core.hp_sweep_params import full_vals, reduced_vals, param_mapping
+from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
 
 def parse_changed_parameters(param_string: str) -> dict:

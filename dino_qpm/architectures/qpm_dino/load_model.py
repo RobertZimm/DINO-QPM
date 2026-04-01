@@ -8,7 +8,7 @@ from dino_qpm.ext_models import sinder
 from dino_qpm.ext_models.dinov2.models.vision_transformer import vit_large, vit_giant2, vit_small, vit_base
 from dino_qpm.architectures.qpm_dino.dino_model import Dino2Div
 from dino_qpm.architectures.model_mapping import get_model
-from dino_qpm.configs.dataset_params import dataset_constants
+from dino_qpm.configs.core.dataset_params import dataset_constants
 
 BACKBONE_ARCHS = {
     "small": "vits",

@@ -5,7 +5,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from dino_qpm.configs.dataset_params import normalize_params
+from dino_qpm.configs.core.dataset_params import normalize_params
 from dino_qpm.helpers.file_system import gen_sample_paths
 from PIL import Image
 from torchvision import transforms as tt

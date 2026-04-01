@@ -11,15 +11,15 @@ from argparse import Namespace
 
 from dino_qpm.training.optim import get_scheduler_for_model
 from dino_qpm.helpers.file_system import get_folder_count, find_file_in_hierarchy
-from dino_qpm.configs.architecture_params import dino_supported_datasets
+from dino_qpm.configs.core.architecture_params import dino_supported_datasets
 from dino_qpm.slurmscripts.python.slurmFunctions import get_slurm_key
-from dino_qpm.configs.dataset_params import dataset_constants
+from dino_qpm.configs.core.dataset_params import dataset_constants
 from dino_qpm.saving.logging import Tee
 from dino_qpm.helpers.optimize import optimize_finetune, optimize_dense
 from dino_qpm.slurmscripts.python.slurmFunctions import is_in_slurm
-from dino_qpm.configs.conf_getter import load_config
-from dino_qpm.configs.config_validation import validate_config
-from dino_qpm.configs.runtime_paths import get_tmp_root
+from dino_qpm.configs.core.conf_getter import load_config
+from dino_qpm.configs.core.config_validation import validate_config
+from dino_qpm.configs.core.runtime_paths import get_tmp_root
 
 
 def create_log_dir_path(config: dict,
@@ -430,7 +430,7 @@ def handle_seed(log_dir: Path,
             print(f"Loading seed {seed} from params.txt")
 
         else:
-            from dino_qpm.configs.conf_getter import get_seeds
+            from dino_qpm.configs.core.conf_getter import get_seeds
             seed = get_seeds()[0]
             print(
                 f"No seed provided and params.txt not found. "

@@ -2348,7 +2348,7 @@ def main(use_dataframe_pipeline, plot_config, folders=None,
             "Provide either 'folders' or both 'dataset' and 'log_ext'.")
 
     # Plot saving uses a subfolder of the default save directory
-    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.configs.core.conf_getter import get_default_save_dir
     plot_config["save_folder"] = get_default_save_dir() / "standard_plot"
     save_path = plot_config["save_folder"]
 

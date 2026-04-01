@@ -513,7 +513,7 @@ def visualize_gradcam_from_model(
             np.array(dataset.get_image(sample_idx))).float()
     else:
         # Fallback: unnormalize sample
-        from dino_qpm.configs.dataset_params import normalize_params
+        from dino_qpm.configs.core.dataset_params import normalize_params
         dataset_name = getattr(dataset, "dataset_name", None) or getattr(
             dataset, "name", "CUB2011")
         data_mean = np.array(normalize_params.get(

@@ -1,7 +1,7 @@
 import itertools
 
 import yaml
-from dino_qpm.configs.hp_sweep_params import full_vals, reduced_vals, param_mapping
+from dino_qpm.configs.core.hp_sweep_params import full_vals, reduced_vals, param_mapping
 from dino_qpm.helpers.dict_op import find_and_update_key_value, update_dict
 
 

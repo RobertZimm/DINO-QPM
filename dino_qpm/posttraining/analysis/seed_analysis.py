@@ -30,7 +30,7 @@ except ImportError as e:
 
 # This import should point to your project's hyperparameter configuration
 # Using placeholder dicts since the original file is not available
-from dino_qpm.configs.hp_sweep_params import full_vals, reduced_vals, param_mapping
+from dino_qpm.configs.core.hp_sweep_params import full_vals, reduced_vals, param_mapping
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 

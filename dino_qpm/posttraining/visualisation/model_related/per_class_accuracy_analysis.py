@@ -40,7 +40,7 @@ from matplotlib import gridspec
 from matplotlib.patches import Patch
 from tqdm import tqdm
 
-from dino_qpm.configs.dataset_params import normalize_params
+from dino_qpm.configs.core.dataset_params import normalize_params
 from dino_qpm.dataset_classes.get_data import get_data
 from dino_qpm.evaluation.load_model import load_model
 from dino_qpm.helpers.data import select_mask
@@ -1112,7 +1112,7 @@ def run_per_class_accuracy_analysis(
     show:
         Display figures interactively.
     """
-    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
     dense_folder = Path(dense_folder)
     ft_folder = Path(ft_folder)

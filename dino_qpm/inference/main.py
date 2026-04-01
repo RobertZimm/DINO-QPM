@@ -11,7 +11,7 @@ from PIL import Image
 from dino_qpm.architectures.qpm_dino.load_model import load_final_model
 from dino_qpm.architectures.qpm_dino.load_model import load_model as load_backbone_model
 from dino_qpm.architectures.registry import is_vision_foundation_model
-from dino_qpm.configs.conf_getter import get_default_save_dir
+from dino_qpm.configs.core.conf_getter import get_default_save_dir
 from dino_qpm.helpers.data import select_mask
 from dino_qpm.helpers.img_tensor_arrays import prep_img
 from dino_qpm.posttraining.visualisation.model_related.backbone.get_heatmaps import (

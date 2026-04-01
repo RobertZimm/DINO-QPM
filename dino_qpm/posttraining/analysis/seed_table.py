@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import pandas as pd
-from dino_qpm.configs.metric_names import cub_only, general_metrics  # noqa
+from dino_qpm.configs.core.metric_names import cub_only, general_metrics  # noqa
 from dino_qpm.posttraining.visualisation.standard_plot import ExperimentVisualiser
 
 

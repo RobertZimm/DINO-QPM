@@ -503,7 +503,7 @@ def compose_all_cover_figures(
         Forwarded to :func:`compose_cover_figure` — ``"gradcam"`` or
         ``"solid"``.
     """
-    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
     if base_dir is None:
         root = get_default_save_dir() / "paired_gradcam_features"
@@ -698,7 +698,7 @@ def generate_and_compose(
 
     # Determine the actual save_dir used by stage 1 (mirrors its logic)
     if save_dir is None:
-        from dino_qpm.configs.conf_getter import get_default_save_dir
+        from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
         gc_name = (
             gradcam_folder.parent.name

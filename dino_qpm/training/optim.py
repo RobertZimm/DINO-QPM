@@ -1,7 +1,7 @@
 import schedulefree
 import torch
-from dino_qpm.configs.qpm_training_params import OptimizationScheduler
-from dino_qpm.configs.qsenn_training_params import QSENNScheduler
+from dino_qpm.configs.core.qpm_training_params import OptimizationScheduler
+from dino_qpm.configs.core.qsenn_training_params import QSENNScheduler
 from torch.optim import SGD, lr_scheduler
 
 

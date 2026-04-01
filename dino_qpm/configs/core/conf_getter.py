@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 from typing import List, Dict, Any, Optional
 import yaml
-from dino_qpm.configs.runtime_paths import get_tmp_root
+from dino_qpm.configs.core.runtime_paths import get_tmp_root
 
 
 GENERAL_CONFIG_FILENAME = "general_config.yaml"

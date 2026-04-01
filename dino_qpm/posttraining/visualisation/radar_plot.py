@@ -20,7 +20,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import shapely
 
-from dino_qpm.configs.conf_getter import get_default_save_dir
+from dino_qpm.configs.core.conf_getter import get_default_save_dir
 from dino_qpm.posttraining.aggregate_results import load_results_dataframe, load_results_dataframes
 
 

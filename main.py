@@ -36,7 +36,7 @@ def _configure_datasets_root_env() -> None:
 
     dataset_name = None
     try:
-        from dino_qpm.configs.conf_getter import load_config
+        from dino_qpm.configs.core.conf_getter import load_config
         cfg = load_config()
         dataset_name = cfg.get("dataset")
     except Exception:

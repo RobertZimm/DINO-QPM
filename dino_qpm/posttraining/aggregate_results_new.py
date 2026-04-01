@@ -31,8 +31,8 @@ import pandas as pd
 import yaml
 
 from dino_qpm.helpers.hp_sweep import prod_combined_vals, process_param_names
-from dino_qpm.configs.hp_sweep_params import full_vals, reduced_vals, param_mapping
-from dino_qpm.configs.conf_getter import get_default_save_dir
+from dino_qpm.configs.core.hp_sweep_params import full_vals, reduced_vals, param_mapping
+from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
 
 # ---------------------------------------------------------------------------

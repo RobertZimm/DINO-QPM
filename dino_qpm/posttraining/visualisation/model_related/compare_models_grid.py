@@ -1380,7 +1380,7 @@ def run_model_comparison_grid(
         partner also produced a figure (had matching samples).  Each
         entry is ``(class_a, class_b)``.  ``None`` disables this check.
     """
-    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
     model_a_folder = Path(model_a_folder)
     model_b_folder = Path(model_b_folder)
@@ -2251,7 +2251,7 @@ def run_auto_discovery(
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
     run_auto_discovery(
         experiment_dir=Path(

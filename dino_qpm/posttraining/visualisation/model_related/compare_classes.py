@@ -3,7 +3,7 @@ from pathlib import Path
 
 import torch
 import yaml
-from dino_qpm.configs.dataset_params import normalize_params
+from dino_qpm.configs.core.dataset_params import normalize_params
 from dino_qpm.dataset_classes.cub200 import load_cub_class_mapping
 from dino_qpm.dataset_classes.stanfordcars import load_stanford_cars_class_mapping
 from dino_qpm.dataset_classes.get_data import get_data
@@ -725,7 +725,7 @@ def get_max_locations(combined_indices: list[int],
     Returns:
         List of lists containing images with rectangles drawn for each feature
     """
-    from dino_qpm.configs.dataset_params import normalize_params
+    from dino_qpm.configs.core.dataset_params import normalize_params
 
     print(f"\n{'='*80}")
     print(

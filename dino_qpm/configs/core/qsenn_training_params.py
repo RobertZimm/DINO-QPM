@@ -1,4 +1,4 @@
-from dino_qpm.configs.qpm_training_params import OptimizationScheduler
+from dino_qpm.configs.core.qpm_training_params import OptimizationScheduler
 
 
 class QSENNScheduler(OptimizationScheduler):

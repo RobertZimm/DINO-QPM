@@ -13,7 +13,7 @@ from dino_qpm.helpers.file_system import get_folder_count, get_path_components
 from dino_qpm.helpers.img_tensor_arrays import apply_heatmap_on_arrays, interpolate_patches
 from dino_qpm.model.dino_model import Dino2Div
 from dino_qpm.model.load_model import load_final_model, load_qpm_feature_selection_and_assignment
-from dino_qpm.configs.dataset_params import dataset_constants
+from dino_qpm.configs.core.dataset_params import dataset_constants
 from PIL import Image
 from sklearn.preprocessing import minmax_scale
 from tqdm import tqdm
