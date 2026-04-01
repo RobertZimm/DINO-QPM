@@ -40,7 +40,7 @@ def _configure_datasets_root_env() -> None:
 
     dataset_name = None
     try:
-        from CleanCodeRelease.configs.conf_getter import load_config
+        from dino_qpm.configs.conf_getter import load_config
         cfg = load_config()
         dataset_name = cfg.get("dataset")
     except Exception:
@@ -90,17 +90,17 @@ def main(argv: list[str] | None = None) -> None:
         list(sys.argv[1:] if argv is None else argv))
 
     if cmd == "inference":
-        from CleanCodeRelease.inference.main import inference_cli
+        from dino_qpm.inference.main import inference_cli
         inference_cli(forwarded_argv)
         return
 
     elif cmd == "evaluate":
-        from CleanCodeRelease.evaluation.main import evaluation_cli
+        from dino_qpm.evaluation.main import evaluation_cli
         evaluation_cli(forwarded_argv)
         return
 
     elif cmd == "train":
-        from CleanCodeRelease.training.main import main_cli
+        from dino_qpm.training.main import main_cli
         main_cli(forwarded_argv)
         return
 

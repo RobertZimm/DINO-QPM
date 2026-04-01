@@ -1,7 +1,11 @@
 [project]
-name = "CleanCodeRelease"
+name = "dino_qpm"
 version = "0.1.0"
-description = "Interpretability of ML Models"
+authors = [
+    {name = "Robert Zimmermann", email = "zimmerro@tnt.uni-hannover.de"}
+]
+
+description = "Code for the Paper 'DINO-QPM: Adapting Visual Foundation Models for Globally Interpretable Image Classification'"
 
 [build-system]
 build-backend = "flit_core.buildapi"
