@@ -58,6 +58,7 @@ def main(config: dict,
                              seed=seed)
 
     seed = handle_seed(log_dir=log_dir, seed=seed)
+    config.setdefault("added_params", {})["seed"] = int(seed)
 
     # Dense Model Training
     if not os.path.exists(log_dir / "Trained_DenseModel.pth"):

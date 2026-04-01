@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-from random import random
+import random
 import sys
 import numpy as np
 import torch
@@ -374,6 +374,7 @@ def handle_seed(log_dir: Path,
 
             print(f"Loading seed {seed} from params.txt")
 
+    random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():

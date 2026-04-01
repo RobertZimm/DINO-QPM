@@ -121,6 +121,9 @@ def get_data(dataset: str,
         raise ValueError(f"Dataset {dataset} is currently not supported.")
 
     sampler = None
+    resolved_seed = int(config.get("added_params", {}).get("seed", 383534468))
+    train_generator = torch.Generator().manual_seed(resolved_seed)
+    test_generator = torch.Generator().manual_seed(resolved_seed + 1)
 
     # With batched backbone extraction in training loop, we CAN use workers
     # for image loading since backbone runs in main process after collation
@@ -132,6 +135,7 @@ def get_data(dataset: str,
         train_loader = torch.utils.data.DataLoader(train_dataset,
                                                    batch_size=batch_size,
                                                    shuffle=True,
+                                                   generator=train_generator,
                                                    num_workers=num_workers,
                                                    pin_memory=pin_memory,
                                                    persistent_workers=persistent_workers if num_workers > 0 else False,)
@@ -139,6 +143,7 @@ def get_data(dataset: str,
         test_loader = torch.utils.data.DataLoader(test_dataset,
                                                   batch_size=batch_size,
                                                   shuffle=False,
+                                                  generator=test_generator,
                                                   num_workers=num_workers,
                                                   pin_memory=pin_memory,
                                                   persistent_workers=persistent_workers if num_workers > 0 else False,)
@@ -147,6 +152,7 @@ def get_data(dataset: str,
         train_loader = torch.utils.data.DataLoader(train_dataset,
                                                    batch_size=batch_size,
                                                    shuffle=False,
+                                                   generator=train_generator,
                                                    num_workers=num_workers,
                                                    sampler=sampler,
                                                    pin_memory=pin_memory,
@@ -155,6 +161,7 @@ def get_data(dataset: str,
         test_loader = torch.utils.data.DataLoader(test_dataset,
                                                   batch_size=batch_size,
                                                   shuffle=False,
+                                                  generator=test_generator,
                                                   num_workers=num_workers,
                                                   pin_memory=pin_memory,
                                                   persistent_workers=persistent_workers if num_workers > 0 else False)
