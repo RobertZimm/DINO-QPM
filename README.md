@@ -5,29 +5,35 @@
 Although visual foundation models like DINOv2 provide state-of-the-art performance as feature extractors, their complex, high-dimensional representations create substantial hurdles for interpretability. This work proposes DINO-QPM, which converts these powerful but entangled features into contrastive, class-independent representations that are interpretable by humans. DINO-QPM is a lightweight interpretability adapter that pursues globally interpretable image classification, adapting the Quadratic Programming Enhanced Model (QPM) to operate on strictly frozen DINO backbones. While classification with visual foundation models typically relies on the CLS token, we deliberately diverge from this standard. By leveraging average-pooling, we directly connect the patch embeddings to the model's features and therefore enable spatial localisation of DINO-QPM's globally interpretable features within the input space. Furthermore, we apply a sparsity loss to minimise spatial scatter and background noise, ensuring that explanations are grounded in relevant object parts. With DINO-QPM we make the level of interpretability of QPM available as an adapter while exceeding the accuracy of DINOv2 linear probe. Evaluated through an introduced Plausbility metric and other interpretability metrics, extensive experiments demonstrate that DINO-QPM is superior to other applicable methods for frozen visual foundation models in both classification accuracy and explanation quality. 
 
 ## DINO-QPM Pipeline
+
 <table width="100%">
   <tr valign="middle">
     <td width="50%" align="center">
-      <img src="res/model-scheme_avg_pooling.svg" alt="Pipeline Diagram" width="100%">
+      <img src="res/model-scheme_avg_pooling.svg" alt="DINO-QPM Architecture" width="100%">
     </td>
     <td width="50%">
-      <p><b>Default method:</b> the input image is first processed by a <b>frozen backbone</b> (e.g. DINOv2), which can provide patch-level feature maps and a global vector (CLS-like token).</p>
-      <p>In the avg-pooling path, the adapter builds its feature vector from pooled patch embeddings, i.e. it does <b>not</b> directly use the backbone global vector.</p>
-      <p>These frozen representations are transformed by the DINO-QPM adapter into class scores while preserving spatial structure for interpretability. The dense stage trains the adapter head, then the finetuning stage applies the selected sparse/interpretable mode (<b>qpm</b>, <b>qsenn</b>, or <b>sldd</b>).</p>
+      <p>The input image is first processed by a <b>frozen backbone</b> (e.g. DINOv2), which can provide patch-level feature maps and a global vector (CLS-like token).</p>
+      <p>...</p>
       <p><b>Note:</b> other processing methods are also possible and selectable via config (for example direct global-vector usage or mixed global+pooled strategies).</p>
-      <p><b>How this maps to the code path:</b> <code>main.py</code> resolves the command (<code>train</code>, <code>evaluate</code>, <code>inference</code>), configures dataset root resolution, and dispatches to the corresponding CLI. In training, dense training/evaluation runs first, optional finetuning runs second, and the final model is evaluated and saved.</p>
     </td>
   </tr>
 </table>
+<br>
+
+<p><b>How this maps to the code path:</b> <code>main.py</code> resolves the command (<code>train</code>, <code>evaluate</code>, <code>inference</code>), configures dataset root resolution, and dispatches to the corresponding CLI. In training, dense training/evaluation runs first, optional finetuning runs second, and the final model is evaluated and saved.</p>
+
+<p align="center">
+  <img src="res/qpm_pipeline.svg" alt="Pipeline Diagram" width="80%">
+</p>
 
 ## Code
 
-## Installation 
-
-Prerequisite:
+### Prerequisite
 
 - A Conda distribution must be installed first (Anaconda or Miniconda).
 - Installation instructions: https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+
+### Installation 
 
 From the repository root:
 
@@ -45,7 +51,7 @@ python -c "import dino_qpm; print('ok')"
 python main.py --help 2>/dev/null || true
 ```
 
-## Dataset Setup
+### Dataset Setup
 
 By default, data is expected under:
 
@@ -67,7 +73,7 @@ Expected dataset folders:
 For `CUB200`, the code expects the standard `CUB_200_2011` substructure (e.g. `images`, `images.txt`, `train_test_split.txt`).
 For `StanfordCars`, it expects dataset artifacts such as `car_devkit` and `cars_train`.
 
-## Configuration
+### Configuration
 
 Configuration is resolved in two steps:
 
@@ -88,7 +94,7 @@ Typical parameters to check first:
 - `sldd_mode`
 - Train/finetune hyperparameters in the corresponding config files
 
-## Frozen Backbone Output Strategies
+### Frozen Backbone Output Strategies
 
 There are multiple strategies for how frozen backbone outputs are processed before classification. These are implemented in the code and can be switched via config.
 
@@ -124,7 +130,7 @@ model:
   feat_vec_type: avg_pooling
 ```
 
-## Run the Code
+### Run the Code
 
 Entry point:
 
