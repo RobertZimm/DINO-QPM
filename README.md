@@ -39,9 +39,7 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
   <img src="res/class_comp_ink.svg" alt="Pipeline Diagram" width="100%">
 </p>
 
-<div align="center">
-
-*Comparison of a Brewer's Blackbird image with a Rusty Blackbird image. From the selected features $\mathcal{F}^{*}$, $N_f^{\hat{c}}=5$ utilised features were selected for both classes using the QP; the corresponding feature maps from $\boldsymbol{F}$ are visualised as saliency maps. Both classes share 4 out of the 5 features and can thus be distinguished by the non-shared features. Notably, the model differentiates the Brewer's Blackbird using feature 24, which localises the beak. This aligns perfectly with established ornithological expertise, where beak morphology is considered a primary diagnostic trait.*
+*Comparison of a Brewer's Blackbird image with a Rusty Blackbird image. From the selected features $\`\mathcal{F}^{*}\`$, $\`N_f^{\hat{c}}=5\`$ utilised features were selected for both classes using the QP; the corresponding feature maps from $\`\boldsymbol{F}\`$ are visualised as saliency maps. Both classes share 4 out of the 5 features and can thus be distinguished by the non-shared features. Notably, the model differentiates the Brewer's Blackbird using feature 24, which localises the beak. This aligns perfectly with established ornithological expertise, where beak morphology is considered a primary diagnostic trait.*
 
 </div>
 
