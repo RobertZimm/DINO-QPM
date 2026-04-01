@@ -26,7 +26,7 @@ From the repository root:
 
 ```bash
 conda env create -f environment.yml
-conda activate NewDino
+conda activate DINO-QPM
 python -m pip install --upgrade pip
 python -m pip install -e .
 ```
@@ -34,11 +34,11 @@ python -m pip install -e .
 Quick sanity checks:
 
 ```bash
-python -c "import CleanCodeRelease; print('ok')"
+python -c "import dino_qpm; print('ok')"
 python main.py --help 2>/dev/null || true
 ```
 
-## Dataset Setup (Local)
+## Dataset Setup
 
 By default, data is expected under:
 
@@ -66,7 +66,7 @@ Typical parameters to check first:
 - `sldd_mode`
 - Train/finetune hyperparameters in the corresponding config files
 
-## Run the Code (Local)
+## Run the Code
 
 Entry point:
 
