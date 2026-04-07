@@ -77,11 +77,6 @@ By default, data is expected under:
 
 - `~/tmp/Datasets`
 
-At runtime, the entrypoint sets `CCR_DATASETS_ROOT` automatically with a local-first policy:
-
-- Prefer `/local/<user>` when the expected dataset structure is available.
-- Otherwise fall back to `~/tmp/Datasets`.
-
 Expected dataset folders:
 
 ```text
