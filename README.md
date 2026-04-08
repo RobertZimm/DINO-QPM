@@ -175,7 +175,7 @@ If you use this work, please cite:
   title     = {{DINO-QPM}: Adapting Visual Foundation Models for Globally Interpretable
 Image Classification},
   author    = {Zimmermann, Robert and Norrenbrock, Thomas and Rosenhahn, Bodo},
-  booktitle = {...},
+  booktitle = {2026 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)},
   year      = {2026}
 }
 ```
