@@ -81,12 +81,23 @@ Expected dataset folders:
 
 ```text
 ~/tmp/Datasets/
-├── CUB200/
-└── StanfordCars/
+├── CUB200
+│   └── CUB_200_2011
+│       ├── attributes
+│       ├── class_sim_gts
+│       ├── images
+│       ├── parts
+│       └── segmentations
+├── StanfordCars
+│   ├── car_devkit
+│   ├── cars_test
+│   └── cars_train
+└── dino_data
+    ├── CUB2011
+    │   └── ...
+    └── StanfordCars
+        └── ...
 ```
-
-For `CUB200`, the code expects the standard `CUB_200_2011` substructure (e.g. `images`, `images.txt`, `train_test_split.txt`).
-For `StanfordCars`, it expects dataset artifacts such as `car_devkit` and `cars_train`.
 
 ### Run the Code
 
