@@ -158,21 +158,6 @@ python main.py evaluate \
 ## Citation
 
 If you use this work, please cite:
-
-```bibtex
-@misc{zimmermann2026dino-qpm,
-  title         = {{DINO-QPM}: Adapting Visual Foundation Models for Globally Interpretable
-Image Classification},
-  author        = {Zimmermann, Robert and Norrenbrock, Thomas and Rosenhahn, Bodo},
-  year          = {2026},
-  eprint        = {...},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.CV},
-  url           = {https://arxiv.org/abs/...}
-}
-```
- 
-Once published at CVPR, please use:
  
 ```bibtex
 @inproceedings{zimmermann2026dino-qpm,
