@@ -8,9 +8,9 @@ import logging
 import os
 import sys
 
-from dino_qpm.ext_models.dinov2.logging import setup_logging
-from dino_qpm.ext_models.dinov2.train import get_args_parser as get_train_args_parser
-from dino_qpm.ext_models.dinov2.run.submit import get_args_parser, submit_jobs
+from dino_qpm.backbones.dinov2.logging import setup_logging
+from dino_qpm.backbones.dinov2.train import get_args_parser as get_train_args_parser
+from dino_qpm.backbones.dinov2.run.submit import get_args_parser, submit_jobs
 
 
 logger = logging.getLogger("dinov2")
@@ -21,7 +21,7 @@ class Trainer(object):
         self.args = args
 
     def __call__(self):
-        from dino_qpm.ext_models.dinov2.train import main as train_main
+        from dino_qpm.backbones.dinov2.train import main as train_main
 
         self._setup_args()
         train_main(self.args)

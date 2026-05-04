@@ -19,14 +19,14 @@ from torch import nn
 from torch.utils.data import TensorDataset
 from torchmetrics import MetricTracker
 
-from dino_qpm.ext_models.dinov2.data import make_dataset
-from dino_qpm.ext_models.dinov2.data.transforms import make_classification_eval_transform
-from dino_qpm.ext_models.dinov2.distributed import get_global_rank, get_global_size
-from dino_qpm.ext_models.dinov2.eval.metrics import MetricType, build_metric
-from dino_qpm.ext_models.dinov2.eval.setup import get_args_parser as get_setup_args_parser
-from dino_qpm.ext_models.dinov2.eval.setup import setup_and_build_model
-from dino_qpm.ext_models.dinov2.eval.utils import evaluate, extract_features
-from dino_qpm.ext_models.dinov2.utils.dtype import as_torch_dtype
+from dino_qpm.backbones.dinov2.data import make_dataset
+from dino_qpm.backbones.dinov2.data.transforms import make_classification_eval_transform
+from dino_qpm.backbones.dinov2.distributed import get_global_rank, get_global_size
+from dino_qpm.backbones.dinov2.eval.metrics import MetricType, build_metric
+from dino_qpm.backbones.dinov2.eval.setup import get_args_parser as get_setup_args_parser
+from dino_qpm.backbones.dinov2.eval.setup import setup_and_build_model
+from dino_qpm.backbones.dinov2.eval.utils import evaluate, extract_features
+from dino_qpm.backbones.dinov2.utils.dtype import as_torch_dtype
 
 
 logger = logging.getLogger("dinov2")

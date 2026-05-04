@@ -20,7 +20,7 @@ import os
 import uuid
 from pathlib import Path
 
-import dino_qpm.ext_models.dino.main_dino as main_dino
+import dino_qpm.backbones.dino.main_dino as main_dino
 import submitit
 
 
@@ -60,7 +60,7 @@ class Trainer(object):
         self.args = args
 
     def __call__(self):
-        import dino_qpm.ext_models.dino.main_dino as main_dino
+        import dino_qpm.backbones.dino.main_dino as main_dino
 
         self._setup_gpu_args()
         main_dino.train_dino(self.args)

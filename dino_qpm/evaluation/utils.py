@@ -8,11 +8,7 @@ import numpy as np
 import yaml
 from typing import List, Dict, Any, Optional, Union
 
-from dino_qpm.evaluation.metrics.dense_finetune_feature_similarity import eval_feat_comp
-from dino_qpm.evaluation.metrics.DinoSimilarityCKA import bootstrapped_sampled_linear_cka, bootstrapped_sampled_proto_consistency
-from dino_qpm.architectures.qpm_dino.layers import create_prototype_projection_dataloader
 from dino_qpm.architectures.qpm_dino.similarity_functions import compute_similarity
-from dino_qpm.sparsification.feature_helpers import load_full_features
 from dino_qpm.sparsification.utils import save_feat_loaders
 from dino_qpm.saving.utils import json_save
 from dino_qpm.dataset_classes.get_data import get_data
@@ -83,72 +79,6 @@ def compute_proto_overlap(
             "PrototypeOverlap_projected_dilated": avg_dilated_overlap}
 
 
-def compute_cka_analysis(
-    model: torch.nn.Module,
-    dense_model: torch.nn.Module,
-    train_loader: torch.utils.data.DataLoader,
-    config: dict,
-    num_bootstrap_runs: int = 20,
-    sample_size: int = 5000
-) -> Dict[str, float]:
-    """
-    Compute CKA analysis between dino, dense, and finetuned features.
-
-    This compares feature representations across different model stages.
-    """
-    results = {}
-
-    print("\n--- Computing CKA Analysis ---")
-
-    # Get features from both models
-    flat_dino_features, flat_ft_features = get_flat_features(
-        model=model,
-        train_loader=train_loader,
-        config=config
-    )
-
-    _, flat_dense_features = get_flat_features(
-        model=dense_model.to("cuda" if torch.cuda.is_available() else "cpu"),
-        train_loader=train_loader,
-        config=config
-    )
-
-    # Dino vs Finetuned
-    mean_cka, std_cka = bootstrapped_sampled_linear_cka(
-        X=flat_dino_features,
-        Y=flat_ft_features,
-        k=sample_size,
-        num_runs=num_bootstrap_runs
-    )
-    results["bootstrapped_sampled_linear_cka_dino_ft"] = mean_cka
-    print(
-        f"Bootstrapped Sampled Linear CKA (Dino vs FT): {mean_cka} ± {std_cka}")
-
-    # Dino vs Dense
-    mean_cka, std_cka = bootstrapped_sampled_linear_cka(
-        X=flat_dino_features,
-        Y=flat_dense_features,
-        k=sample_size,
-        num_runs=num_bootstrap_runs
-    )
-    results["bootstrapped_sampled_linear_cka_dino_dense"] = mean_cka
-    print(
-        f"Bootstrapped Sampled Linear CKA (Dino vs Dense): {mean_cka} ± {std_cka}")
-
-    # Dense vs Finetuned
-    mean_cka, std_cka = bootstrapped_sampled_linear_cka(
-        X=flat_dense_features,
-        Y=flat_ft_features,
-        k=sample_size,
-        num_runs=num_bootstrap_runs
-    )
-    results["bootstrapped_sampled_linear_cka_dense_ft"] = mean_cka
-    print(
-        f"Bootstrapped Sampled Linear CKA (Dense vs FT): {mean_cka} ± {std_cka}")
-
-    return results
-
-
 def compute_prototype_diversity(model: torch.nn.Module) -> Dict[str, float]:
     """
     Compute prototype diversity by calculating the average similarity
@@ -213,88 +143,6 @@ def compute_prototype_diversity(model: torch.nn.Module) -> Dict[str, float]:
     return results
 
 
-def compute_prototype_similarity(
-    model: torch.nn.Module,
-    dense_model: torch.nn.Module,
-    flat_dense_features: np.ndarray,
-    flat_ft_features: np.ndarray
-) -> Dict[str, float]:
-    """
-    Compute prototype similarity metrics between dense and finetuned models.
-    """
-    results = {}
-
-    if not hasattr(model, 'proto_layer') or model.proto_layer is None:
-        return results
-
-    print("\n--- Computing Prototype Similarity ---")
-
-    dense_protos = dense_model.proto_layer.prototypes.detach().cpu().numpy()
-    ft_protos = model.proto_layer.prototypes.detach().cpu().numpy()
-
-    if not hasattr(model, "selection"):
-        print("Warning: Model does not have selection attribute for prototype comparison")
-        return results
-
-    selection = model.selection
-    sel_dense_protos = dense_protos[selection]
-    sel_ft_protos = ft_protos[selection]
-
-    # Calculate cosine similarity
-    proto_sims = []
-    for i in range(sel_dense_protos.shape[0]):
-        dense_proto = sel_dense_protos[i]
-        ft_proto = sel_ft_protos[i]
-
-        if ft_proto.ndim == 2:
-            cos_sim = np.dot(dense_proto, ft_proto.T) / \
-                (np.linalg.norm(dense_proto) * np.linalg.norm(ft_proto))
-            cos_sim = np.mean(cos_sim).item()
-        else:
-            cos_sim = np.dot(dense_proto, ft_proto) / \
-                (np.linalg.norm(dense_proto) * np.linalg.norm(ft_proto))
-
-        proto_sims.append(cos_sim)
-
-    avg_proto_sim = np.mean(proto_sims).item()
-    results["avg_proto_cosine_similarity_dense_ft"] = avg_proto_sim
-    print(f"Average Prototype Cosine Similarity: {avg_proto_sim}")
-
-    # Bootstrapped prototype consistency
-    if len(ft_protos.shape) == 2:
-        similarity_method = model.proto_layer.similarity_method
-        rbf_gamma = model.proto_layer.rbf_gamma if hasattr(
-            model.proto_layer, 'rbf_gamma') else 1e-3
-        mean_corrs = []
-        std_corrs = []
-
-        for proto_idx in tqdm(selection, desc="Computing Prototype Consistency"):
-            mean_corr, std_corr = bootstrapped_sampled_proto_consistency(
-                X=flat_dense_features,
-                Y=flat_ft_features,
-                prototype_X=dense_protos[proto_idx],
-                prototype_Y=ft_protos[proto_idx],
-                k=5000,
-                num_runs=20,
-                similarity_method=similarity_method,
-                gamma=rbf_gamma
-            )
-            mean_corrs.append(mean_corr)
-            std_corrs.append(std_corr)
-
-        results["avg_bootstrapped_sampled_prototype_consistency"] = np.mean(
-            mean_corrs).item()
-        results["max_bootstrapped_sampled_prototype_consistency"] = np.max(
-            mean_corrs).item()
-        results["min_bootstrapped_sampled_prototype_consistency"] = np.min(
-            mean_corrs).item()
-
-        print(
-            f"Average Bootstrapped Sampled Prototype Consistency: {results['avg_bootstrapped_sampled_prototype_consistency']}")
-
-    return results
-
-
 def evaluate(config: dict,
              dataset: str,
              mode: str,
@@ -304,45 +152,16 @@ def evaluate(config: dict,
              save_features: bool = False,
              base_log_dir: str | Path = None,
              eval_mode: Union[str, List[str]] = "all",
-             model_path: str | Path = None,
-             dense_model: Optional[torch.nn.Module] = None) -> Dict[str, Any]:
+             model_path: str | Path = None) -> Dict[str, Any]:
     """
-    Evaluate a model comprehensively using the metric registry system.
+    Evaluate a model using the metric registry system.
 
-    Parameters
-    ----------
-    config : dict
-        Configuration dictionary
-    dataset : str
-        Dataset name
-    mode : str
-        Evaluation mode ('dense' or 'finetune')
-    crop : bool
-        Whether to use cropped images
-    model : torch.nn.Module
-        Model to evaluate
-    save_path : str | Path, optional
-        Path to save results JSON
-    save_features : bool
-        Whether to save extracted features
-    base_log_dir : str | Path, optional
-        Base logging directory
-    eval_mode : str or List[str]
-        Evaluation mode. Can be:
-        - "all": Run all available metrics and analyses
-        - "fast": Run only fast metrics
-        - "essential": Run only essential metrics (accuracy, correlation, class_independence)
-        - List of metric names: Run specific metrics (e.g., ['accuracy', 'correlation'])
-        - Legacy modes still supported: "metrics", "feat_comp", "new_metrics"
-    model_path : str | Path, optional
-        Path to model checkpoint (required for CKA analysis)
-    dense_model : torch.nn.Module, optional
-        Dense model for comparison (if not provided, will be loaded for CKA analysis)
-
-    Returns
-    -------
-    dict
-        Dictionary of evaluation metrics
+    eval_mode accepts:
+        - "all" / "metrics": all registered metrics
+        - "fast": metrics flagged as cheap
+        - "essential": accuracy, correlation, class_independence
+        - list of metric IDs: only those metrics
+        - any other string: treated as a single metric ID
     """
     print("\n--- Evaluating model ---")
 
@@ -391,149 +210,31 @@ def evaluate(config: dict,
     metrics = {}
 
     # Parse eval_mode to determine which metrics to run
-    run_standard_metrics = False
-    run_feat_comp = False
-    run_cka_analysis = False
-    metric_registry = None
-
-    if isinstance(eval_mode, str):
-        if eval_mode in ["all", "metrics"]:
-            run_standard_metrics = True
-            metric_registry = MetricRegistry.get_default()
-        elif eval_mode == "fast":
-            run_standard_metrics = True
-            metric_registry = MetricRegistry.get_fast_metrics()
-        elif eval_mode == "essential":
-            run_standard_metrics = True
-            metric_registry = MetricRegistry.get_essential_metrics()
-        elif eval_mode == "feat_comp":
-            run_feat_comp = True
-        elif eval_mode == "new_metrics":
-            run_cka_analysis = True
-        else:
-            # Try to parse as single metric name
-            run_standard_metrics = True
-            metric_registry = MetricRegistry.from_names([eval_mode])
-
-        if eval_mode == "all":
-            run_feat_comp = True
-            if mode == "finetune" and model_path is not None:
-                run_cka_analysis = True
-
-    elif isinstance(eval_mode, list):
-        # List of metric names
-        run_standard_metrics = True
+    if isinstance(eval_mode, list):
         metric_registry = MetricRegistry.from_names(eval_mode)
+    elif eval_mode in ["all", "metrics"]:
+        metric_registry = MetricRegistry.get_default()
+    elif eval_mode == "fast":
+        metric_registry = MetricRegistry.get_fast_metrics()
+    elif eval_mode == "essential":
+        metric_registry = MetricRegistry.get_essential_metrics()
+    else:
+        metric_registry = MetricRegistry.from_names([eval_mode])
 
-    # Print evaluation overview
     print(f"\n{'='*80}")
     print(f"EVALUATION OVERVIEW")
     print(f"{'='*80}")
     print(f"Mode: {mode}")
     print(f"Dataset: {dataset}")
-
-    analyses_to_run = []
-    if run_standard_metrics:
-        analyses_to_run.append("Standard Metrics (via MetricRegistry)")
-    if run_feat_comp:
-        analyses_to_run.append("Feature Comparison")
-    if run_cka_analysis:
-        analyses_to_run.extend([
-            "CKA Analysis (dino vs dense)",
-            "CKA Analysis (dino vs finetuned)",
-            "CKA Analysis (dense vs finetuned)",
-            "Prototype Cosine Similarity",
-            "Bootstrapped Prototype Consistency"
-        ])
-
-    print(f"\nAnalyses to perform ({len(analyses_to_run)} total):")
-    for analysis in analyses_to_run:
-        print(f"  ✓ {analysis}")
     print(f"{'='*80}\n")
 
-    # Run standard metrics using batch-based accumulators
-    if run_standard_metrics:
-        metrics.update(get_metrics(
-            model=model,
-            test_loader=test_loader,
-            train_loader=train_loader,
-            config=config,
-            metric_registry=metric_registry
-        ))
-
-    # Run feature comparison metrics
-    if run_feat_comp:
-        eval_feat_comp(
-            metrics=metrics,
-            config=config,
-            base_log_dir=base_log_dir,
-            mode=mode,
-            selection=model.selection if hasattr(model, "selection") else None
-        )
-
-    # Run CKA analysis and prototype comparison
-    if run_cka_analysis and mode == "finetune" and model_path is not None:
-        # Load or use provided dense model
-        if dense_model is None:
-            upper_folder = Path(model_path).parent.parent.parent if "projection" in list(
-                Path(model_path).parts) else Path(model_path).parent
-            reduced_strides = config["model"].get("reduced_strides", False)
-            dense_model = get_model(
-                num_classes=dataset_constants[dataset]["num_classes"],
-                changed_strides=reduced_strides,
-                config=config
-            )
-            dense_model.load_state_dict(
-                torch.load(
-                    upper_folder / "Trained_DenseModel.pth",
-                    map_location=torch.device('cpu'),
-                    weights_only=True
-                ),
-                strict=False
-            )
-
-        # Turn off shuffling for consistent comparisons
-        train_loader_no_shuffle = torch.utils.data.DataLoader(
-            train_loader.dataset,
-            batch_size=config["dense"]["batch_size"],
-            shuffle=False
-        )
-
-        # CKA analysis
-        if hasattr(model, "proto_layer") and model.proto_layer is not None:
-            cka_metrics = compute_cka_analysis(
-                model=model,
-                dense_model=dense_model,
-                train_loader=train_loader_no_shuffle,
-                config=config
-            )
-            metrics.update(cka_metrics)
-
-            # Prototype similarity
-            flat_dino_features, flat_ft_features = get_flat_features(
-                model=model,
-                train_loader=train_loader_no_shuffle,
-                config=config
-            )
-            _, flat_dense_features = get_flat_features(
-                model=dense_model.to(
-                    "cuda" if torch.cuda.is_available() else "cpu"),
-                train_loader=train_loader_no_shuffle,
-                config=config
-            )
-
-            proto_metrics = compute_prototype_similarity(
-                model=model,
-                dense_model=dense_model,
-                flat_dense_features=flat_dense_features,
-                flat_ft_features=flat_ft_features
-            )
-
-            metrics.update(proto_metrics)
-
-        else:
-            print(
-                "\nModel has no prototype layer, skipping CKA analysis and prototype similarity metrics.")
+    metrics.update(get_metrics(
+        model=model,
+        test_loader=test_loader,
+        train_loader=train_loader,
+        config=config,
+        metric_registry=metric_registry
+    ))
 
     if projection_info_path is not None:
         if isinstance(projection_info_path, str):
@@ -574,22 +275,6 @@ def evaluate(config: dict,
             print("No save path provided")
 
     return metrics
-
-
-def get_flat_features(model, train_loader, config):
-    # Run comparison with dino original feature maps to see how similarity has changed
-    model_dataloader = create_prototype_projection_dataloader(
-        model, train_loader, device="cuda" if torch.cuda.is_available() else "cpu",
-        batch_size=config["dense"]["batch_size"])
-
-    dino_features, model_features, labels = load_full_features(
-        train_loader, model_dataloader, device="cuda" if torch.cuda.is_available() else "cpu")
-
-    flat_dino_features = dino_features.reshape(-1, dino_features.shape[-1])
-    flat_model_features = model_features.reshape(
-        -1, model_features.shape[-1])
-
-    return flat_dino_features, flat_model_features
 
 
 def get_metrics(train_loader: torch.utils.data.DataLoader,
@@ -869,16 +554,11 @@ def get_metrics(train_loader: torch.utils.data.DataLoader,
 def eval_results(model_path: str | Path,
                  config: dict,
                  mode: str = "dense",
-                 reduced_strides: bool = None,
                  crop: bool = False,
                  save: bool = False,
                  eval_mode: str = "all"):
     dataset = config["dataset"]
     model_path = Path(model_path)
-
-    # Read reduced_strides from config if not explicitly provided
-    if reduced_strides is None:
-        reduced_strides = config.get("model", {}).get("reduced_strides", False)
 
     if mode == "dense":
         res_path = "Results_DenseModel.json"
@@ -888,7 +568,6 @@ def eval_results(model_path: str | Path,
             raise FileNotFoundError(f"Model file not found: {model_file}")
 
         model = get_model(num_classes=dataset_constants[dataset]["num_classes"],
-                          changed_strides=reduced_strides,
                           config=config)
 
         model.load_state_dict(torch.load(model_file,

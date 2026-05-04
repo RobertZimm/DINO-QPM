@@ -24,8 +24,8 @@ from torchvision import datasets
 from torchvision import transforms as pth_transforms
 from torchvision import models as torchvision_models
 
-import dino_qpm.ext_models.dino.utils as utils
-import dino_qpm.ext_models.dino.vision_transformer as vits
+import dino_qpm.backbones.dino.utils as utils
+import dino_qpm.backbones.dino.vision_transformer as vits
 
 
 def eval_linear(args):

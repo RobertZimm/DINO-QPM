@@ -9,15 +9,12 @@ from typing import Dict, List, Optional, Type, Any
 from dino_qpm.evaluation.metrics.batch_metrics import (
     MetricAccumulator,
     AccuracyAccumulator,
-    CorrelationAccumulator,
     ClassIndependenceAccumulator,
     ContrastivenessAccumulator,
     DiversityAccumulator,
     PerSkinToneAccuracyAccumulator,
     PoolingBaselineAccuracyAccumulator,
-    StructuralGroundingAccumulator,
-    CUBAlignmentAccumulator,
-    CUBSegmentationOverlapAccumulator
+    CUBSegmentationOverlapAccumulator,
 )
 
 
@@ -26,7 +23,7 @@ class MetricConfig:
     Configuration for a single metric.
 
     Attributes:
-        name: Human-readable metric name (e.g., "Correlation")
+        name: Human-readable metric name (e.g., "Accuracy")
         accumulator_class: The MetricAccumulator subclass to use
         requires_train: Whether the metric needs training data
         requires_test: Whether the metric needs test data
@@ -84,7 +81,7 @@ class MetricRegistry:
     Example:
         >>> registry = MetricRegistry.get_default()
         >>> # Enable specific metrics
-        >>> registry = registry.subset(['accuracy', 'correlation', 'diversity'])
+        >>> registry = registry.subset(['accuracy', 'class_independence', 'diversity'])
         >>> # Or disable expensive metrics
         >>> registry = registry.filter_expensive(False)
     """
@@ -106,8 +103,8 @@ class MetricRegistry:
         Register a new metric.
 
         Args:
-            metric_id: Unique identifier (e.g., "correlation")
-            name: Display name (e.g., "Correlation")
+            metric_id: Unique identifier (e.g., "class_independence")
+            name: Display name (e.g., "Accuracy")
             accumulator_class: MetricAccumulator subclass
             requires_train: Whether metric needs training data
             requires_test: Whether metric needs test data
@@ -217,15 +214,6 @@ class MetricRegistry:
         )
 
         registry.register(
-            metric_id='correlation',
-            name='Correlation',
-            accumulator_class=CorrelationAccumulator,
-            requires_train=True,
-            requires_test=False,
-            expensive=False
-        )
-
-        registry.register(
             metric_id='class_independence',
             name='Class-Independence',
             accumulator_class=ClassIndependenceAccumulator,
@@ -274,24 +262,6 @@ class MetricRegistry:
 
         # CUB-specific metrics
         registry.register(
-            metric_id='structural_grounding',
-            name='Structural Grounding',
-            accumulator_class=StructuralGroundingAccumulator,
-            requires_train=False,
-            requires_test=False,  # Only needs linear_matrix
-            expensive=False
-        )
-
-        registry.register(
-            metric_id='cub_alignment',
-            name='alignment',
-            accumulator_class=CUBAlignmentAccumulator,
-            requires_train=True,
-            requires_test=False,
-            expensive=False
-        )
-
-        registry.register(
             metric_id='cub_segmentation_overlap',
             name='CUBSegmentationOverlap',
             accumulator_class=CUBSegmentationOverlapAccumulator,
@@ -318,12 +288,11 @@ class MetricRegistry:
         Get registry with essential metrics for quick evaluation.
 
         Returns:
-            MetricRegistry with accuracy, correlation, and class independence
+            MetricRegistry with accuracy and class independence
         """
         return MetricRegistry.get_default().subset([
             'accuracy',
-            'correlation',
-            'class_independence'
+            'class_independence',
         ])
 
     @staticmethod
@@ -338,7 +307,7 @@ class MetricRegistry:
 
         Example:
             >>> registry = MetricRegistry.from_dict({
-            ...     'correlation': True,
+            ...     'class_independence': True,
             ...     'diversity': False,
             ...     'contrastiveness': True
             ... })
@@ -359,7 +328,7 @@ class MetricRegistry:
         Create registry from list of metric IDs or names.
 
         Args:
-            metric_names: List of metric IDs (e.g., ['accuracy', 'correlation'])
+            metric_names: List of metric IDs (e.g., ['accuracy', 'class_independence'])
 
         Returns:
             MetricRegistry with specified metrics

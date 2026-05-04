@@ -10,15 +10,15 @@ import math
 import os
 from functools import partial
 
-import dino_qpm.ext_models.dinov2.distributed as distributed
+import dino_qpm.backbones.dinov2.distributed as distributed
 import torch
-from dino_qpm.ext_models.dinov2.data import SamplerType, make_data_loader, make_dataset
-from dino_qpm.ext_models.dinov2.data import collate_data_and_cast, DataAugmentationDINO, MaskingGenerator
-from dino_qpm.ext_models.dinov2.fsdp import FSDPCheckpointer
-from dino_qpm.ext_models.dinov2.logging import MetricLogger
-from dino_qpm.ext_models.dinov2.train.ssl_meta_arch import SSLMetaArch
-from dino_qpm.ext_models.dinov2.utils.config import setup
-from dino_qpm.ext_models.dinov2.utils.utils import CosineScheduler
+from dino_qpm.backbones.dinov2.data import SamplerType, make_data_loader, make_dataset
+from dino_qpm.backbones.dinov2.data import collate_data_and_cast, DataAugmentationDINO, MaskingGenerator
+from dino_qpm.backbones.dinov2.fsdp import FSDPCheckpointer
+from dino_qpm.backbones.dinov2.logging import MetricLogger
+from dino_qpm.backbones.dinov2.train.ssl_meta_arch import SSLMetaArch
+from dino_qpm.backbones.dinov2.utils.config import setup
+from dino_qpm.backbones.dinov2.utils.utils import CosineScheduler
 from fvcore.common.checkpoint import PeriodicCheckpointer
 
 torch.backends.cuda.matmul.allow_tf32 = True  # PyTorch 1.12 sets this to False by default

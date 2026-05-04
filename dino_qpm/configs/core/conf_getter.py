@@ -72,15 +72,10 @@ def get_default_save_dir() -> Path:
     """Get the default save directory from general_config."""
     save_dir = general_config.get("default_save_dir", None)
     if save_dir is None:
-        save_dir = get_tmp_root(general_config) / "attention_entropy_results"
+        save_dir = get_tmp_root(general_config) / "dino_qpm_results"
     else:
         save_dir = Path(save_dir)
     return save_dir
-
-
-def get_attention_entropy_results_path() -> Path:
-    """Get the path for attention entropy results JSON."""
-    return get_default_save_dir() / "attention_entropy_results.json"
 
 
 def load_config(filename: str = None) -> dict:

@@ -21,7 +21,6 @@ def main(config: dict,
          input_ft_dir: str | None = None,
          run_number: int | None = None,
          multi_seed: bool = False):
-    reduced_strides = config["model"].get("reduced_strides", False)
     crop = config["data"].get("crop", False)
     dataset = config["dataset"]
 
@@ -77,7 +76,6 @@ def main(config: dict,
 
     if os.path.exists(log_dir / "Trained_DenseModel.pth"):
         model = get_model(num_classes=n_classes,
-                          changed_strides=reduced_strides,
                           config=config)
 
         # Load the trained model state

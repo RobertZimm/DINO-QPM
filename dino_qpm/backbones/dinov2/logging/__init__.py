@@ -10,7 +10,7 @@ import os
 import sys
 from typing import Optional
 
-import dino_qpm.ext_models.dinov2.distributed as distributed
+import dino_qpm.backbones.dinov2.distributed as distributed
 from .helpers import MetricLogger, SmoothedValue
 
 

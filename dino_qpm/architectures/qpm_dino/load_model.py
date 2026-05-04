@@ -4,11 +4,13 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 import yaml
-from dino_qpm.ext_models.dinov2.models.vision_transformer import vit_large, vit_giant2, vit_small, vit_base
+from dino_qpm.backbones.dinov2.models.vision_transformer import vit_large, vit_giant2, vit_small, vit_base
 from dino_qpm.architectures.qpm_dino.dino_model import Dino2Div
 from dino_qpm.architectures.model_mapping import get_model
 from dino_qpm.configs.core.dataset_params import dataset_constants
 from dino_qpm.helpers.logging_utils import get_logger
+
+_BACKBONES_ROOT = Path(__file__).resolve().parent.parent.parent / "backbones"
 
 logger = get_logger(__name__)
 BACKBONE_ARCHS = {
@@ -142,11 +144,8 @@ def load_final_model(config: dict,
     n_classes = dataset_constants[dataset]["num_classes"]
     n_features = config["finetune"]["n_features"]
     n_per_class = config["finetune"]["n_per_class"]
-    reduced_strides = config["model"].get("reduced_strides", False)
 
-    model = get_model(config=config,
-                      num_classes=n_classes,
-                      changed_strides=reduced_strides, )
+    model = get_model(config=config, num_classes=n_classes)
 
     if "qpm" in model_type:
         sel_dir = model_path.parent.parent.parent if "projection" in list(
@@ -284,7 +283,7 @@ def load_backbone(model_type: str,
 
     elif arch == "dino":
         backbone_model = torch.hub.load(
-            repo_or_dir="ext_models/dino",
+            repo_or_dir=str(_BACKBONES_ROOT / "dino"),
             model=model_name,
             source="local",
             weights=str(model_path),

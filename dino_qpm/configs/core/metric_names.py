@@ -1,2 +1,2 @@
-cub_only = ['CUBSegmentationOverlapgradcamdi', 'alignment', 'StructuralGrounding', ]
-general_metrics = ["accuracy", "Contrastiveness", "SID", "SID5", "Correlation", "ClassIndependence", "WSF"]
+cub_only = ['CUBSegmentationOverlapgradcamdi']
+general_metrics = ["accuracy", "Contrastiveness", "SID", "SID5", "ClassIndependence", "WSF"]

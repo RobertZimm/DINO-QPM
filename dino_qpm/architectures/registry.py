@@ -10,12 +10,6 @@ class ArchitectureSpec:
 
 
 ARCH_REGISTRY = {
-    "resnet50": ArchitectureSpec(
-        name="resnet50",
-        family="cnn",
-        is_vision_foundation_model=False,
-        supported_finetune_modes=("qpm", "qsenn", "sldd"),
-    ),
     "dino": ArchitectureSpec(
         name="dino",
         family="vit",

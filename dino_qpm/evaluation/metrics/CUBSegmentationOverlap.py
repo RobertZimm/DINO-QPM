@@ -270,7 +270,6 @@ def _load_model_and_data(
 
     is_vit_model = is_vision_foundation_model(config)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    reduced_strides = config.get("model", {}).get("reduced_strides", False)
 
     if model_mode == "dense":
         model_file = folder / "Trained_DenseModel.pth"
@@ -280,7 +279,6 @@ def _load_model_and_data(
         model = get_model(
             num_classes=dataset_constants[dataset]["num_classes"],
             config=config,
-            changed_strides=reduced_strides,
         )
         model.load_state_dict(torch.load(
             model_file, map_location="cpu", weights_only=True))

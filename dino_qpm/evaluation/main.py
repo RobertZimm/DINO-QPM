@@ -66,10 +66,7 @@ def _load_model_for_eval(config: dict, model_path: Path, mode: str) -> torch.nn.
     # Dense mode: load architecture and checkpoint directly.
     dataset = config["dataset"]
     n_classes = dataset_constants[dataset]["num_classes"]
-    reduced_strides = config["model"].get("reduced_strides", False)
-    model = get_model(num_classes=n_classes,
-                      config=config,
-                      changed_strides=reduced_strides)
+    model = get_model(num_classes=n_classes, config=config)
     state_dict = torch.load(model_path,
                             map_location=torch.device("cpu"),
                             weights_only=True)

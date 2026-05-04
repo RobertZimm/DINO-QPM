@@ -12,7 +12,7 @@ import time
 
 import torch
 
-import dino_qpm.ext_models.dinov2.distributed as distributed
+import dino_qpm.backbones.dinov2.distributed as distributed
 
 
 logger = logging.getLogger("dinov2")

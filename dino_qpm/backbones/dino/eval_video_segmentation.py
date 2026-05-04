@@ -30,8 +30,8 @@ from torch.nn import functional as F
 from PIL import Image
 from torchvision import transforms
 
-import dino_qpm.ext_models.dino.utils as utils
-import dino_qpm.ext_models.dino.vision_transformer as vits
+import dino_qpm.backbones.dino.utils as utils
+import dino_qpm.backbones.dino.vision_transformer as vits
 
 
 @torch.no_grad()

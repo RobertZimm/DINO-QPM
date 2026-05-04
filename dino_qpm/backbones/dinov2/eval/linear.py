@@ -18,14 +18,14 @@ import torch.nn as nn
 from torch.nn.parallel import DistributedDataParallel
 from fvcore.common.checkpoint import Checkpointer, PeriodicCheckpointer
 
-from dino_qpm.ext_models.dinov2.data import SamplerType, make_data_loader, make_dataset
-from dino_qpm.ext_models.dinov2.data.transforms import make_classification_eval_transform, make_classification_train_transform
-import dino_qpm.ext_models.dinov2.distributed as distributed
-from dino_qpm.ext_models.dinov2.eval.metrics import MetricType, build_metric
-from dino_qpm.ext_models.dinov2.eval.setup import get_args_parser as get_setup_args_parser
-from dino_qpm.ext_models.dinov2.eval.setup import setup_and_build_model
-from dino_qpm.ext_models.dinov2.eval.utils import ModelWithIntermediateLayers, evaluate
-from dino_qpm.ext_models.dinov2.logging import MetricLogger
+from dino_qpm.backbones.dinov2.data import SamplerType, make_data_loader, make_dataset
+from dino_qpm.backbones.dinov2.data.transforms import make_classification_eval_transform, make_classification_train_transform
+import dino_qpm.backbones.dinov2.distributed as distributed
+from dino_qpm.backbones.dinov2.eval.metrics import MetricType, build_metric
+from dino_qpm.backbones.dinov2.eval.setup import get_args_parser as get_setup_args_parser
+from dino_qpm.backbones.dinov2.eval.setup import setup_and_build_model
+from dino_qpm.backbones.dinov2.eval.utils import ModelWithIntermediateLayers, evaluate
+from dino_qpm.backbones.dinov2.logging import MetricLogger
 
 
 logger = logging.getLogger("dinov2")

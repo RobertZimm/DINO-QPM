@@ -11,9 +11,9 @@ import torch
 from torch import nn
 from torchmetrics import MetricCollection
 
-from dino_qpm.ext_models.dinov2.data import DatasetWithEnumeratedTargets, SamplerType, make_data_loader
-import dino_qpm.ext_models.dinov2.distributed as distributed
-from dino_qpm.ext_models.dinov2.logging import MetricLogger
+from dino_qpm.backbones.dinov2.data import DatasetWithEnumeratedTargets, SamplerType, make_data_loader
+import dino_qpm.backbones.dinov2.distributed as distributed
+from dino_qpm.backbones.dinov2.logging import MetricLogger
 
 
 logger = logging.getLogger("dinov2")

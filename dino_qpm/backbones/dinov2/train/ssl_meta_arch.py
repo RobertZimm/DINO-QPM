@@ -8,13 +8,13 @@ import logging
 from functools import partial
 
 import torch
-from dino_qpm.ext_models.dinov2.fsdp import get_fsdp_wrapper, ShardedGradScaler, get_fsdp_modules, reshard_fsdp_model
-from dino_qpm.ext_models.dinov2.layers import DINOHead
-from dino_qpm.ext_models.dinov2.loss import DINOLoss, iBOTPatchLoss, KoLeoLoss
-from dino_qpm.ext_models.dinov2.models import build_model_from_cfg
-from dino_qpm.ext_models.dinov2.models.vision_transformer import BlockChunk
-from dino_qpm.ext_models.dinov2.utils.param_groups import get_params_groups_with_decay, fuse_params_groups
-from dino_qpm.ext_models.dinov2.utils.utils import has_batchnorms
+from dino_qpm.backbones.dinov2.fsdp import get_fsdp_wrapper, ShardedGradScaler, get_fsdp_modules, reshard_fsdp_model
+from dino_qpm.backbones.dinov2.layers import DINOHead
+from dino_qpm.backbones.dinov2.loss import DINOLoss, iBOTPatchLoss, KoLeoLoss
+from dino_qpm.backbones.dinov2.models import build_model_from_cfg
+from dino_qpm.backbones.dinov2.models.vision_transformer import BlockChunk
+from dino_qpm.backbones.dinov2.utils.param_groups import get_params_groups_with_decay, fuse_params_groups
+from dino_qpm.backbones.dinov2.utils.utils import has_batchnorms
 from torch import nn
 
 try:

@@ -55,7 +55,6 @@ def optimize_dense(optimization_schedule: QSENNScheduler | OptimizationScheduler
                    n_classes: int,
                    dataset: str,
                    mode: str):
-    reduced_strides = config["model"].get("reduced_strides", False)
     batch_size = config["dense"]["batch_size"]
     beta = config["dense"]["fdl"]
 
@@ -70,7 +69,6 @@ def optimize_dense(optimization_schedule: QSENNScheduler | OptimizationScheduler
                                          batch_size=batch_size)
 
     model = get_model(num_classes=n_classes,
-                      changed_strides=reduced_strides,
                       config=config)
 
     # Initialize backbone model for on-the-fly feature extraction if needed

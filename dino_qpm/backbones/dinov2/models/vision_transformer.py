@@ -15,7 +15,7 @@ from typing import Sequence, Tuple, Union, Callable
 import torch
 import torch.nn as nn
 import torch.utils.checkpoint
-from dino_qpm.ext_models.dinov2.layers import Mlp, PatchEmbed, SwiGLUFFNFused, MemEffAttention, \
+from dino_qpm.backbones.dinov2.layers import Mlp, PatchEmbed, SwiGLUFFNFused, MemEffAttention, \
     NestedTensorBlock as Block
 from torch.nn.init import trunc_normal_
 

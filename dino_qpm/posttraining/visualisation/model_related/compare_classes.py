@@ -842,7 +842,7 @@ def run_cls_comparison(folder: str | Path,
     parser.add_argument('--dataset', default="CUB2011", type=str, help='dataset name',
                         choices=["CUB2011", "TravelingBirds", "StanfordCars"])
     parser.add_argument('--arch', default="dinov2", type=str, help='Backbone Feature Extractor',
-                        choices=["resnet50", "resnet18, dinov2"])
+                        choices=["dino", "dinov2"])
     parser.add_argument('--model_type', default="qpm", type=str,
                         help='Type of Model', choices=["qsenn", "sldd", "qpm"])
     parser.add_argument('--seed', default=504405, type=int,  # 504405 is good
@@ -855,8 +855,6 @@ def run_cls_comparison(folder: str | Path,
     parser.add_argument('--n_per_class', default=5, type=int,
                         help='How many features to assign to each class')
     parser.add_argument('--img_size', default=224, type=int, help='Image size')
-    parser.add_argument('--reduced_strides', default=False, type=bool,
-                        help='Whether to use reduced strides for resnets')
     parser.add_argument("--folder", default=None, type=str,
                         help="Folder to load model from")
     args = parser.parse_args()

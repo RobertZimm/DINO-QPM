@@ -31,8 +31,8 @@ from torchvision import transforms as pth_transforms
 import numpy as np
 from PIL import Image
 
-import dino_qpm.ext_models.dino.utils as utils
-import dino_qpm.ext_models.dino.vision_transformer as vits
+import dino_qpm.backbones.dino.utils as utils
+import dino_qpm.backbones.dino.vision_transformer as vits
 
 
 def apply_mask(image, mask, color, alpha=0.5):

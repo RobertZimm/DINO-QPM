@@ -63,12 +63,11 @@ def get_data(dataset: str,
                                           True, True,
                                           normalize_params["CUB2011"])
 
-        # For ResNet, enable masks for segmentation overlap metric
-        # Stride depends on reduced_strides config: 8 if True, 32 if False
-        with_masks = True  # Always enable for CUB2011 to support segmentation overlap metric
-        reduced_strides = config["model"].get("reduced_strides", False)
-        stride = 8 if reduced_strides else 32
-        mask_size = img_size // stride
+        # CUB2011 always carries masks so the segmentation overlap metric works.
+        # Mask resolution is tied to the backbone patch size (14 for DINOv2, 16 for DINO).
+        with_masks = True
+        patch_size = config.get("data", {}).get("patch_size", 14)
+        mask_size = img_size // patch_size
 
         train_dataset = CUB200Class(True, train_transform, crop,
                                     with_masks=with_masks, mask_size=mask_size)

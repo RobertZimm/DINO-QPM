@@ -12,7 +12,7 @@ from typing import List, Optional
 
 import submitit
 
-from dino_qpm.ext_models.dinov2.utils.cluster import (
+from dino_qpm.backbones.dinov2.utils.cluster import (
     get_slurm_executor_parameters,
     get_slurm_partition,
     get_user_checkpoint_path,

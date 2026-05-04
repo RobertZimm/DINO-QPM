@@ -78,70 +78,6 @@ class AccuracyAccumulator(MetricAccumulator):
         return self.correct / self.total
 
 
-class CorrelationAccumulator(MetricAccumulator):
-    """
-    Accumulator for feature correlation metric.
-
-    Computes correlation using cosine similarity to match Correlation.py.
-    Uses incremental computation to avoid storing all features.
-    Note: This accumulates the unnormalized outer product and normalizes at the end.
-    """
-
-    def reset(self):
-        self.sum_outer = None
-        self.n_samples = 0
-        self.feature_dim = None
-
-    def update(self, features: torch.Tensor):
-        """
-        Update correlation statistics.
-
-        Args:
-            features: Feature tensor (batch_size, n_features)
-        """
-        if features.device.type == 'cuda':
-            features = features.cpu()
-
-        features = features.float()
-        batch_size = features.shape[0]
-
-        if self.sum_outer is None:
-            self.feature_dim = int(features.shape[1])
-            self.sum_outer = torch.zeros(
-                (self.feature_dim, self.feature_dim), dtype=torch.float32)
-
-        # Transpose: (n_features, batch_size)
-        features_transposed = features.T
-
-        # Accumulate unnormalized outer product
-        # This is equivalent to sum of (feature_i * feature_j) across all samples
-        self.sum_outer += torch.mm(features_transposed, features_transposed.T)
-        self.n_samples += batch_size
-
-    def compute(self) -> Optional[float]:
-        if self.n_samples == 0:
-            print(f"⚠️  Correlation metric: no samples processed")
-            return None
-
-        # Compute the norm for each feature (diagonal of the accumulated matrix)
-        # sqrt(sum(feature_i^2)) for each feature i
-        feature_norms = torch.sqrt(torch.diag(self.sum_outer))
-        feature_norms = torch.clamp(feature_norms, min=1e-8)
-
-        # Normalize to get cosine similarity matrix
-        # corr[i,j] = sum(feature_i * feature_j) / (norm_i * norm_j)
-        corr_matrix = self.sum_outer / \
-            torch.outer(feature_norms, feature_norms)
-
-        # Zero out diagonal
-        diag_indices = torch.arange(corr_matrix.shape[0])
-        corr_matrix[diag_indices, diag_indices] = 0
-
-        # Return mean of max correlation per feature
-        max_per_feature = corr_matrix.max(dim=0)[0]
-        return max_per_feature.mean().item()
-
-
 class ClassIndependenceAccumulator(MetricAccumulator):
     """
     Accumulator for class independence metric.
@@ -485,81 +421,6 @@ class PoolingBaselineAccuracyAccumulator(MetricAccumulator):
         }
 
 
-class StructuralGroundingAccumulator(MetricAccumulator):
-    """
-    Accumulator for structural grounding metric (CUB dataset).
-
-    Computes cross-class similarity based on linear layer weights
-    and compares against ground truth class similarity.
-    Only needs linear_matrix - no batch updates required.
-    """
-
-    def __init__(self, linear_matrix: torch.Tensor = None, **kwargs):
-        self.linear_matrix = linear_matrix
-        super().__init__()
-
-    def reset(self):
-        self._computed = False
-        self._result = None
-
-    def update(self, **kwargs):
-        # No batch updates needed - computed entirely from linear_matrix
-        pass
-
-    def compute(self) -> Optional[float]:
-        if self.linear_matrix is None:
-            print("⚠️  Structural Grounding: linear_matrix not provided")
-            return None
-
-        if self._computed:
-            return self._result
-
-        from dino_qpm.evaluation.metrics.StructuralGrounding import (
-            get_structural_grounding_for_weight_matrix
-        )
-
-        self._result = get_structural_grounding_for_weight_matrix(
-            self.linear_matrix)
-        self._computed = True
-        return self._result
-
-
-class CUBAlignmentAccumulator(MetricAccumulator):
-    """
-    Accumulator for CUB alignment metric.
-
-    Accumulates training features batch-wise and computes alignment
-    with CUB attribute labels at the end.
-    """
-
-    def reset(self):
-        self.all_features = []
-
-    def update(self, features: torch.Tensor, **kwargs):
-        """
-        Accumulate training features.
-
-        Args:
-            features: Feature tensor (batch_size, n_features)
-        """
-        if features.device.type == 'cuda':
-            features = features.cpu()
-        self.all_features.append(features)
-
-    def compute(self) -> Optional[float]:
-        if len(self.all_features) == 0:
-            print("⚠️  CUB Alignment: no features accumulated")
-            return None
-
-        from dino_qpm.evaluation.metrics.cub_Alignment import (
-            get_cub_alignment_from_features
-        )
-
-        # Concatenate all features
-        features = torch.cat(self.all_features, dim=0)
-        return get_cub_alignment_from_features(features)
-
-
 class CUBSegmentationOverlapAccumulator(MetricAccumulator):
     """
     Accumulator for CUB segmentation overlap metrics.
@@ -705,26 +566,17 @@ class MetricAggregator:
     def __init__(self, num_classes: int, linear_matrix: torch.Tensor,
                  metric_registry=None,
                  model: torch.nn.Module = None,
-                 config: dict = None,
-                 compute_diversity: bool = None,
-                 compute_contrastiveness: bool = None,
-                 compute_correlation: bool = None,
-                 compute_class_independence: bool = None):
+                 config: dict = None):
         """
         Initialize metric aggregator.
 
         Args:
             num_classes: Number of output classes
             linear_matrix: Final linear layer weights
-            metric_registry: MetricRegistry object defining which metrics to compute
-                           If None, uses default metrics. If provided, individual
-                           compute_* flags are ignored.
+            metric_registry: MetricRegistry object defining which metrics to compute.
+                             If None, uses the default registry.
             model: The model for metrics that need access to model components (e.g., pooling baseline)
             config: Configuration dictionary (needed for CUB-specific metrics)
-            compute_diversity: (Deprecated) Whether to compute diversity metric
-            compute_contrastiveness: (Deprecated) Whether to compute contrastiveness
-            compute_correlation: (Deprecated) Whether to compute correlation
-            compute_class_independence: (Deprecated) Whether to compute class independence
         """
         self.num_classes = num_classes
         self.linear_matrix = linear_matrix
@@ -733,34 +585,9 @@ class MetricAggregator:
         self.metrics = {}
         self.metric_configs = {}
 
-        # Handle backward compatibility: convert old boolean flags to registry
         if metric_registry is None:
-            if any(param is not None for param in [compute_diversity, compute_contrastiveness,
-                                                   compute_correlation, compute_class_independence]):
-                # User is using old API - convert to registry
-                import warnings
-                warnings.warn(
-                    "Individual compute_* parameters are deprecated. "
-                    "Use metric_registry parameter instead. "
-                    "See evaluation.metric_registry.MetricRegistry for details.",
-                    DeprecationWarning,
-                    stacklevel=2
-                )
-                from evaluation.metric_registry import MetricRegistry
-                config_dict = {}
-                if compute_correlation is not None:
-                    config_dict['correlation'] = compute_correlation
-                if compute_class_independence is not None:
-                    config_dict['class_independence'] = compute_class_independence
-                if compute_contrastiveness is not None:
-                    config_dict['contrastiveness'] = compute_contrastiveness
-                if compute_diversity is not None:
-                    config_dict['diversity'] = compute_diversity
-                metric_registry = MetricRegistry.from_dict(config_dict)
-            else:
-                # No params provided, use defaults
-                from evaluation.metric_registry import MetricRegistry
-                metric_registry = MetricRegistry.get_default()
+            from dino_qpm.evaluation.metric_registry import MetricRegistry
+            metric_registry = MetricRegistry.get_default()
 
         # Initialize metrics from registry
         for metric_id, metric_cfg in metric_registry.get_all().items():
@@ -797,15 +624,11 @@ class MetricAggregator:
             if config and config.requires_train:
                 try:
                     # Different metrics need different inputs
-                    if metric_id == 'correlation':
-                        accumulator.update(features=features)
-                    elif metric_id == 'class_independence':
+                    if metric_id == 'class_independence':
                         accumulator.update(
                             features=features, labels=labels, num_classes=self.num_classes
                         )
                     elif metric_id == 'contrastiveness':
-                        accumulator.update(features=features)
-                    elif metric_id == 'cub_alignment':
                         accumulator.update(features=features)
                     else:
                         # Try generic update with all available data

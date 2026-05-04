@@ -30,9 +30,9 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torchvision import models as torchvision_models
 
-import dino_qpm.ext_models.dino.utils as utils
-import dino_qpm.ext_models.dino.vision_transformer as vits
-from dino_qpm.ext_models.dino.vision_transformer import DINOHead
+import dino_qpm.backbones.dino.utils as utils
+import dino_qpm.backbones.dino.vision_transformer as vits
+from dino_qpm.backbones.dino.vision_transformer import DINOHead
 
 torchvision_archs = sorted(name for name in torchvision_models.__dict__
     if name.islower() and not name.startswith("__")

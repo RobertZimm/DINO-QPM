@@ -8,10 +8,10 @@ import logging
 import math
 import os
 
-import dino_qpm.ext_models.dinov2.distributed as distributed
-from dino_qpm.ext_models.dinov2.configs import dinov2_default_config
-from dino_qpm.ext_models.dinov2.logging import setup_logging
-from dino_qpm.ext_models.dinov2.utils import utils
+import dino_qpm.backbones.dinov2.distributed as distributed
+from dino_qpm.backbones.dinov2.configs import dinov2_default_config
+from dino_qpm.backbones.dinov2.logging import setup_logging
+from dino_qpm.backbones.dinov2.utils import utils
 from omegaconf import OmegaConf
 
 logger = logging.getLogger("dinov2")
