@@ -840,7 +840,7 @@ def run_cls_comparison(folder: str | Path,
                        show_row_labels: bool | None = None) -> None:
     parser = ArgumentParser()
     parser.add_argument('--dataset', default="CUB2011", type=str, help='dataset name',
-                        choices=["CUB2011", "TravelingBirds", "StanfordCars"])
+                        choices=["CUB2011", "StanfordCars"])
     parser.add_argument('--arch', default="dinov2", type=str, help='Backbone Feature Extractor',
                         choices=["dino", "dinov2"])
     parser.add_argument('--model_type', default="qpm", type=str,
@@ -849,7 +849,7 @@ def run_cls_comparison(folder: str | Path,
                         # 769567, 552629
                         help='seed, used for naming the folder and random processes. Could be useful to set to have multiple finetune runs (e.g. Q-SENN and SLDD) on the same dense model')
     parser.add_argument('--cropGT', default=False, type=bool,
-                        help='Whether to crop CUB/TravelingBirds based on GT Boundaries')
+                        help='Whether to crop CUB based on GT Boundaries')
     parser.add_argument('--n_features', default=50, type=int,
                         help='How many features to select')  # 769567
     parser.add_argument('--n_per_class', default=5, type=int,

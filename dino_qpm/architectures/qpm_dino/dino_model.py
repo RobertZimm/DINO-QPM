@@ -155,135 +155,41 @@ class Dino2Div(nn.Module, FinalLayer):
 
     def run_mlp(self, x: torch.Tensor,
                 mask: torch.Tensor = None):
-        # Split behaviour dependent on architecture
-        # and feature vector type
-        if (self.arch_type == "normal" and (self.feat_vec_type == "normal" or
-                                            self.feat_vec_type == "mean_avg_pooling" or
-                                            self.feat_vec_type == "avg_pooling" or
-                                            self.feat_vec_type == "max_pooling")):
-            if self.seq is not None:
-                if self.residual:
-                    x = self.seq(x) + x
-
-                else:
-                    x = self.seq(x)
-
-            elif self.residual:
-                raise ValueError(
-                    "Residual connection specified but no layers defined.")
-
-            # Feature map: B x #Tokens x #Channels
-            # Feature vector: B x #Channels
-            feat_map_flat = x[:, :-1, :]
-
-            if self.feat_vec_type == "normal":
-                feat_vec = x[:, -1, :]
-
-            elif self.feat_vec_type == "avg_pooling" or \
-                    self.feat_vec_type == "max_pooling":
-                feat_vec = torch.mean(feat_map_flat, dim=1)
-
-            elif self.feat_vec_type == "mean_avg_pooling":
-                feat_vec_orig = x[:, -1, :]
-                feat_vec_patches = torch.mean(feat_map_flat, dim=1)
-                feat_vec = (feat_vec_orig + feat_vec_patches) / 2
-
-            else:
-                raise NotImplementedError(
-                    f"feat_vec_type {self.feat_vec_type} not supported")
-
-            # Batch size: number of samples
-            batch_size = feat_map_flat.shape[0]
-
-            # Quadratic size of feature map
-            map_size = int(sqrt(feat_map_flat.shape[1]))
-
-            # Reshape feature map to have quadratic shape
-            # and not be flat
-            if self.mlp_arch == "linear":
-                feat_map_flat = feat_map_flat.transpose(1, 2)
-                feat_maps = feat_map_flat.reshape(batch_size,
-                                                  self.n_features,
-                                                  map_size,
-                                                  map_size)
-
-            elif self.mlp_arch == "transformer":
-                feat_map_flat = feat_map_flat.transpose(1, 2)
-                feat_maps = feat_map_flat.reshape(batch_size,
-                                                  self.dino_channels,
-                                                  map_size,
-                                                  map_size)
-
-            else:
-                raise NotImplementedError(
-                    f"model_arch {self.mlp_arch} not supported")
-
-        elif self.arch_type == "concat" and (self.feat_vec_type == "avg_pooling" or
-                                             self.feat_vec_type == "max_pooling"):
-            # Concat doubles number of feature channels
-            output_token = x[:, -1, :]
-            feat_map_flat = x[:, :-1, :]
-
-            if mask is not None and self.use_pre_concat_mask:
-                flat_mask = mask.reshape(mask.shape[0], -1).float()
-                feat_map_flat = feat_map_flat * flat_mask.unsqueeze(2)
-
-            feat_rep = output_token.unsqueeze(
-                1).repeat(1, feat_map_flat.shape[1], 1)
-
-            feat_map_flat_concat = torch.concatenate([feat_map_flat,
-                                                      feat_rep],
-                                                     dim=2)
-
-            if mask is not None and self.use_post_concat_mask:
-                flat_mask = mask.reshape(mask.shape[0], -1).float()
-                feat_map_flat_concat = feat_map_flat_concat * \
-                    flat_mask.unsqueeze(2)
-
-            # Apply neural network to input
+        if self.seq is not None:
             if self.residual:
-                feat_map_flat_concat = self.seq(
-                    feat_map_flat_concat) + feat_map_flat_concat
+                x = self.seq(x) + x
             else:
-                feat_map_flat_concat = self.seq(feat_map_flat_concat)
+                x = self.seq(x)
+        elif self.residual:
+            raise ValueError(
+                "Residual connection specified but no layers defined.")
 
-            # Batch size: number of samples
-            batch_size = feat_map_flat_concat.shape[0]
+        # Feature map: B x #Tokens x #Channels (patch tokens only, drop CLS)
+        feat_map_flat = x[:, :-1, :]
 
-            # Quadratic size of feature map
-            map_size = int(sqrt(feat_map_flat_concat.shape[1]))
-
-            n_channels = feat_map_flat_concat.shape[2]
-
-            if self.mlp_arch == "linear":
-                # Reshape feature map to have quadratic shape
-                # and not be flat
-                feat_map_flat_concat = feat_map_flat_concat.transpose(1, 2)
-                feat_maps = feat_map_flat_concat.reshape(batch_size,
-                                                         n_channels,
-                                                         map_size,
-                                                         map_size)
-
-            elif self.mlp_arch == "transformer":
-                feat_map_flat_concat = feat_map_flat_concat.transpose(1, 2)
-                feat_maps = feat_map_flat_concat.reshape(batch_size,
-                                                         self.dino_channels,
-                                                         map_size,
-                                                         map_size)
-
-            if self.feat_vec_type == "avg_pooling":
-                feat_vec = self.avgpool(feat_maps)
-
-            elif self.feat_vec_type == "max_pooling":
-                feat_vec = self.maxpool(feat_maps)
-
-            else:
-                raise NotImplementedError(
-                    f"feat_vec_type {feat_vec} not supported")
-
+        if self.feat_vec_type == "normal":
+            feat_vec = x[:, -1, :]
         else:
-            raise NotImplementedError(f"Combination of arch_type={self.arch_type} and "
-                                      f"feat_vec_type={self.feat_vec_type} not supported")
+            feat_vec = torch.mean(feat_map_flat, dim=1)
+
+        batch_size = feat_map_flat.shape[0]
+        map_size = int(sqrt(feat_map_flat.shape[1]))
+
+        if self.mlp_arch == "linear":
+            feat_map_flat = feat_map_flat.transpose(1, 2)
+            feat_maps = feat_map_flat.reshape(batch_size,
+                                              self.n_features,
+                                              map_size,
+                                              map_size)
+        elif self.mlp_arch == "transformer":
+            feat_map_flat = feat_map_flat.transpose(1, 2)
+            feat_maps = feat_map_flat.reshape(batch_size,
+                                              self.dino_channels,
+                                              map_size,
+                                              map_size)
+        else:
+            raise NotImplementedError(
+                f"model_arch {self.mlp_arch} not supported")
 
         return feat_maps, feat_vec
 
@@ -456,11 +362,8 @@ class Dino2Div(nn.Module, FinalLayer):
         self.mlp_arch = config["model"]["arch"]
         self.backbone_arch = config["model_type"]
 
-        self.feat_vec_type = config["model"]["feat_vec_type"]
-        self.arch_type = config["model"]["arch_type"]
+        self.feat_vec_type = config["model"].get("feat_vec_type", "avg_pooling")
         self.residual = config["model"]["residual"]
-        self.use_pre_concat_mask = config["model"]["use_pre_concat_mask"]
-        self.use_post_concat_mask = config["model"]["use_post_concat_mask"]
         self.random_noise = 0.0
         self.scale_feat_vec = config["model"].get("scale_feat_vec", False)
         self.relu_after_scaling = config["model"].get(
@@ -498,9 +401,6 @@ class Dino2Div(nn.Module, FinalLayer):
         else:
             raise ValueError(f">>> Unknown model type: {model_type}")
 
-        if self.arch_type == "concat":
-            self.dino_channels *= 2
-
         if self.deprecated_notation:
             self.layer_strings = config["model"]["layers"]
             self.last_out_channels = self.dino_channels
@@ -510,9 +410,6 @@ class Dino2Div(nn.Module, FinalLayer):
             self.use_batch_norm = config["model"]["use_batch_norm"]
             self.use_dropout = config["model"]["use_dropout"]
             self.activation_func = config["model"]["activation"]
-
-        self.avgpool = torch.nn.AdaptiveAvgPool2d((1, 1))
-        self.maxpool = torch.nn.AdaptiveMaxPool2d((1, 1))
 
         if config["model"].get("n_prototypes", 0) > 0 and self.proto_method != "pipnet":
             self.n_prototypes = config["model"]["n_prototypes"]

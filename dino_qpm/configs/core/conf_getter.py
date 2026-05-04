@@ -57,7 +57,6 @@ def build_conf_filename(dataset: str = None,
     if mlp is None:
         mlp = general_config.get("mlp", True)
 
-    # For dinov2 with mlp=False, use dinov2_no_mlp.yaml
     if "dino" in arch and not mlp:
         arch = f"{arch}_no_mlp"
 

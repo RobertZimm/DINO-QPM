@@ -21,7 +21,7 @@ def _parse_args(argv: list[str] | None = None):
     parser.add_argument("--mode", default="finetune", choices=["dense", "finetune"],
                         help="Model mode for loading and evaluation")
     parser.add_argument("--eval-mode", nargs="*", default=None,
-                        help="Subset of evaluations. Examples: --eval-mode all OR --eval-mode accuracy correlation")
+                        help="Subset of evaluations. Examples: --eval-mode all OR --eval-mode accuracy class_independence")
     parser.add_argument("--save-features", action="store_true",
                         help="Whether to save extracted feature files during evaluation")
     parser.add_argument("--output-json", default=None, type=str,

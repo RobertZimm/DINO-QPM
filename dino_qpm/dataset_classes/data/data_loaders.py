@@ -56,7 +56,6 @@ class DinoData(Dataset):
         self.ret_img_path = ret_img_path
         self.loader_norm = config["data"].get("loader_norm", False)
         self.drouput_percentage = config["data"].get("dropout", 0)
-        self.feat_vec_type = config["model"].get("feat_vec_type", "normal")
         self.use_norm = config["data"].get("use_norm", True)
         self.layer_num = config["data"].get("layer_num", 0)
         self.dataset_name = config["dataset"]

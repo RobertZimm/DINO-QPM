@@ -95,27 +95,12 @@ model:
   # Apply relu after scaling feature vector
   relu_after_scaling: False
 
-  # Architecture of the model
-  # either normal or concat
-  # normal only has an effect when feat_vec_type is avg_pooling
-  # takes feat_map and averages it to feat_vec
-  # concat takes feat_map and feat_vec and concatenates them
-  # and then averages them to feat_vec
-  arch_type: normal # options: normal, concat
 
-  # type of feature vector to be used
-  # options: normal, avg_pooling, max_pooling
-  # avg_pooling means average pooling
-  # means taking the average pooling from 
-  # the feature map as the feature vector
-  feat_vec_type: avg_pooling # options: normal, avg_pooling, max_pooling, mean_avg_pooling
 
   # what to use a mask for the feature map
   # to filter foreground object (object of interest)
   masking: null # options: segmentations, dino, learn_masking, null
 
-  use_pre_concat_mask: False
-  use_post_concat_mask: False
   
 # Parameters related to the training
 # of the dense model

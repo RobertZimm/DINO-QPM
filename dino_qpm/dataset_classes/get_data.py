@@ -4,10 +4,8 @@ import numpy as np
 import torch
 from dino_qpm.configs.core.architecture_params import dino_supported_datasets
 from dino_qpm.configs.core.dataset_params import normalize_params
-from dino_qpm.dataset_classes.aircraft import FGVCAircraftClass
 from dino_qpm.dataset_classes.cub200 import CUB200Class
 from dino_qpm.dataset_classes.stanfordcars import StanfordCarsClass
-from dino_qpm.dataset_classes.travelingbirds import TravelingBirds
 from dino_qpm.dataset_classes.data.data_loaders import DinoData
 from dino_qpm.architectures.registry import is_vision_foundation_model
 from torchvision.transforms import transforms, TrivialAugmentWide
@@ -23,7 +21,7 @@ def get_data(dataset: str,
     Returns train and test data loaders for the given dataset.
 
     Args:
-    - dataset: str, name of the dataset to load (CUB2011, TravelingBirds, StanfordCars, FGVCAircraft)
+    - dataset: str, name of the dataset to load (CUB2011, StanfordCars)
     - crop: bool, whether to crop the images (default: True)
     - img_size: int, size of the images (default: 224)
     - finetuning_data: bool, whether to use the dataset for finetuning (default: False)
@@ -74,20 +72,6 @@ def get_data(dataset: str,
         test_dataset = CUB200Class(False, test_transform, crop,
                                    with_masks=with_masks, mask_size=mask_size)
 
-    elif dataset == "TravelingBirds":
-        train_transform = get_augmentation(0.1, img_size,
-                                           True, not crop,
-                                           True, True,
-                                           normalize_params["TravelingBirds"])
-
-        test_transform = get_augmentation(0.1, img_size,
-                                          False, not crop,
-                                          True, True,
-                                          normalize_params["TravelingBirds"])
-
-        train_dataset = TravelingBirds(True, train_transform, crop)
-        test_dataset = TravelingBirds(False, test_transform, crop)
-
     elif dataset == "StanfordCars":
         train_transform = get_augmentation(0.1, img_size,
                                            True, True,
@@ -101,20 +85,6 @@ def get_data(dataset: str,
 
         train_dataset = StanfordCarsClass(True, train_transform)
         test_dataset = StanfordCarsClass(False, test_transform)
-
-    elif dataset == "FGVCAircraft":
-        train_transform = get_augmentation(0.1, img_size,
-                                           True, False,
-                                           True, True,
-                                           normalize_params["FGVCAircraft"])
-
-        test_transform = get_augmentation(0.1, img_size,
-                                          False, False,
-                                          True, True,
-                                          normalize_params["FGVCAircraft"])
-
-        train_dataset = FGVCAircraftClass(True, transform=train_transform)
-        test_dataset = FGVCAircraftClass(False, transform=test_transform)
 
     else:
         raise ValueError(f"Dataset {dataset} is currently not supported.")

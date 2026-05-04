@@ -56,7 +56,6 @@ def create_log_dir_path(config: dict,
         base = base / log_dir_prefix
 
     base = base / arch / dataset_key / sldd_mode / model_type
-    # For dinov2 with mlp=False, append no_mlp level
     if arch == "dinov2" and not config.get("mlp", True):
         base = base / "no_mlp"
 
@@ -171,7 +170,7 @@ def init_dense_params(config: dict,
                 f"DINOv2 is not implemented for dataset {dataset}. Currently implemented for: {dino_supported_datasets}")
 
     if config["data"].get("crop", False):
-        assert dataset in ["CUB2011", "TravelingBirds"]
+        assert dataset in ["CUB2011"]
         dataset_key += "_crop"
 
     return (is_rerun,

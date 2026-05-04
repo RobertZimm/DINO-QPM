@@ -189,17 +189,7 @@ Configuration is resolved in two steps:
 1. General config (`dino_qpm/configs/main_training.yaml`)
 2. Model config in `dino_qpm/configs/models` selected by `(sldd_mode, arch[, mlp])`, e.g. `qpm/dinov2.yaml`
 
-Although our primary DINO-QPM configuration only utilises the patch embeddings from the frozen backbone, the codebase supports several alternative strategies. These can be configured via `model.arch_type` and `model.feat_vec_type`, which dictate exactly which features are extracted from the backbone and how they are processed following the MLP.
-
-`model.arch_type`: Specifies whether the embedding of the CLS token returned by the frozen backbone is immediately concatenated with each of the patch embeddings (`concat`) or not (`normal`).
-Note: `concat` is only compatible with `model.feat_vec_type=avg_pooling` and `model.feat_vec_type=max_pooling`.
-
-`model.feat_vec_type`: Specifies what we demand the frozen backbone to return for downstream usage.
-
-- `model.feat_vec_type=normal` uses the embedding of the CLS token for classification; patch embeddings are only used for visualisation purposes.
-- `model.feat_vec_type=mean_avg_pooling`: Both CLS token and patch embeddings are processed by the MLP separately. Afterwards the results are each average-pooled; the feature vector results as the mean of both.
-- `model.feat_vec_type=avg_pooling` derives the adapter feature vector from patch embeddings as an average-pooling over the patch embeddings processed by the MLP (DINO-QPM).
-- `model.feat_vec_type=max_pooling` derives the adapter feature vector from patch embeddings as a max-pooling of the patch embeddings processed by the MLP.
+The default configuration processes patch embeddings through the MLP token-by-token and derives the feature vector by average-pooling over all patch tokens (`model.feat_vec_type=avg_pooling`). An alternative no-MLP baseline (`mlp: false`, config `qpm/dinov2_no_mlp.yaml`) skips the MLP entirely and uses the CLS token as the feature vector (`model.feat_vec_type=normal`).
 
 ### 2. Inference
 
