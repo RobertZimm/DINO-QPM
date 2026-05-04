@@ -1,6 +1,6 @@
 # DINO-QPM: Adapting Visual Foundation Models for Globally Interpretable Image Classification
 
-<!--[![arXiv](https://img.shields.io/badge/<...>.svg)](<placeholder>)-->
+[![arXiv](https://img.shields.io/badge/arXiv-2604.07166-b31b1b.svg)](https://arxiv.org/abs/2604.07166v1)
 <p align="center">
   <img src="res/cover_figure_ink.svg" alt="Pipeline Diagram" width="100%">
 </p>
