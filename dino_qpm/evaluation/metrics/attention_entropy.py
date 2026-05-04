@@ -122,9 +122,6 @@ def compute_spatial_entropy(attention: torch.Tensor,
     Spatial Entropy (Patch-Only): Attention only over patch tokens, re-normalized.
 
     Measures "Spatial Blur" - how distributed the attention is across the image.
-    High spatial entropy in NeCo models indicates the Neighbor Consistency objective
-    is successfully "smearing" attention across the image, explaining why Average
-    Pooling works better for NeCo than standard DINOv2.
 
     Args:
         attention: Full attention matrix (batch, num_heads, seq_len, seq_len)
@@ -447,7 +444,7 @@ class DinoAttentionData(Dataset):
             if self.model_arch == "dinov2":
                 # DINOv2: get_last_self_attention
                 attention = self.backbone_model.get_last_self_attention(img)
-            elif self.model_arch in ["dino", "dinov3"]:
+            elif self.model_arch == "dino":
                 # DINO: get_last_selfattention
                 attention = self.backbone_model.get_last_selfattention(img)
             else:
@@ -611,7 +608,7 @@ def get_attention_from_batch(
         images: Batch of images (B, C, H, W)
         backbone_model: Loaded backbone model
         device: Device to use
-        arch: Architecture type ("dino", "dinov2", "dinov3")
+        arch: Architecture type ("dino", "dinov2")
 
     Returns:
         Attention tensor (B, num_heads, seq_len, seq_len)
@@ -621,7 +618,7 @@ def get_attention_from_batch(
     with torch.no_grad():
         if arch == "dinov2":
             attention = backbone_model.get_last_self_attention(images)
-        elif arch in ["dino", "dinov3"]:
+        elif arch == "dino":
             attention = backbone_model.get_last_selfattention(images)
         else:
             raise ValueError(f"Attention not supported for arch {arch}")
@@ -726,8 +723,8 @@ def run_attention_entropy_experiment(
     Run attention entropy computation for a specific (model_type, arch, dataset) combination.
 
     Args:
-        model_type: Model type (e.g., "base", "large_reg", "neco_small")
-        arch: Architecture (e.g., "dinov2", "dino", "dinov3")
+        model_type: Model type (e.g., "base", "large_reg")
+        arch: Architecture (e.g., "dinov2", "dino")
         dataset: Dataset name (e.g., "CUB2011", "StanfordCars")
         split: "train", "test", or "both" (default: "both")
         save_results: Whether to save results to JSON
@@ -855,8 +852,6 @@ if __name__ == "__main__":
     experiments = [
         {"model_type": "base", "arch": "dinov2", "dataset": "CUB2011"},
         {"model_type": "base_reg", "arch": "dinov2", "dataset": "CUB2011"},
-        {"model_type": "neco_base", "arch": "dinov2", "dataset": "CUB2011"},
-        {"model_type": "neco_base_reg", "arch": "dinov2", "dataset": "CUB2011"},
         {"model_type": "large_reg", "arch": "dinov2", "dataset": "CUB2011"},
         {"model_type": "small_reg", "arch": "dinov2", "dataset": "CUB2011"},
     ]

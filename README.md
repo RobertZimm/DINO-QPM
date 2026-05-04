@@ -93,6 +93,23 @@ Expected dataset folders:
 For `CUB200`, the code expects the standard `CUB_200_2011` substructure (e.g. `images`, `images.txt`, `train_test_split.txt`).
 For `StanfordCars`, it expects dataset artifacts such as `car_devkit` and `cars_train`.
 
+### Model Weights
+
+Pretrained backbone weights are expected under:
+
+- `~/tmp/model_weights/`
+
+The exact filename depends on the selected backbone (`arch` and `model_type`). Examples:
+
+```text
+~/tmp/model_weights/
+├── dinov2_vitl14_pretrain.pth              # DINOv2 large
+├── dinov2_vitb14_reg4_pretrain.pth         # DINOv2 base with registers
+└── dino_vitbase16_pretrain.pth             # DINO base
+```
+
+Weights must be downloaded from the upstream repositories (DINO, DINOv2) and placed in this folder. A missing file raises a `FileNotFoundError` pointing at the expected path.
+
 ### Run the Code
 
 Entry point:

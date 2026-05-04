@@ -299,16 +299,11 @@ def generate_features(folder: str | Path,
                 raise ValueError(
                     f"Invalid return type: {map_type} and feat_vec: {ret_feat_vec}")
 
-        elif arch == "dinov3" or arch == "dino":
+        elif arch == "dino":
             ret = backbone_model(imgs, is_training=True)
 
-            if arch == "dinov3":
-                feat_vecs = ret["x_norm_clstoken"].detach().cpu()
-                feat_maps = ret["x_norm_patchtokens"].detach().cpu()
-
-            else:
-                feat_vecs = ret[:, 0, :].detach().cpu()  # CLS token
-                feat_maps = ret[:, 1:, :].detach().cpu()  # Patch tokens
+            feat_vecs = ret[:, 0, :].detach().cpu()  # CLS token
+            feat_maps = ret[:, 1:, :].detach().cpu()  # Patch tokens
 
             # Iterate over the batch results to save them individually
             for i in range(len(paths_batch)):
@@ -334,7 +329,7 @@ def generate_features(folder: str | Path,
 if __name__ == "__main__":
     BASE_FOLDER = Path.home() / "tmp" / "Datasets" / "dino_data"
 
-    # \in ["base", "base_reg", "neco_base_reg", "large", ...]
+    # \in ["base", "base_reg", "large", ...]
     backbone_type = "base"
     dataset = "StanfordCars"
     img_size = (224, 224)

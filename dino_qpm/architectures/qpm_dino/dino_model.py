@@ -492,7 +492,7 @@ class Dino2Div(nn.Module, FinalLayer):
         elif "large" in model_type:
             self.dino_channels = 1024
 
-        elif "giant" in model_type or "sinder" in model_type:
+        elif "giant" in model_type:
             self.dino_channels = 1536
 
         else:

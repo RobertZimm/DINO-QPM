@@ -1,9 +1,7 @@
-arch: dinov2 # options: dino, dinov2, dinov3, resnet50
+arch: dinov2 # options: dino, dinov2, resnet50
 
 # Available model_types are:
 # small, base, large, giant; also with _reg
-# neco_small, neco_base; also with _reg
-# sinder
 model_type: base_reg
 
 mlp: True # whether to use an mlp on top of the features; only for dinov2

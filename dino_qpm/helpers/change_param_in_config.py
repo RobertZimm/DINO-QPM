@@ -166,7 +166,7 @@ if __name__ == "__main__":
     ]
 
     change_params_in_folder(
-        folder="/home/zimmerro/tmp/dinov3/CUB2011/CVPR_2026/qpm/stacking",
+        folder="/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/qpm/stacking",
         changes=changes,
         recursive=True,
         dry_run=False,

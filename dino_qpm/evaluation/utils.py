@@ -1069,8 +1069,8 @@ def eval_all_runs_with_number(parent_folder: str | Path,
 
 
 if __name__ == "__main__":
-    paths = ["/home/zimmerro/tmp/dinov3/CUB2011/CVPR_2026/qpm/avg_pooling",
-             "/home/zimmerro/tmp/dinov3/CUB2011/CVPR_2026/qpm/stacking"]
+    paths = ["/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/qpm/avg_pooling",
+             "/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/qpm/stacking"]
 
     for path in paths:
         eval_all_runs_with_number(

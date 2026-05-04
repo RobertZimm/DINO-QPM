@@ -4,7 +4,6 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 import yaml
-from dino_qpm.ext_models import sinder
 from dino_qpm.ext_models.dinov2.models.vision_transformer import vit_large, vit_giant2, vit_small, vit_base
 from dino_qpm.architectures.qpm_dino.dino_model import Dino2Div
 from dino_qpm.architectures.model_mapping import get_model
@@ -19,79 +18,10 @@ BACKBONE_ARCHS = {
     "giant": "vitg",
 }
 
-DINOV3_MAPPING = {
-    "large": "dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth",
-    "base": "dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth",
-    "small": "dinov3_vits16_pretrain_lvd1689m-08c60483.pth",
-}
-
 DINO_MAPPING = {
     "base": "dino_vitbase16_pretrain.pth",
     "small": "dino_vitsmall16_pretrain.pth",
 }
-
-
-def load_neco_model(model_type: str,
-                    force_cpu: bool = False,
-                    model_weights_folder: str | Path = Path.home() / "tmp/model_weights") -> tuple[
-        torch.nn.Module, torch.device]:
-    if force_cpu:
-        device = torch.device("cpu")
-        logger.info("Forced to use CPU")
-
-    else:
-        device = torch.device(
-            "cuda") if torch.cuda.is_available() else torch.device("cpu")
-
-        if device.type == "cuda":
-            logger.info("Device: CUDA")
-
-        elif device.type == "cpu":
-            logger.info("Device: CPU")
-
-        else:
-            raise ValueError(f"Unsupported device: {device}")
-
-    model_path = f"dinov2_vit{'s' if 'small' in model_type else 'b'}14{'_reg' if 'reg' in model_type else ''}"
-    dir = str(Path(sinder.__file__).parent)
-    model = torch.hub.load(
-        repo_or_dir=dir,
-        source='local',
-        model=model_path,
-    )
-
-    model = model.to(device=device)
-
-    path_to_checkpoint = model_weights_folder / f"neco_{model_path}.ckpt"
-
-    if not path_to_checkpoint.exists():
-        raise FileNotFoundError(f"Checkpoint file {path_to_checkpoint} does not exist. "
-                                "Please download the model weights from the NECO repository.")
-
-    state_dict = torch.load(path_to_checkpoint, weights_only=True)
-
-    model.load_state_dict(state_dict,
-                          strict=False)
-
-    return model, device
-
-
-def load_sinder_model(force_cpu: bool = False, ) -> tuple[torch.nn.Module, torch.device]:
-    singular_defects_path = Path.home() / "tmp/model_weights/singular_defects.pkl"
-    model_path = Path.home() / "tmp/model_weights/sinder.pth"
-
-    if force_cpu:
-        device_type = "cpu"
-
-    else:
-        device_type = "cuda" if torch.cuda.is_available() else "cpu"
-
-    model, device = sinder.load_model(model_name="dinov2_vitg14",
-                                      checkpoint=model_path,
-                                      device_type=device_type,
-                                      singular_defects_path=singular_defects_path)
-
-    return model, device
 
 
 def load_model(model_type: str = "large",
@@ -101,15 +31,7 @@ def load_model(model_type: str = "large",
                force_cpu: bool = False, ):
     if model_path is None:
         logger.info("Loading model %s", model_type)
-        if model_type == "sinder":
-            model, device = load_sinder_model(force_cpu=force_cpu)
-
-        elif "neco" in model_type:
-            model, device = load_neco_model(model_type=model_type,
-                                            force_cpu=force_cpu)
-
-        else:
-            model, device = load_backbone(model_type, force_cpu, arch=arch)
+        model, device = load_backbone(model_type, force_cpu, arch=arch)
 
     else:
         device = torch.device("cpu")
@@ -307,11 +229,7 @@ def load_backbone(model_type: str,
     if model_type in BACKBONE_ARCHS.keys():
         model_name = f"{arch}_{BACKBONE_ARCHS[model_type]}{num_heads}"
 
-        if arch == "dinov3" and model_type in DINOV3_MAPPING.keys():
-            model_path = Path.home() / \
-                f"tmp/model_weights/{DINOV3_MAPPING[model_type]}"
-
-        elif arch == "dino" and model_type in DINO_MAPPING.keys():
+        if arch == "dino" and model_type in DINO_MAPPING.keys():
             model_path = Path.home() / \
                 f"tmp/model_weights/{DINO_MAPPING[model_type]}"
 
@@ -334,7 +252,7 @@ def load_backbone(model_type: str,
 
     if not model_path.exists():
         raise FileNotFoundError(f"Model path {model_path} does not exist. "
-                                "Please download the model weights from the DINO/DINOv2/DINOv3 repository.")
+                                "Please download the model weights from the DINO/DINOv2 repository.")
 
     # Initialize and load model
     if not force_cpu:
@@ -363,14 +281,6 @@ def load_backbone(model_type: str,
                             weights_only=True)
 
         backbone_model.load_state_dict(states)
-
-    elif arch == "dinov3":
-        backbone_model = torch.hub.load(
-            repo_or_dir="ext_models/dinov3",
-            model=model_name,
-            source="local",
-            weights=str(model_path),
-        )
 
     elif arch == "dino":
         backbone_model = torch.hub.load(
@@ -433,5 +343,5 @@ def load_bb_dinov2(model_type: str, n_regs: int = 0):
 
 if __name__ == "__main__":
     # Example usage
-    model, device = load_model(model_type="neco_base_reg", arch="dinov2")
+    model, device = load_model(model_type="base_reg", arch="dinov2")
     logger.info("Model loaded for smoke test")

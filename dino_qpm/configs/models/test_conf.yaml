@@ -1,4 +1,4 @@
-arch: dinov2 # options: dino, dinov2, dinov3, resnet50
+arch: dinov2 # options: dino, dinov2, resnet50
 
 model_type: small_reg
 

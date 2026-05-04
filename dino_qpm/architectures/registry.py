@@ -28,12 +28,6 @@ ARCH_REGISTRY = {
         is_vision_foundation_model=True,
         supported_finetune_modes=("qpm", "qsenn", "sldd"),
     ),
-    "dinov3": ArchitectureSpec(
-        name="dinov3",
-        family="vit",
-        is_vision_foundation_model=True,
-        supported_finetune_modes=("qpm", "qsenn", "sldd"),
-    ),
 }
 
 
