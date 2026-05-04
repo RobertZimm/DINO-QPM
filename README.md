@@ -77,21 +77,64 @@ By default, data is expected under:
 
 - `~/tmp/Datasets`
 
-At runtime, the entrypoint sets `CCR_DATASETS_ROOT` automatically with a local-first policy:
-
-- Prefer `/local/<user>` when the expected dataset structure is available.
-- Otherwise fall back to `~/tmp/Datasets`.
-
 Expected dataset folders:
 
 ```text
 ~/tmp/Datasets/
-├── CUB200/
-└── StanfordCars/
+├── CUB200
+│   └── CUB_200_2011
+│       ├── attributes
+│       ├── class_sim_gts
+│       ├── images
+│       ├── parts
+│       └── segmentations
+├── StanfordCars
+│   ├── car_devkit
+│   ├── cars_test
+│   └── cars_train
+└── dino_data
+    ├── CUB2011
+    │   └── ...
+    └── StanfordCars
+        └── ...
 ```
 
-For `CUB200`, the code expects the standard `CUB_200_2011` substructure (e.g. `images`, `images.txt`, `train_test_split.txt`).
-For `StanfordCars`, it expects dataset artifacts such as `car_devkit` and `cars_train`.
+#### CUB-200-2011
+
+Download `CUB_200_2011.tgz` from the [official Caltech project page](https://www.vision.caltech.edu/datasets/cub_200_2011/) (mirror: [Caltech Data](https://data.caltech.edu/records/65de6-vp158)) and extract it into `~/tmp/Datasets/CUB200/`:
+
+```bash
+mkdir -p ~/tmp/Datasets/CUB200
+tar -xzf CUB_200_2011.tgz -C ~/tmp/Datasets/CUB200
+```
+
+The archive already contains the expected `CUB_200_2011/` directory with `images/`, `images.txt`, `image_class_labels.txt`, `train_test_split.txt`, `attributes/`, `parts/` and `segmentations/`.
+
+#### Stanford Cars
+
+The dataset is no longer hosted at the original Stanford URLs. The easiest way is to let the [`StanfordCarsClass`](dino_qpm/dataset_classes/stanfordcars.py) loader fetch it from the Kaggle mirror — it will pull and unpack the archive into `~/tmp/Datasets/StanfordCars/` automatically on first use (requires Kaggle credentials in `~/.kaggle/kaggle.json`):
+
+```bash
+pip install kaggle
+# place your kaggle.json under ~/.kaggle/ (chmod 600)
+python -c "from dino_qpm.dataset_classes.stanfordcars import StanfordCarsClass; StanfordCarsClass(train=True, transform=None, download=True)"
+```
+
+Alternatively, download the archives manually (e.g. from the [Kaggle mirror](https://www.kaggle.com/datasets/eduardo4jesus/stanford-cars-dataset)) and arrange them as:
+
+```text
+~/tmp/Datasets/StanfordCars/
+├── car_devkit/
+│   ├── cars_meta.mat
+│   └── cars_train_annos.mat
+├── cars_train/
+├── cars_test/
+└── cars_test_annos_withlabels.mat
+```
+
+The test annotations (`cars_test_annos_withlabels.mat`) are not bundled with the original devkit and must be added separately; one mirror is linked in [stanfordcars.py:70](dino_qpm/dataset_classes/stanfordcars.py#L70).
+
+The `dino_data/` folder shown above is generated automatically the first time precomputed feature maps/vectors are written — it does not need to be downloaded.
 
 ### Model Weights
 
@@ -180,28 +223,13 @@ python main.py evaluate \
 ## Citation
 
 If you use this work, please cite:
-
-```bibtex
-@misc{zimmermann2026dino-qpm,
-  title         = {{DINO-QPM}: Adapting Visual Foundation Models for Globally Interpretable
-Image Classification},
-  author        = {Zimmermann, Robert and Norrenbrock, Thomas and Rosenhahn, Bodo},
-  year          = {2026},
-  eprint        = {...},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.CV},
-  url           = {https://arxiv.org/abs/...}
-}
-```
- 
-Once published at CVPR, please use:
  
 ```bibtex
 @inproceedings{zimmermann2026dino-qpm,
   title     = {{DINO-QPM}: Adapting Visual Foundation Models for Globally Interpretable
 Image Classification},
   author    = {Zimmermann, Robert and Norrenbrock, Thomas and Rosenhahn, Bodo},
-  booktitle = {...},
+  booktitle = {2026 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)},
   year      = {2026}
 }
 ```
