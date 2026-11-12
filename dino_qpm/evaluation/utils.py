@@ -152,9 +152,13 @@ def evaluate(config: dict,
              save_features: bool = False,
              base_log_dir: str | Path = None,
              eval_mode: Union[str, List[str]] = "all",
-             model_path: str | Path = None) -> Dict[str, Any]:
+             model_path: str | Path = None,
+             features_dir: str | Path = None) -> Dict[str, Any]:
     """
     Evaluate a model using the metric registry system.
+
+    Extracted features are written below ``features_dir`` if given, otherwise
+    below ``base_log_dir`` (dense) or ``base_log_dir / "ft"`` (fine-tuned).
 
     eval_mode accepts:
         - "all" / "metrics": all registered metrics
@@ -195,10 +199,14 @@ def evaluate(config: dict,
     if save_features:
         num_classes = dataset_constants[dataset]["num_classes"]
         resolved_seed = int(config.get(
-            "added_params", {}).get("seed", 383534468))
+            "added_params", {}).get("seed", config.get("seed", 383534468)))
+        if features_dir is not None:
+            feature_log_folder = Path(features_dir)
+        else:
+            feature_log_folder = Path(base_log_dir) if mode == "dense" else Path(base_log_dir) / "ft"
         save_feat_loaders(
             seed=resolved_seed,
-            log_folder=base_log_dir if mode == "dense" else base_log_dir / "ft",
+            log_folder=feature_log_folder,
             train_loader=train_loader,
             test_loader=test_loader,
             model=model,

@@ -193,7 +193,7 @@ def visualize_gradcam_segmentation(
     Returns:
         List of matplotlib figures
     """
-    from posttraining.visualisation.model_related.backbone.gradcam_segmentation_viz import (
+    from dino_qpm.posttraining.visualisation.model_related.backbone.gradcam_segmentation_viz import (
         visualize_gradcam_batch
     )
 
@@ -244,7 +244,7 @@ def _load_model_and_data(
     from dino_qpm.dataset_classes.get_data import get_data
     from dino_qpm.evaluation.load_model import load_model
     from dino_qpm.architectures.model_mapping import get_model
-    from dino_qpm.configs.dataset_params import dataset_constants
+    from dino_qpm.configs.core.dataset_params import dataset_constants
     from dino_qpm.architectures.registry import is_vision_foundation_model
 
     folder = Path(folder)
@@ -364,8 +364,8 @@ def run_visualization_pipeline(
     Returns:
         List of matplotlib figures
     """
-    from dino_qpm.configs.dataset_params import normalize_params
-    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.configs.core.dataset_params import normalize_params
+    from dino_qpm.configs.core.conf_getter import get_default_save_dir
     from dino_qpm.helpers.data import select_mask
     from dino_qpm.posttraining.visualisation.model_related.visualize_per_class import get_class_names
 
@@ -605,9 +605,9 @@ def run_border_activation_pipeline(
     Returns:
         List of matplotlib figures for the top n_samples
     """
-    from dino_qpm.configs.conf_getter import get_default_save_dir
+    from dino_qpm.configs.core.conf_getter import get_default_save_dir
     from dino_qpm.helpers.data import select_mask
-    from posttraining.visualisation.model_related.visualize_per_class import get_class_names
+    from dino_qpm.posttraining.visualisation.model_related.visualize_per_class import get_class_names
 
     folder = Path(folder)
 
@@ -722,7 +722,7 @@ def run_border_activation_pipeline(
                 vit_fetch_indices.append(idx)
 
             else:
-                from dino_qpm.configs.dataset_params import normalize_params
+                from dino_qpm.configs.core.dataset_params import normalize_params
 
                 if isinstance(batch_data, (list, tuple)):
                     samples = batch_data[0].unsqueeze(0).to(device)

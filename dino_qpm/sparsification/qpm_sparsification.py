@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import torch.utils.data
 import yaml
+from dino_qpm.architectures.qpm_dino.load_model import load_qpm_feature_selection_and_assignment
 from dino_qpm.saving.utils import json_save
 from dino_qpm.sparsification.qpm.qpm_solving import solve_qp
 from dino_qpm.sparsification.qpm_constants.compute_A import compute_feat_class_corr_matrix
@@ -98,15 +99,7 @@ def compute_qpm_feature_selection_and_assignment(model: torch.nn.Module,
 
     if (os.path.exists(save_folder / "sel.pt")
             and os.path.exists(save_folder / "weight.pt")):
-        print(f">>> Loading Selection and Weight Matrix from {save_folder}\n")
-
-        feature_sel = torch.load(save_folder / "sel.pt",
-                                 map_location=torch.device('cpu'),
-                                 weights_only=False)
-
-        weight = torch.load(save_folder / "weight.pt",
-                            map_location=torch.device('cpu'),
-                            weights_only=False)
+        feature_sel, weight = load_qpm_feature_selection_and_assignment(log_dir)
 
     else:
         if config["finetune"]["no_b"]:
@@ -134,9 +127,10 @@ def compute_qpm_feature_selection_and_assignment(model: torch.nn.Module,
                                                      mode=qpm_mode,
                                                      config=config)
 
-        torch.save(feature_sel,
+        # Plain tensors, so the files load with torch.load(weights_only=True).
+        torch.save(torch.as_tensor(np.asarray(feature_sel), dtype=torch.int64),
                    save_folder / "sel.pt")
-        torch.save(weight,
+        torch.save(torch.as_tensor(weight),
                    save_folder / "weight.pt")
 
         json_save(log_dir / "qpm_sol.json",

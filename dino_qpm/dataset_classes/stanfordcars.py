@@ -2,6 +2,7 @@ import pathlib
 from typing import Callable, Optional, Any, Tuple
 
 import numpy as np
+from dino_qpm.configs.core.runtime_paths import get_datasets_root
 from dino_qpm.dataset_classes.data.download_kaggle import download_stanford_cars
 from PIL import Image
 from torchvision.datasets import VisionDataset
@@ -28,7 +29,7 @@ class StanfordCarsClass(VisionDataset):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again."""
-    root = pathlib.Path.home() / "tmp" / "Datasets" / "StanfordCars"
+    root = get_datasets_root() / "StanfordCars"
 
     def __init__(
             self,

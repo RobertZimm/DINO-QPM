@@ -1,16 +1,16 @@
 import os
+import pickle
 from pathlib import Path
 
+import numpy as np
 import torch
 import torch.nn as nn
-import yaml
 from dino_qpm.backbones.dinov2.models.vision_transformer import vit_large, vit_giant2, vit_small, vit_base
-from dino_qpm.architectures.qpm_dino.dino_model import Dino2Div
 from dino_qpm.architectures.model_mapping import get_model
 from dino_qpm.configs.core.dataset_params import dataset_constants
+from dino_qpm.configs.core.runtime_paths import get_weights_root
+from dino_qpm.helpers.checkpoints import SELECTION_KEY, load_state_dict
 from dino_qpm.helpers.logging_utils import get_logger
-
-_BACKBONES_ROOT = Path(__file__).resolve().parent.parent.parent / "backbones"
 
 logger = get_logger(__name__)
 BACKBONE_ARCHS = {
@@ -20,46 +20,22 @@ BACKBONE_ARCHS = {
     "giant": "vitg",
 }
 
+# DINO (v1) checkpoints keep their official file names.
 DINO_MAPPING = {
     "base": "dino_vitbase16_pretrain.pth",
-    "small": "dino_vitsmall16_pretrain.pth",
+    "small": "dino_deitsmall16_pretrain.pth",
 }
+
+DINOV2_BASE_URL = "https://dl.fbaipublicfiles.com/dinov2"
+DINO_BASE_URL = "https://dl.fbaipublicfiles.com/dino"
 
 
 def load_model(model_type: str = "large",
-               model_path: str | Path = None,
                arch: str = "dinov2",
-               config_path: str = None,
-               force_cpu: bool = False, ):
-    if model_path is None:
-        logger.info("Loading model %s", model_type)
-        model, device = load_backbone(model_type, force_cpu, arch=arch)
-
-    else:
-        device = torch.device("cpu")
-
-        with open(config_path, "r") as f:
-            config = yaml.safe_load(f)
-
-        # Load model
-        model = Dino2Div(config=config)
-
-        feature_sel, weight = load_qpm_feature_selection_and_assignment(
-            log_dir=model_path.parent)
-
-        state_dict = torch.load(model_path,
-                                map_location=device,
-                                weights_only=True)
-
-        model.set_model_sldd(selection=feature_sel,
-                             weight_at_selection=weight,
-                             mean=state_dict["linear.mean"],
-                             std=state_dict["linear.std"],
-                             retrain_normalisation=False)
-
-        model.load_state_dict(state_dict=state_dict, )
-
-    return model, device
+               force_cpu: bool = False):
+    """Load the frozen backbone (DINO or DINOv2) and the device it lives on."""
+    logger.info("Loading backbone %s (%s)", model_type, arch)
+    return load_backbone(model_type, force_cpu, arch=arch)
 
 
 def load_sldd_feature_selection_and_assignment(log_dir: str | Path, n_per_class: int = 5, select_features: int = 50):
@@ -117,28 +93,43 @@ def load_qsenn_feature_selection_and_assignment(log_dir: str | Path, n_features:
     return feature_selection, weight_sparse, bias_sparse, mean, std
 
 
+def _load_selection_file(path: Path):
+    try:
+        return torch.load(path, map_location="cpu", weights_only=True)
+    except pickle.UnpicklingError:
+        # Files written by older versions of the training code hold a pickled
+        # numpy array. Only load such files if you created them yourself.
+        logger.warning("%s was written by an older version of the code; "
+                       "loading it with full unpickling.", path)
+        return torch.load(path, map_location="cpu", weights_only=False)
+
+
 def load_qpm_feature_selection_and_assignment(log_dir: str | Path):
-    save_folder = log_dir / "qpm_constants_saved"
+    save_folder = Path(log_dir) / "qpm_constants_saved"
 
-    if (os.path.exists(save_folder / "sel.pt")
-            and os.path.exists(save_folder / "weight.pt")):
-        print(f"Loading selection and weight matrix from {save_folder}")
-        feature_sel = torch.load(save_folder / "sel.pt",
-                                 map_location=torch.device('cpu'),
-                                 weights_only=False)
+    if not ((save_folder / "sel.pt").exists() and (save_folder / "weight.pt").exists()):
+        raise FileNotFoundError(
+            f"No QPM feature selection found in {save_folder} (expected sel.pt and weight.pt).")
 
-        weight = torch.load(save_folder / "weight.pt",
-                            map_location=torch.device('cpu'),
-                            weights_only=False)
-
-    else:
-        raise Exception("No feature selection found")
+    logger.info("Loading selection and weight matrix from %s", save_folder)
+    feature_sel = np.asarray(_load_selection_file(save_folder / "sel.pt"))
+    weight = torch.as_tensor(_load_selection_file(save_folder / "weight.pt"))
 
     return feature_sel, weight.float()
 
 
+def load_dense_model(config: dict, model_path: Path) -> nn.Module:
+    """Build the dense model described by ``config`` and load its checkpoint."""
+    n_classes = dataset_constants[config["dataset"]]["num_classes"]
+    model = get_model(num_classes=n_classes, config=config)
+    model.load_state_dict(load_state_dict(model_path), strict=True)
+    return model
+
+
 def load_final_model(config: dict,
                      model_path: Path,):
+    """Build the fine-tuned (sparse) model described by ``config`` and load its checkpoint."""
+    model_path = Path(model_path)
     model_type = config.get("sldd_mode", "qpm")
     dataset = config["dataset"]
     n_classes = dataset_constants[dataset]["num_classes"]
@@ -146,17 +137,19 @@ def load_final_model(config: dict,
     n_per_class = config["finetune"]["n_per_class"]
 
     model = get_model(config=config, num_classes=n_classes)
+    state_dict = load_state_dict(model_path)
 
     if "qpm" in model_type:
-        sel_dir = model_path.parent.parent.parent if "projection" in list(
-            model_path.parts) else model_path.parent
-
-        feature_sel, weight = load_qpm_feature_selection_and_assignment(
-            log_dir=sel_dir)
-
-        state_dict = torch.load(model_path,
-                                map_location=torch.device("cpu"),
-                                weights_only=True)
+        selection = state_dict.pop(SELECTION_KEY, None)
+        if selection is not None:
+            # Released checkpoints carry the selection; the weight is linear.layer.weight.
+            feature_sel = selection.numpy()
+            weight = state_dict["linear.layer.weight"].float()
+        else:
+            sel_dir = model_path.parent.parent.parent if "projection" in list(
+                model_path.parts) else model_path.parent
+            feature_sel, weight = load_qpm_feature_selection_and_assignment(
+                log_dir=sel_dir)
 
         model.set_model_sldd(selection=feature_sel,
                              weight_at_selection=weight,
@@ -167,140 +160,110 @@ def load_final_model(config: dict,
     elif model_type == "qsenn":
         feature_sel, weight, bias, mean, std = load_qsenn_feature_selection_and_assignment(
             log_dir=model_path.parent, n_features=n_features, n_per_class=n_per_class)
-
-        state_dict = torch.load(model_path,
-                                map_location=torch.device("cpu"),
-                                weights_only=True)
-
         model.set_model_sldd(feature_sel, weight, mean, std, bias)
 
     elif model_type == "sldd":
         feature_sel, weight, bias, mean, std = load_sldd_feature_selection_and_assignment(
             log_dir=model_path.parent)
-        state_dict = torch.load(model_path,
-                                map_location=torch.device("cpu"),
-                                weights_only=True)
-
         model.set_model_sldd(feature_sel, weight, mean, std, bias)
 
     else:
         raise NotImplementedError(
             f"Loading not implemented for model type {model_type}")
 
-    if "proto_layer.prototypes" in state_dict and hasattr(model, "proto_layer") and model.proto_layer is not None:
-        # Set model.proto_layer.prototypes to have the size according to loaded state dict
-        prots = state_dict["proto_layer.prototypes"]
-        prev_prot = state_dict["proto_layer._previous_prototypes"]
-
-        model.proto_layer.prototypes = nn.Parameter(
-            torch.zeros_like(prots))
-        model.proto_layer.register_buffer(
-            '_previous_prototypes', torch.zeros_like(prev_prot))
-
-    model.load_state_dict(state_dict=state_dict,
-                          strict=False)
+    model.load_state_dict(state_dict=state_dict, strict=True)
 
     return model
+
+
+def _weights_file_and_url(model_type: str, arch: str) -> tuple[str, str]:
+    """Return the expected weights file name and its official download URL."""
+    size = model_type.removesuffix("_reg")
+    if size not in BACKBONE_ARCHS:
+        raise ValueError(
+            f"Invalid model type. Must be one of {list(BACKBONE_ARCHS)} "
+            f"or {[f'{key}_reg' for key in BACKBONE_ARCHS]}")
+
+    if arch == "dinov2":
+        base_name = f"dinov2_{BACKBONE_ARCHS[size]}14"
+        full_name = base_name + ("_reg4" if model_type.endswith("_reg") else "")
+        file_name = f"{full_name}_pretrain.pth"
+        return file_name, f"{DINOV2_BASE_URL}/{base_name}/{file_name}"
+
+    if arch == "dino":
+        if model_type.endswith("_reg"):
+            raise ValueError(
+                f"Models with registers are only implemented for dinov2 but got {arch}")
+        if size not in DINO_MAPPING:
+            raise ValueError(
+                f"Model type {model_type} not supported for DINO; choose one of {list(DINO_MAPPING)}.")
+        file_name = DINO_MAPPING[size]
+        return file_name, f"{DINO_BASE_URL}/{file_name.removesuffix('.pth')}/{file_name}"
+
+    raise NotImplementedError(f"Backbone architecture {arch} not implemented.")
+
+
+def get_backbone_weights(model_type: str, arch: str = "dinov2", download: bool = True) -> Path:
+    """Path of the backbone weights, downloading the official file if it is missing."""
+    file_name, url = _weights_file_and_url(model_type, arch)
+    model_path = get_weights_root() / file_name
+
+    if not model_path.exists():
+        if not download:
+            raise FileNotFoundError(
+                f"Backbone weights {model_path} not found. Download them from {url}.")
+        logger.info("Downloading backbone weights %s to %s", url, model_path)
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        torch.hub.download_url_to_file(url, str(model_path), progress=True)
+
+    return model_path
 
 
 def load_backbone(model_type: str,
                   force_cpu: bool = False,
                   arch: str = "dinov2") -> tuple[nn.Module, torch.device]:
     """
-    Loads a pre-trained backbone model from the dinov2 model zoo.
+    Load a frozen, pre-trained DINO or DINOv2 backbone.
 
     Args:
-    bb_size (str): The size of the backbone model. Should be one of "small", "base", "large", or "giant".
+        model_type: one of "small", "base", "large", "giant", optionally with "_reg"
+            (registers, DINOv2 only).
+        force_cpu: keep the model on the CPU even if CUDA is available.
+        arch: "dinov2" or "dino".
 
     Returns:
-    A tuple containing the loaded backbone model and the device it is loaded on.
+        The backbone model and the device it is loaded on.
     """
-    n_regs = 0
-    if "reg" in model_type:
-        if arch != "dinov2":
-            raise ValueError(
-                f"Models with registers are only implemented for dinov2 architecture but got {arch}")
+    model_path = get_backbone_weights(model_type, arch=arch)
 
-        n_regs = 4
-
-    num_heads = 14 if arch == "dinov2" else 16
-
-    if model_type in BACKBONE_ARCHS.keys():
-        model_name = f"{arch}_{BACKBONE_ARCHS[model_type]}{num_heads}"
-
-        if arch == "dino" and model_type in DINO_MAPPING.keys():
-            model_path = Path.home() / \
-                f"tmp/model_weights/{DINO_MAPPING[model_type]}"
-
-        elif arch == "dinov2":
-            model_path = Path.home() / \
-                f"tmp/model_weights/{model_name}_pretrain.pth"
-
-        else:
-            raise ValueError(
-                f"Model type {model_type} not supported for architecture {arch}.")
-
-    elif model_type.removesuffix("_reg") in BACKBONE_ARCHS.keys():
-        model_name = f"{arch}_{BACKBONE_ARCHS[model_type.removesuffix('_reg')]}{num_heads}{'_reg4' if n_regs > 0 else ''}"
-        model_path = Path.home() / \
-            f"tmp/model_weights/{model_name}_pretrain.pth"
-
-    else:
-        raise ValueError(
-            f"Invalid model type. Must be one of {BACKBONE_ARCHS.keys()} or {[f'{key}_reg' for key in BACKBONE_ARCHS.keys()]}")
-
-    if not model_path.exists():
-        raise FileNotFoundError(f"Model path {model_path} does not exist. "
-                                "Please download the model weights from the DINO/DINOv2 repository.")
-
-    # Initialize and load model
-    if not force_cpu:
-        device = torch.device(
-            "cuda") if torch.cuda.is_available() else torch.device("cpu")
-
-        if device.type == "cuda":
-            logger.info("Device: CUDA")
-
-        elif device.type == "cpu":
-            logger.info("Device: CPU")
-
-        else:
-            raise ValueError(
-                f"Invalid device type. Must be one of CUDA or CPU but got {device.type}")
+    if not force_cpu and torch.cuda.is_available():
+        device = torch.device("cuda")
     else:
         device = torch.device("cpu")
+    logger.info("Backbone device: %s%s", device.type, " (forced)" if force_cpu else "")
 
-        logger.info("Working on CPU (forced)")
+    states = torch.load(model_path, map_location="cpu", weights_only=True)
 
     if arch == "dinov2":
+        n_regs = 4 if model_type.endswith("_reg") else 0
         backbone_model = load_bb_dinov2(model_type=model_type, n_regs=n_regs)
 
-        states = torch.load(model_path,
-                            map_location=torch.device('cpu'),
-                            weights_only=True)
-
-        backbone_model.load_state_dict(states)
-
     elif arch == "dino":
-        backbone_model = torch.hub.load(
-            repo_or_dir=str(_BACKBONES_ROOT / "dino"),
-            model=model_name,
-            source="local",
-            weights=str(model_path),
-        )
+        import dino_qpm.backbones.dino.vision_transformer as dino_vits
+        size = model_type.removesuffix("_reg")
+        backbone_model = dino_vits.__dict__[f"vit_{size}"](patch_size=16, num_classes=0)
 
     else:
         raise NotImplementedError(
             f"Backbone architecture {arch} not implemented.")
+
+    backbone_model.load_state_dict(states, strict=True)
 
     for p in backbone_model.parameters():
         p.requires_grad = False
 
     backbone_model.to(device)
     backbone_model.eval()
-
-    if device.type == "cuda":
-        backbone_model.cuda()
 
     return backbone_model, device
 
@@ -341,6 +304,6 @@ def load_bb_dinov2(model_type: str, n_regs: int = 0):
 
 
 if __name__ == "__main__":
-    # Example usage
+    # Smoke test: load the default backbone.
     model, device = load_model(model_type="base_reg", arch="dinov2")
     logger.info("Model loaded for smoke test")

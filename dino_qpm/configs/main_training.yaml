@@ -16,4 +16,6 @@ load_pre_computed: True
 
 log_dir_prefix: DINO-QPM
 
-default_save_dir: /home/zimmerro/tmp/saveCCR                                  
+# Folder for inference visualisations and other outputs.
+# null = <tmp root>/dino_qpm_results, with tmp root ~/tmp or $DINO_QPM_TMP_ROOT.
+default_save_dir: null

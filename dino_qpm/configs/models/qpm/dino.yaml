@@ -95,6 +95,9 @@ model:
   # Apply relu after scaling feature vector
   relu_after_scaling: False
 
+  # type of feature vector to be used
+  feat_vec_type: avg_pooling # normal = CLS token; avg_pooling = average over patch tokens
+
 
 
   # what to use a mask for the feature map

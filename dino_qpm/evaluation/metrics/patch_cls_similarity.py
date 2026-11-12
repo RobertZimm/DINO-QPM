@@ -8,7 +8,7 @@ from dino_qpm.dataset_classes.get_data import get_data
 from torch.utils.data import ConcatDataset, DataLoader
 import yaml
 from tqdm import tqdm
-from dino_qpm.configs.conf_getter import get_default_save_dir
+from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
 # Define default save directory for results
 DEFAULT_SAVE_DIR = get_default_save_dir()

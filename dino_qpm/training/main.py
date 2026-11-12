@@ -6,8 +6,7 @@ import yaml
 from dino_qpm.helpers.main_utils import (
     create_log_dir, init_dense_params, phase1_dense, init_ft_params, phase2_ft, init_args_and_conf)
 from dino_qpm.evaluation.utils import evaluate
-from dino_qpm.architectures.model_mapping import get_model
-from dino_qpm.architectures.qpm_dino.load_model import load_final_model
+from dino_qpm.architectures.qpm_dino.load_model import load_dense_model, load_final_model
 from dino_qpm.helpers.main_utils import handle_seed
 from dino_qpm.helpers.logging_utils import get_logger
 
@@ -75,14 +74,8 @@ def main(config: dict,
                     log_dir / "Trained_DenseModel.pth")
 
     if os.path.exists(log_dir / "Trained_DenseModel.pth"):
-        model = get_model(num_classes=n_classes,
-                          config=config)
-
-        # Load the trained model state
-        model.load_state_dict(torch.load(log_dir / "Trained_DenseModel.pth",
-                                         weights_only=True,
-                                         map_location=torch.device('cpu')),
-                              strict=False)
+        model = load_dense_model(config=config,
+                                 model_path=log_dir / "Trained_DenseModel.pth")
 
     else:
         raise FileNotFoundError(

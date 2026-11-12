@@ -246,7 +246,8 @@ def gen_sample_paths(num_classes: int = 4,
                      class_idx: int = None,
                      class_indices: list = None,
                      return_img_selection: bool = True):
-    base_folder = Path.home() / "tmp/Datasets/CUB200/CUB_200_2011" / "images"
+    from dino_qpm.configs.core.runtime_paths import get_datasets_root
+    base_folder = get_datasets_root() / "CUB200" / "CUB_200_2011" / "images"
     folder_list = os.listdir(base_folder)
 
     if '.DS_Store' in folder_list:

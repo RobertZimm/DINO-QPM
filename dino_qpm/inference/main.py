@@ -12,6 +12,7 @@ from dino_qpm.architectures.qpm_dino.load_model import load_final_model
 from dino_qpm.architectures.qpm_dino.load_model import load_model as load_backbone_model
 from dino_qpm.architectures.registry import is_vision_foundation_model
 from dino_qpm.configs.core.conf_getter import get_default_save_dir
+from dino_qpm.helpers.checkpoints import CHECKPOINT_SUFFIXES, read_metadata
 from dino_qpm.helpers.data import select_mask
 from dino_qpm.helpers.img_tensor_arrays import prep_img
 from dino_qpm.posttraining.visualisation.model_related.backbone.get_heatmaps import (
@@ -68,9 +69,14 @@ VIZ_DEFAULTS = {
 
 
 def _parse_args(argv: list[str] | None = None):
-    parser = ArgumentParser(description="Inference forward-pass entrypoint")
-    parser.add_argument("--model-path", required=True, type=str,
-                        help="Path to model checkpoint (.pth)")
+    parser = ArgumentParser(description="Predict and visualise images with a fine-tuned DINO-QPM model")
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--model-path", type=str,
+                        help="Path to a fine-tuned model checkpoint (.safetensors or .pth), "
+                             "or a folder holding exactly one checkpoint")
+    source.add_argument("--pretrained", type=str,
+                        help="Released checkpoint to download from the Hugging Face Hub, "
+                             "as dataset[/seed], e.g. cub/2847391 (fine-tuned stage)")
     parser.add_argument("--config-file", default=None, type=str,
                         help="Optional config YAML path. If omitted, nearest config.yaml above model path is used.")
     parser.add_argument("--image-path", default=None, type=str,
@@ -83,13 +89,12 @@ def _parse_args(argv: list[str] | None = None):
                         help="How many top classes to store per image")
     parser.add_argument("--output-json", default=None, type=str,
                         help="Optional output path for prediction results JSON")
-    parser.add_argument("--visualize-feature-maps", action="store_true", default=True,
-                        help="Whether to save feature-map visualizations (enabled by default)")
     parser.add_argument("--no-visualize-feature-maps", dest="visualize_feature_maps",
                         action="store_false",
-                        help="Disable feature-map visualizations")
+                        help="Disable the feature-map visualisations (saved by default)")
     parser.add_argument("--viz-dir", default=None, type=str,
-                        help="Optional output directory for visualizations")
+                        help="Output directory for visualisations "
+                             "(default: <default_save_dir>/inference, see main_training.yaml)")
     parser.add_argument("--viz-max-features", default=8, type=int,
                         help="Maximum number of features to visualize per image")
     return parser.parse_args(argv)
@@ -126,15 +131,16 @@ def _resolve_model_checkpoint(model_path_arg: str) -> Path:
         return model_path
 
     if model_path.is_dir():
-        candidates = sorted(model_path.glob("*.pth"))
+        candidates = sorted(p for suffix in CHECKPOINT_SUFFIXES
+                            for p in model_path.glob(f"*{suffix}"))
         if len(candidates) == 0:
             raise FileNotFoundError(
-                "Model path points to a directory but no .pth checkpoint was found there. "
+                "Model path points to a directory but no checkpoint (.safetensors/.pth) was found there. "
                 f"Directory: {model_path}"
             )
         if len(candidates) > 1:
             raise ValueError(
-                "Model path points to a directory with multiple .pth checkpoints. "
+                "Model path points to a directory with multiple checkpoints. "
                 "Please pass one explicit checkpoint path via --model-path. "
                 f"Found: {[p.name for p in candidates]}"
             )
@@ -519,7 +525,19 @@ def _save_feature_map_visualizations(feature_map: torch.Tensor,
 def inference_cli(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
 
-    model_path = _resolve_model_checkpoint(args.model_path)
+    if args.pretrained is not None:
+        from dino_qpm.hub import download_pretrained, parse_pretrained_spec
+        dataset_key, seed, stage = parse_pretrained_spec(args.pretrained)
+        if stage != "finetune":
+            raise ValueError("Inference supports fine-tuned models only; drop the stage or use 'finetune'.")
+        model_path = download_pretrained(dataset_key, seed, stage)
+        run_name = f"{dataset_key}_seed{seed}"
+    else:
+        model_path = _resolve_model_checkpoint(args.model_path)
+        run_name = "_".join(model_path.parts[-3:-1]) if model_path.stem == "model" else model_path.stem
+
+    if read_metadata(model_path).get("stage", "finetune") != "finetune":
+        raise ValueError("Inference supports fine-tuned models only, but this checkpoint is a dense model.")
 
     config = _resolve_config(model_path=model_path,
                              config_file=args.config_file)
@@ -558,7 +576,7 @@ def inference_cli(argv: list[str] | None = None) -> None:
         viz_root = Path(args.viz_dir) if args.viz_dir else default_viz_root
         viz_root = viz_root / _safe_name(model_descriptor)
         viz_root.mkdir(parents=True, exist_ok=True)
-        image_output_dir = viz_root / _safe_name(model_path.stem)
+        image_output_dir = viz_root / _safe_name(run_name)
         image_output_dir.mkdir(parents=True, exist_ok=True)
 
     if args.output_json:
@@ -566,7 +584,7 @@ def inference_cli(argv: list[str] | None = None) -> None:
     elif image_output_dir is not None:
         output_json = image_output_dir / "predictions_inference.json"
     else:
-        output_json = model_path.parent / "predictions_inference.json"
+        output_json = Path.cwd() / "predictions_inference.json"
 
     predictions = []
 

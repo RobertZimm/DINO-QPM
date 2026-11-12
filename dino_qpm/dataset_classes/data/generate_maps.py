@@ -4,6 +4,7 @@ from pathlib import Path
 
 import torch.nn as nn
 import torchvision.transforms as tt
+from dino_qpm.configs.core.runtime_paths import get_datasets_root
 from dino_qpm.helpers.file_system import extract_output_dir, read_filenames
 from dino_qpm.helpers.img_tensor_arrays import prep_img
 from dino_qpm.helpers.mask_functions import *
@@ -327,7 +328,7 @@ def generate_features(folder: str | Path,
 
 
 if __name__ == "__main__":
-    BASE_FOLDER = Path.home() / "tmp" / "Datasets" / "dino_data"
+    BASE_FOLDER = get_datasets_root() / "dino_data"
 
     # \in ["base", "base_reg", "large", ...]
     backbone_type = "base"
@@ -343,14 +344,14 @@ if __name__ == "__main__":
     print("Saving in ", folder)
 
     if dataset == "CUB2011":
-        cub_path = Path.home() / "tmp" / "Datasets" / "CUB200" / "CUB_200_2011"
+        cub_path = get_datasets_root() / "CUB200" / "CUB_200_2011"
         filenames = read_filenames(cub_path / "images.txt")
 
         img_paths = [str(cub_path / "images" / filename)
                      for filename in filenames]
 
     elif dataset == "StanfordCars":
-        sc_path = Path.home() / "tmp" / "Datasets" / "StanfordCars"
+        sc_path = get_datasets_root() / "StanfordCars"
         img_paths = []
 
         for mode in ["train", "test"]:

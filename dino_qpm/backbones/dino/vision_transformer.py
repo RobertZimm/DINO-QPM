@@ -241,6 +241,43 @@ class VisionTransformer(nn.Module):
                 # return attention of the last block
                 return blk(x, return_attention=True)
 
+    # Added for DINO-QPM: same interface as the DINOv2 backbone
+    # (dino_qpm/backbones/dinov2/models/vision_transformer.py).
+    def get_feat_maps_and_vecs(self, x, masks=None, use_norm: bool = True, max_layer_num: int = 1):
+        x = self.prepare_tokens(x)
+        maps = []
+        feat_vecs = []
+
+        for i, blk in enumerate(self.blocks):
+            x = blk(x)
+
+            if i >= len(self.blocks) - max_layer_num - 1:
+                out = self.norm(x) if use_norm else x
+                maps.append(out[:, 1:])
+                feat_vecs.append(self.head(out[:, 0]))
+
+        return maps, feat_vecs
+
+    def get_feat_maps(self, x, masks=None, use_norm: bool = True, max_layer_num: int = 1):
+        x = self.prepare_tokens(x)
+        maps = []
+
+        for i, blk in enumerate(self.blocks):
+            x = blk(x)
+
+            if i >= len(self.blocks) - max_layer_num - 1:
+                out = self.norm(x) if use_norm else x
+                prefix = "x_norm_" if use_norm else "x_"
+                maps.append({
+                    f"{prefix}clstoken": out[:, 0],
+                    f"{prefix}regtokens": out[:, 1:1],
+                    f"{prefix}patchtokens": out[:, 1:],
+                    "x_prenorm": x,
+                    "masks": masks,
+                })
+
+        return maps
+
     def get_intermediate_layers(self, x, n=1):
         x = self.prepare_tokens(x)
         # we return the output tokens from the `n` last blocks

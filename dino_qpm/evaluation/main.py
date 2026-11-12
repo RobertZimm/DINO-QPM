@@ -4,28 +4,31 @@ from pathlib import Path
 import torch
 import yaml
 
-from dino_qpm.architectures.model_mapping import get_model
-from dino_qpm.architectures.qpm_dino.load_model import load_final_model
-from dino_qpm.configs.dataset_params import dataset_constants
+from dino_qpm.architectures.qpm_dino.load_model import load_dense_model, load_final_model
 from dino_qpm.evaluation.utils import evaluate
+from dino_qpm.helpers.checkpoints import read_metadata
 
 
 def _parse_args(argv: list[str] | None = None):
-    parser = ArgumentParser(description="Evaluation-only entrypoint")
-    parser.add_argument("--model-path", required=True, type=str,
-                        help="Path to model checkpoint (.pth)")
+    parser = ArgumentParser(description="Evaluate a trained or released DINO-QPM model")
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--model-path", type=str,
+                        help="Path to a model checkpoint (.safetensors or .pth)")
+    source.add_argument("--pretrained", type=str,
+                        help="Released checkpoint to download from the Hugging Face Hub, "
+                             "as dataset[/seed[/stage]], e.g. cub/2847391/finetune")
     parser.add_argument("--config-file", default=None, type=str,
-                        help="Optional config YAML path. If omitted, nearest config.yaml above model path is used.")
+                        help="Optional config YAML path. If omitted, the nearest config.yaml above the model path is used.")
     parser.add_argument("--dataset", default=None, type=str,
                         help="Optional dataset override")
-    parser.add_argument("--mode", default="finetune", choices=["dense", "finetune"],
-                        help="Model mode for loading and evaluation")
+    parser.add_argument("--mode", default=None, choices=["dense", "finetune"],
+                        help="Model stage. Defaults to the stage stored in a released checkpoint, else finetune.")
     parser.add_argument("--eval-mode", nargs="*", default=None,
                         help="Subset of evaluations. Examples: --eval-mode all OR --eval-mode accuracy class_independence")
     parser.add_argument("--save-features", action="store_true",
-                        help="Whether to save extracted feature files during evaluation")
+                        help="Save the extracted features next to the checkpoint")
     parser.add_argument("--output-json", default=None, type=str,
-                        help="Optional output path for evaluation results JSON")
+                        help="Output path for the results JSON (default: Results_EvalOnly.json next to the checkpoint)")
     return parser.parse_args(argv)
 
 
@@ -62,24 +65,22 @@ def _parse_eval_mode(eval_mode_args: list[str] | None):
 def _load_model_for_eval(config: dict, model_path: Path, mode: str) -> torch.nn.Module:
     if mode == "finetune":
         return load_final_model(config=config, model_path=model_path)
-
-    # Dense mode: load architecture and checkpoint directly.
-    dataset = config["dataset"]
-    n_classes = dataset_constants[dataset]["num_classes"]
-    model = get_model(num_classes=n_classes, config=config)
-    state_dict = torch.load(model_path,
-                            map_location=torch.device("cpu"),
-                            weights_only=True)
-    model.load_state_dict(state_dict, strict=False)
-    return model
+    return load_dense_model(config=config, model_path=model_path)
 
 
 def evaluation_cli(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
 
-    model_path = Path(args.model_path)
+    if args.pretrained is not None:
+        from dino_qpm.hub import download_pretrained, parse_pretrained_spec
+        dataset_key, seed, stage = parse_pretrained_spec(args.pretrained)
+        model_path = download_pretrained(dataset_key, seed, stage)
+    else:
+        model_path = Path(args.model_path).expanduser()
     if not model_path.exists():
         raise FileNotFoundError(f"Model checkpoint not found: {model_path}")
+
+    mode = args.mode or read_metadata(model_path).get("stage", "finetune")
 
     config = _resolve_config(model_path=model_path,
                              config_file=args.config_file)
@@ -89,24 +90,32 @@ def evaluation_cli(argv: list[str] | None = None) -> None:
 
     model = _load_model_for_eval(config=config,
                                  model_path=model_path,
-                                 mode=args.mode)
+                                 mode=mode)
 
     dataset = config["dataset"]
     crop = config["data"].get("crop", False)
     eval_mode = _parse_eval_mode(args.eval_mode)
-    output_json = Path(
-        args.output_json) if args.output_json else model_path.parent / "Results_EvalOnly.json"
+    if args.pretrained is not None:
+        # Keep results and features out of the download cache.
+        tag = f"{dataset_key}_{seed}_{stage}"
+        output_json = Path(args.output_json) if args.output_json else Path.cwd() / f"Results_{tag}.json"
+        features_dir = output_json.parent / f"features_{tag}"
+    else:
+        output_json = Path(args.output_json) if args.output_json else model_path.parent / "Results_EvalOnly.json"
+        features_dir = model_path.parent
 
     evaluate(config=config,
              dataset=dataset,
-             mode=args.mode,
+             mode=mode,
              crop=crop,
              model=model,
              save_path=output_json,
              save_features=args.save_features,
              base_log_dir=model_path.parent,
              eval_mode=eval_mode,
-             model_path=model_path)
+             model_path=model_path,
+             features_dir=features_dir)
+    print(f"Saved evaluation results to {output_json}")
 
 
 if __name__ == "__main__":

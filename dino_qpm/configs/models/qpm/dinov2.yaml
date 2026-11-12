@@ -98,6 +98,9 @@ model:
   # Apply relu after scaling feature vector
   relu_after_scaling: False
 
+  # type of feature vector to be used
+  feat_vec_type: avg_pooling # normal = CLS token; avg_pooling = average over patch tokens
+
 
 
   # what to use a mask for the feature map
@@ -111,7 +114,7 @@ dense:
   # params means hyperparameters like batch_size, epochs; loss means beta and gamma
 
   # Dense Training Params
-  epochs: 25
+  epochs: 40
   weight_decay: 0.0007
   batch_size: 32 # originally for batch_norm=True equal to 32
   start_lr: 0.001
@@ -170,7 +173,7 @@ finetune:
   # params means hyperparameters like batch_size, epochs; loss means beta and gamma
 
   # Finetune Training Params
-  epochs: 25
+  epochs: 50
   start_lr: 0.005
   weight_decay: 0.0008
   batch_size: 16

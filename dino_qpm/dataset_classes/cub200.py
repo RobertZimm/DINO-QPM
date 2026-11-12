@@ -1,6 +1,6 @@
 # Dataset should lie under /root/
-# root is currently set to ~/tmp/Datasets/CUB200
-# If cropped iamges, like for PIP-Net, ProtoPool, etc. are used, then the crop_root should be set to a folder containing the
+# root defaults to ~/tmp/Datasets/CUB200 (see dino_qpm/configs/core/runtime_paths.py)
+# If cropped images, like for PIP-Net, ProtoPool, etc. are used, then the crop_root should be set to a folder containing the
 # cropped images in the expected structure, obtained by following ProtoTree's instructions.
 # https://github.com/M-Nauta/ProtoTree/blob/main/README.md#preprocessing-cub
 import json
@@ -12,14 +12,15 @@ import numpy as np
 import pandas as pd
 import torch
 from PIL import Image
+from dino_qpm.configs.core.runtime_paths import get_datasets_root
 from dino_qpm.dataset_classes.utils import txt_load
 from torch.utils.data import Dataset
 from torchvision.datasets.folder import default_loader
 
 
 class CUB200Class(Dataset):
-    root = Path.home() / "tmp/Datasets/CUB200"
-    crop_root = Path.home() / "tmp/Datasets/PPCUB200"
+    root = get_datasets_root() / "CUB200"
+    crop_root = get_datasets_root() / "PPCUB200"
     name = "CUB2011"
     base_folder = 'CUB_200_2011/images'
 
