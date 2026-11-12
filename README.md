@@ -78,11 +78,26 @@ The QPM feature selection solves a quadratic program with [Gurobi](https://www.g
 
 We release DINO-QPM checkpoints for CUB-200-2011 and Stanford Cars, 5 seeds each, as the dense model and the fine-tuned (sparse, interpretable) model: 20 checkpoints in total.
 
-> **These are reproductions, not the checkpoints behind the paper's tables.** The original checkpoints were not kept. The released models were retrained with the same architecture, losses and hyperparameters, but with a shorter schedule: 10 dense epochs and 25 fine-tuning epochs with fine-tuning batch size 16 (paper: 40 and 50 epochs, batch size 32). They were trained with our internal training code, a successor of this repository; their accuracy was re-computed with this repository and matches the values logged at training time exactly.
+> **These are reproductions, not the checkpoints behind the paper's tables.** The original checkpoints were not kept. The released models were retrained with the same architecture, losses and hyperparameters, but with a shorter schedule: 10 dense epochs and 25 fine-tuning epochs with fine-tuning batch size 16 (paper: 40 and 50 epochs, batch size 32), and over 5 seeds (the paper's DINO-QPM numbers are over 15 seeds). They were trained with our internal training code, a successor of this repository; their accuracy was re-computed with this repository and matches the values logged at training time exactly.
 
 Test accuracy (%) of the released checkpoints, mean ± standard deviation over 5 seeds:
 
-RESULTS_TABLE_PLACEHOLDER
+| Model | CUB-200-2011 | Stanford Cars |
+|---|---|---|
+| DINO-QPM (fine-tuned), released | 88.4 ± 0.3 | 93.7 ± 0.1 |
+| DINO-QPM (fine-tuned), paper | 88.3 ± 0.3 | 94.0 ± 0.2 |
+| Dense model, released | 80.7 ± 0.3 | 91.7 ± 0.2 |
+| Dense model, paper | 78.1 ± 0.3 | 92.9 ± 0.1 |
+
+Per seed:
+
+| Seed | CUB dense | CUB fine-tuned | Cars dense | Cars fine-tuned |
+|---|---|---|---|---|
+| 2847391 | 81.0 | 88.3 | 91.8 | 93.7 |
+| 3748291 | 80.9 | 88.9 | 91.4 | 93.7 |
+| 5647382 | 80.2 | 88.1 | 91.6 | 93.8 |
+| 6190452 | 80.6 | 88.4 | 91.9 | 93.6 |
+| 9182736 | 80.6 | 88.1 | 91.6 | 93.4 |
 
 The checkpoints are hosted on the [Hugging Face Hub](https://huggingface.co/HF_REPO_PLACEHOLDER) and archived on [Zenodo](https://doi.org/ZENODO_DOI_PLACEHOLDER) (DOI `ZENODO_DOI_PLACEHOLDER`). Each checkpoint is a `model.safetensors` file (the interpretability adapter on top of the frozen backbone; ~44 MB) with the `config.yaml` it was trained with. The fine-tuned checkpoints also store the QPM feature selection, so no other files are needed. The frozen DINOv2 ViT-B/14 (with registers) backbone is downloaded automatically from Meta on first use.
 

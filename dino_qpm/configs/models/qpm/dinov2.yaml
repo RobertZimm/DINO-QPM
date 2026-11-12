@@ -176,7 +176,7 @@ finetune:
   epochs: 50
   start_lr: 0.005
   weight_decay: 0.0008
-  batch_size: 16
+  batch_size: 32
 
   # droupout for final layer in finetune Training
   dropout: 0

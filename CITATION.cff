@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this code or the released models, please cite the paper."
+title: "DINO-QPM"
+type: software
+license: Apache-2.0
+repository-code: "https://github.com/RobertZimm/DINO-QPM"
+authors:
+  - family-names: Zimmermann
+    given-names: Robert
+  - family-names: Norrenbrock
+    given-names: Thomas
+  - family-names: Rosenhahn
+    given-names: Bodo
+preferred-citation:
+  type: conference-paper
+  title: "DINO-QPM: Adapting Visual Foundation Models for Globally Interpretable Image Classification"
+  authors:
+    - family-names: Zimmermann
+      given-names: Robert
+    - family-names: Norrenbrock
+      given-names: Thomas
+    - family-names: Rosenhahn
+      given-names: Bodo
+  collection-title: "2026 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)"
+  year: 2026
+  identifiers:
+    - type: other
+      value: "arXiv:2604.07166"
