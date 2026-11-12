@@ -756,13 +756,17 @@ def eval_all_runs_with_number(parent_folder: str | Path,
 
 
 if __name__ == "__main__":
-    paths = ["/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/qpm/avg_pooling",
-             "/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/qpm/stacking"]
+    import argparse
 
-    for path in paths:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("parent_folders", type=str, nargs="+", help="Folders holding the runs to evaluate")
+    parser.add_argument("--run-number", type=int, default=0)
+    args = parser.parse_args()
+
+    for path in args.parent_folders:
         eval_all_runs_with_number(
             parent_folder=path,
-            run_number=0,  # Set to specific run number if needed
+            run_number=args.run_number,
             eval_mode="all",
             skip_existing=False,
             dense=True,

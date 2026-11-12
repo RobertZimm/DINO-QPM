@@ -341,14 +341,17 @@ def run_per_class_visualization(
 
 
 if __name__ == "__main__":
-    folder = Path(
-        "/home/zimmerro/tmp/dinov2/CUB2011/Masterarbeit_Experiments/"
-        "MAS1-model_type-approach/1792713_8/ft"
-    )
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("folder", type=str, help="Run folder of a fine-tuned model (the ft/ folder)")
+    parser.add_argument("--classes", type=int, nargs="*", default=[0, 1, 2],
+                        help="Class indices to visualise")
+    args = parser.parse_args()
 
     run_per_class_visualization(
-        folder=folder,
-        class_subset=[0, 1, 2],  # Only visualize first 3 classes for testing
+        folder=Path(args.folder),
+        class_subset=args.classes,
         use_gamma=False,
         interpolation_mode="nearest",
     )

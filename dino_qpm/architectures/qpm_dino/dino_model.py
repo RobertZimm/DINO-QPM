@@ -467,12 +467,3 @@ def extract_in_out(text: str):
         return first_arg, second_arg
     else:
         raise ValueError(f"No pattern found in text: {text}")
-
-
-if __name__ == '__main__':
-    config_path = "../../configs/dinov2.yaml"
-
-    with open(config_path, "r") as f:
-        config = yaml.safe_load(f)
-
-    model = Dino2Div(config=config)

@@ -161,13 +161,21 @@ def change_params_in_folders(
 
 
 if __name__ == "__main__":
-    changes = [
-        ("data.patch_size", 16),
-    ]
+    import argparse
+    import yaml as _yaml
+
+    parser = argparse.ArgumentParser(
+        description="Change parameters in all config.yaml files below a folder.")
+    parser.add_argument("folder", type=str)
+    parser.add_argument("--set", nargs=2, action="append", metavar=("KEY", "VALUE"), required=True,
+                        help="Dotted key and YAML value, e.g. --set data.patch_size 16")
+    parser.add_argument("--no-recursive", dest="recursive", action="store_false")
+    parser.add_argument("--apply", action="store_true", help="Write the changes (default: dry run)")
+    args = parser.parse_args()
 
     change_params_in_folder(
-        folder="/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/qpm/stacking",
-        changes=changes,
-        recursive=True,
-        dry_run=False,
+        folder=args.folder,
+        changes=[(k, _yaml.safe_load(v)) for k, v in args.set],
+        recursive=args.recursive,
+        dry_run=not args.apply,
     )

@@ -821,11 +821,11 @@ def get_prototype_training_logs(
 
 
 if __name__ == "__main__":
-    # Example usage
-    log_dir = Path.home() / "tmp/dinov2" / "Fitzpatrick17k" / \
-        "Study1-Split_Method/1470223_9/ft"
-    mode = "finetune"
-    logger = TrainingLogger(log_dir, mode)
+    import argparse
 
-    logger.visualize_training(save_plots=True)
-    # logger.plot_single_metric("Acc", save_plot=False, show_plot=True)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("log_dir", type=str, help="Run folder with the training logs")
+    parser.add_argument("--mode", choices=["dense", "finetune"], default="finetune")
+    args = parser.parse_args()
+
+    TrainingLogger(Path(args.log_dir), args.mode).visualize_training(save_plots=True)

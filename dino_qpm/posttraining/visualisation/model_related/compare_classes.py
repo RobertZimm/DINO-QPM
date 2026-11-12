@@ -930,19 +930,20 @@ def run_cls_comparison(folder: str | Path,
 
 
 if __name__ == "__main__":
-    folder = Path(
-        # "/home/zimmerro/tmp/dinov2/CUB2011/Masterarbeit_Experiments/MAS1-model_type-approach/1792712_10/ft"
-        # "/home/zimmerro/tmp/dinov2/StanfordCars/CVPR_2026/1-N_f_star-N_f_c/1840942_17/ft"
-        "/home/zimmerro/tmp/dinov2/CUB2011/Masterarbeit_Experiments/"
-        "MAS1-model_type-approach/1792713_10/ft")
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Compare the features of class pairs")
+    parser.add_argument("folder", type=str, help="Fine-tuned run folder (ft/)")
+    parser.add_argument("--pair", type=int, nargs=2, action="append", default=None,
+                        help="Class pair to compare (repeatable), default 188 190")
+    args = parser.parse_args()
+    folder = Path(args.folder)
 
     run_cls_comparison(folder=folder,
                        save=True,
                        vis_per_pair=3,
                        use_ft_indices=True,
-                       pairs=[
-                           (188, 190),
-                       ],
+                       pairs=[tuple(p) for p in args.pair] if args.pair else [(188, 190)],
                        fontsizes={
                            # column titles (feature/prototype numbers)
                            "feature_indices": 15,

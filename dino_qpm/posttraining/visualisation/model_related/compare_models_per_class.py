@@ -397,19 +397,18 @@ def run_model_comparison(
 
 
 if __name__ == "__main__":
-    # Example: compare two model variants
-    base = Path("/home/zimmerro/tmp/dinov2/CUB2011/Masterarbeit_Experiments/")
-    folders = [
-        base / "MAS5-losses/1795255_18/ft",
-        base / "MAS1-model_type-approach/1792713_10/ft",
-    ]
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("folders", type=str, nargs="+", help="Fine-tuned run folders (ft/) to compare")
+    parser.add_argument("--names", type=str, nargs="*", default=None, help="Display name per model")
+    parser.add_argument("--classes", type=int, nargs="*", default=[33], help="Class indices to show")
+    args = parser.parse_args()
 
     run_model_comparison(
-        folders=folders,
-        # Custom names optional
-        model_names=[r"w/o $\mathcal{L}_{\text{L1-FM}}$",
-                     r"$\mathcal{L}_{\text{L1-FM}}$"],
-        class_subset=[33],
+        folders=[Path(f) for f in args.folders],
+        model_names=args.names,
+        class_subset=args.classes,
         use_gamma=False,
         norm_across_images=True,
         thinning=0.5,

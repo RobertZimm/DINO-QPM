@@ -2251,12 +2251,15 @@ def run_auto_discovery(
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    import argparse
     from dino_qpm.configs.core.conf_getter import get_default_save_dir
 
+    parser = argparse.ArgumentParser(description="Compare models found in an experiment folder")
+    parser.add_argument("experiment_dir", type=str, help="Folder that holds the runs to compare")
+    args = parser.parse_args()
+
     run_auto_discovery(
-        experiment_dir=Path(
-            "/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/1-N_f_star-N_f_c"
-        ),
+        experiment_dir=Path(args.experiment_dir),
         run_suffix="_2",
         max_pairs_per_model=None,
         classification_filters=("a_correct", "wrong"),

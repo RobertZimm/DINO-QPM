@@ -319,8 +319,3 @@ def extract_output_dir(img_path: str | Path, folder: str | Path) -> Path:
 
     # Concatenate folder name and image name without extension and return it
     return folder / folder_name / image_name_without_ext
-
-
-if __name__ == "__main__":
-    pth = "/home/robert/tmp/dinov2/CUB2011/normal/hp_test/829188_28/ft"
-    print(find_file_in_hierarchy(pth, "Trained_DenseModel.pth"))

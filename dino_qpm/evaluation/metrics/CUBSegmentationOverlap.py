@@ -880,15 +880,18 @@ def run_segmentation_visualization(
 
 
 if __name__ == "__main__":
-    # --- Example: finetune model ---
-    folder = Path(
-        "/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/qpm/linear_probe/1858406_0")
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("folder", type=str, help="Run folder of a dense or fine-tuned (ft/) model")
+    parser.add_argument("--n-samples", type=int, default=10)
+    args = parser.parse_args()
 
     run_segmentation_visualization(
-        folder=folder,
+        folder=Path(args.folder),
         mode="default",
-        # model_mode auto-detected from path (ft/ → finetune, else dense)
-        n_samples=10,
+        # model_mode auto-detected from path (ft/ -> finetune, else dense)
+        n_samples=args.n_samples,
         grayscale_background=False,
         heatmap_scale=0.3,
         heatmap_threshold=1e-8,
