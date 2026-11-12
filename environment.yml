@@ -209,7 +209,7 @@ dependencies:
       - importlib-resources==6.5.2
       - iniconfig==2.3.0
       - joblib==1.5.2
-      - kaggle==1.7.4.5
+      - kagglehub==1.0.2
       - kaleido==1.2.0
       - kiwisolver==1.4.9
       - lightning-utilities==0.15.2

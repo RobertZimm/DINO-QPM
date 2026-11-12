@@ -112,15 +112,13 @@ The archive already contains the expected `CUB_200_2011/` directory with `images
 
 #### Stanford Cars
 
-The dataset is no longer hosted at the original Stanford URLs. The easiest way is to let the [`StanfordCarsClass`](dino_qpm/dataset_classes/stanfordcars.py) loader fetch it from the Kaggle mirror — it will pull and unpack the archive into `~/tmp/Datasets/StanfordCars/` automatically on first use (requires Kaggle credentials in `~/.kaggle/kaggle.json`):
+The dataset is no longer hosted at the original Stanford URLs. The [`StanfordCarsClass`](dino_qpm/dataset_classes/stanfordcars.py) loader downloads it automatically on first use from the public [Kaggle mirror](https://www.kaggle.com/datasets/eduardo4jesus/stanford-cars-dataset) via `kagglehub` (about 1.8 GB). No Kaggle account or API key is needed. The labelled test annotations (`cars_test_annos_withlabels.mat`), which the Kaggle archive lacks, are fetched separately and checked against the checksum of the original Stanford file. To download in advance:
 
 ```bash
-pip install kaggle
-# place your kaggle.json under ~/.kaggle/ (chmod 600)
-python -c "from dino_qpm.dataset_classes.stanfordcars import StanfordCarsClass; StanfordCarsClass(train=True, transform=None, download=True)"
+python -c "from dino_qpm.dataset_classes.stanfordcars import StanfordCarsClass; StanfordCarsClass(train=True)"
 ```
 
-Alternatively, download the archives manually (e.g. from the [Kaggle mirror](https://www.kaggle.com/datasets/eduardo4jesus/stanford-cars-dataset)) and arrange them as:
+Alternatively, download the archives manually and arrange them as:
 
 ```text
 ~/tmp/Datasets/StanfordCars/
@@ -132,7 +130,7 @@ Alternatively, download the archives manually (e.g. from the [Kaggle mirror](htt
 └── cars_test_annos_withlabels.mat
 ```
 
-The test annotations (`cars_test_annos_withlabels.mat`) are not bundled with the original devkit and must be added separately; one mirror is linked in [stanfordcars.py:70](dino_qpm/dataset_classes/stanfordcars.py#L70).
+For a manual setup, the test annotations (`cars_test_annos_withlabels.mat`) are not bundled with the devkit and must be added separately; the download URL is in [download_kaggle.py](dino_qpm/dataset_classes/data/download_kaggle.py).
 
 The `dino_data/` folder shown above is generated automatically the first time precomputed feature maps/vectors are written — it does not need to be downloaded.
 

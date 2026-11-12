@@ -1,12 +1,10 @@
-import os.path
 import pathlib
 from typing import Callable, Optional, Any, Tuple
 
 import numpy as np
-from dino_qpm.dataset_classes.data.download_kaggle import download_and_unzip_kaggle_dataset
+from dino_qpm.dataset_classes.data.download_kaggle import download_stanford_cars
 from PIL import Image
 from torchvision.datasets import VisionDataset
-from torchvision.datasets.utils import download_and_extract_archive, download_url
 
 
 class StanfordCarsClass(VisionDataset):
@@ -60,15 +58,7 @@ class StanfordCarsClass(VisionDataset):
             self._images_base_path = self._base_folder / "cars_test"
 
         if download:
-            download_and_unzip_kaggle_dataset(dataset_slug="eduardo4jesus/stanford-cars-dataset",
-                                              download_path=self._base_folder,
-                                              expected_check_item="car_devkit")
-
-            if not os.path.exists(self._annotations_mat_path):
-                print(
-                    "WARNING: By default the test annotations are not available. They have to be transferred manually; "
-                    "I found them at https://github.com/phongdinhv/stanford-cars-model/blob/master/data_processing/datasets/cars_metas/cars_test_annos_withlabels.mat. "
-                    "An Error will occur if the file doesnt exist; only relevant for the test split.")
+            download_stanford_cars(self._base_folder)
 
         if not self._check_exists():
             raise RuntimeError(
@@ -104,42 +94,14 @@ class StanfordCarsClass(VisionDataset):
             target = self.target_transform(target)
         return pil_image, target
 
-    def download(self) -> None:
-        if self._check_exists():
-            return
-
-        download_and_extract_archive(
-            url="https://ai.stanford.edu/~jkrause/cars/car_devkit.tgz",
-            download_root=str(self._base_folder),
-            md5="c3b158d763b6e2245038c8ad08e45376",
-        )
-        if self.train:
-            download_and_extract_archive(
-                url="https://ai.stanford.edu/~jkrause/car196/cars_train.tgz",
-                download_root=str(self._base_folder),
-                md5="065e5b463ae28d29e77c1b4b166cfe61",
-            )
-        else:
-            download_and_extract_archive(
-                url="https://ai.stanford.edu/~jkrause/car196/cars_test.tgz",
-                download_root=str(self._base_folder),
-                md5="4ce7ebf6a94d07f1952d94dd34c4d501",
-            )
-            download_url(
-                url="https://ai.stanford.edu/~jkrause/car196/cars_test_annos_withlabels.mat",
-                root=str(self._base_folder),
-                md5="b0a2b23655a3edd16d84508592a98d10",
-            )
-
     def _check_exists(self) -> bool:
         if not (self._base_folder / "car_devkit").is_dir():
             return False
 
         if not self._annotations_mat_path.exists():
             raise ValueError(
-                "By default the test annotations are not available. They have to be transferred manually; "
-                "I found them at https://github.com/phongdinhv/stanford-cars-model/blob/master/data_processing/datasets/cars_metas/cars_test_annos_withlabels.mat. "
-                "An Error will occur if the file doesnt exist; only relevant for the test split.")
+                f"Annotation file {self._annotations_mat_path} is missing. Run with download=True "
+                "to fetch it, or see the Stanford Cars section of the README for a manual setup.")
 
         return self._annotations_mat_path.exists() and self._images_base_path.is_dir()
 

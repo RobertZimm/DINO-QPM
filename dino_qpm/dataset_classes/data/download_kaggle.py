@@ -1,129 +1,93 @@
-import glob
-import os
-import zipfile
+"""Credential-free download of the Stanford Cars dataset.
 
-import kaggle
-from dino_qpm.helpers.file_system import cleanup_redundant_nested_folders
+The images and devkit come from the public Kaggle mirror via ``kagglehub``,
+which downloads public datasets without a Kaggle account or API key. The
+labelled test annotations (``cars_test_annos_withlabels.mat``) are not part of
+that archive and are fetched separately; their checksum is verified against the
+original Stanford release.
+"""
+import shutil
+from pathlib import Path
 
-# --- Configuration (same as before) ---
-DATASET_SLUG = 'jessicali9530/stanford-cars-dataset'  # Or your dataset
-DOWNLOAD_ROOT_DIR = './datasets'
-TARGET_DATA_DIR = os.path.join(DOWNLOAD_ROOT_DIR, 'stanford_cars')
-# CHECK_FOLDER_NAME is what you expect after *initial extraction* to decide if download is needed.
-# The cleanup happens *after* this decision and initial extraction.
-# For jessicali9530/stanford-cars-dataset, 'car_data' is a good top-level item after extraction.
-CHECK_FOLDER_NAME = 'car_data'
+from torchvision.datasets.utils import download_url
+
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
+
+KAGGLE_HANDLE = "eduardo4jesus/stanford-cars-dataset"
+TEST_ANNOS_URL = ("https://raw.githubusercontent.com/phongdinhv/stanford-cars-model/master/"
+                  "data_processing/datasets/cars_metas/cars_test_annos_withlabels.mat")
+TEST_ANNOS_FILENAME = "cars_test_annos_withlabels.mat"
+# Checksum of the original Stanford file (same value torchvision uses).
+TEST_ANNOS_MD5 = "b0a2b23655a3edd16d84508592a98d10"
+
+# Folders of the expected layout under the dataset root.
+EXPECTED_DIRS = ("car_devkit", "cars_train", "cars_test")
 
 
-# (The cleanup_redundant_nested_folders function from above should be defined here or imported)
+def _unwrap_single_subdir(path: Path) -> Path:
+    """Return the innermost folder of a chain of folders that each hold exactly one folder.
 
-def download_and_unzip_kaggle_dataset(dataset_slug, download_path, expected_check_item):
+    The Kaggle archive nests one level too deep (e.g. ``cars_train/cars_train/*.jpg``,
+    ``car_devkit/devkit/*.mat``).
     """
-    Downloads a Kaggle dataset, manually unzips, and then cleans up redundant nested folders.
-    """
-    full_check_path = os.path.join(download_path, expected_check_item)
+    while True:
+        entries = [p for p in path.iterdir() if not p.name.startswith(".")]
+        if len(entries) == 1 and entries[0].is_dir():
+            path = entries[0]
+        else:
+            return path
 
-    if os.path.exists(full_check_path):
-        print(
-            f"Dataset's expected item '{expected_check_item}' already found in '{download_path}'. Skipping download and extraction.")
-        # Even if already downloaded, you might want to run cleanup if it hasn't run before
-        # or if the definition of "clean" has changed. For simplicity, we only run cleanup
-        # if we also download. You can separate this if needed.
-        # cleanup_redundant_nested_folders(download_path) # Optional: run cleanup even if not re-downloading
-        return
+
+def _images_present(base_folder: Path) -> bool:
+    return all((base_folder / name).is_dir() for name in EXPECTED_DIRS)
+
+
+def download_stanford_cars(base_folder: str | Path) -> None:
+    """Download Stanford Cars into ``base_folder`` unless it is already there.
+
+    Resulting layout::
+
+        base_folder/
+        ├── car_devkit/            (cars_meta.mat, cars_train_annos.mat, ...)
+        ├── cars_train/            (8,144 images)
+        ├── cars_test/             (8,041 images)
+        └── cars_test_annos_withlabels.mat
+    """
+    base_folder = Path(base_folder)
+    base_folder.mkdir(parents=True, exist_ok=True)
+
+    if _images_present(base_folder):
+        logger.info("Stanford Cars images found in %s, skipping download.", base_folder)
     else:
-        print(
-            f"Dataset's expected item '{expected_check_item}' not found. Proceeding with download and processing.")
+        try:
+            import kagglehub
+        except ImportError as e:
+            raise ImportError(
+                "Downloading Stanford Cars needs the 'kagglehub' package: pip install kagglehub. "
+                f"Alternatively, place the dataset manually under {base_folder} (see README)."
+            ) from e
 
-    os.makedirs(download_path, exist_ok=True)
+        staging = base_folder / ".kaggle_download"
+        logger.info("Downloading Stanford Cars (~1.8 GB) from Kaggle (%s), no account needed.",
+                    KAGGLE_HANDLE)
+        kagglehub.dataset_download(KAGGLE_HANDLE, output_dir=str(staging))
 
-    print(f"Initializing Kaggle API...")
-    try:
-        api = kaggle.KaggleApi()
-        api.authenticate()
-        print(
-            f"Downloading dataset '{dataset_slug}' to '{download_path}' (zip files only, no auto-unzip):")
+        for name in EXPECTED_DIRS:
+            target = base_folder / name
+            if target.exists():
+                continue
+            source = staging / name
+            if not source.is_dir():
+                raise RuntimeError(
+                    f"Unexpected layout of the Kaggle download: '{name}' missing in {staging}.")
+            shutil.move(str(_unwrap_single_subdir(source)), str(target))
 
-        api.dataset_download_files(dataset_slug,
-                                   path=download_path,
-                                   unzip=False,
-                                   quiet=False)
-        print("\nDownload complete. Proceeding with manual unzipping.")
+        shutil.rmtree(staging, ignore_errors=True)
+        logger.info("Stanford Cars images ready in %s.", base_folder)
 
-        zip_files_found = glob.glob(os.path.join(download_path, "*.zip"))
-
-        if not zip_files_found:
-            print(f"No .zip files found in '{download_path}' after download.")
-            # Check if the expected item is NOW present (e.g. dataset wasn't zipped)
-            if not os.path.exists(full_check_path):
-                print(
-                    f"And expected item '{expected_check_item}' is also NOT present. Download might have failed or dataset structure is unexpected.")
-                return  # Critical failure if no zips and no expected data
-            else:
-                print(
-                    f"However, expected item '{expected_check_item}' is present. Assuming data is okay (not zipped or already extracted).")
-                # Proceed to cleanup if data is present but wasn't from a zip we processed now
-                cleanup_redundant_nested_folders(download_path)
-                return
-
-        for zip_filepath in zip_files_found:
-            zip_filename = os.path.basename(zip_filepath)
-            print(f"Processing '{zip_filename}'...")
-            try:
-                with zipfile.ZipFile(zip_filepath, 'r') as zip_ref:
-                    print(
-                        f"  Extracting '{zip_filename}' directly into '{download_path}'...")
-                    zip_ref.extractall(download_path)
-                print(f"  Successfully extracted '{zip_filename}'.")
-                try:
-                    os.remove(zip_filepath)
-                    print(f"  Removed '{zip_filename}'.")
-                except OSError as e:
-                    print(f"  Error removing '{zip_filename}': {e}")
-            except zipfile.BadZipFile:
-                print(
-                    f"  Error: '{zip_filename}' is not a valid zip file or is corrupted.")
-            except Exception as e:
-                print(
-                    f"  An error occurred while processing '{zip_filename}': {e}")
-
-        # --- Call the cleanup function AFTER all zips are processed ---
-        # Only cleanup if we actually got data
-        if os.path.exists(full_check_path) or zip_files_found:
-            cleanup_redundant_nested_folders(download_path)
-        else:
-            print(
-                f"\nSkipping cleanup as initial expected data or zip files were not found/processed.")
-
-        # Final verification based on the initial check item
-        if os.path.exists(full_check_path):
-            print(
-                f"\nSuccessfully processed. Initial check item '{expected_check_item}' found in '{download_path}'.")
-        else:
-            # This check might be tricky if the cleanup renames the expected_check_item itself.
-            # The check should ideally be for a more fundamental piece of data.
-            print(
-                f"\nNote: Processing finished. The initial check item '{expected_check_item}' might have been affected by cleanup if it was part of a redundant hierarchy.")
-            print(f"Please verify the contents of '{download_path}'.")
-
-    except Exception as e:
-        print(f"An error occurred during the Kaggle API operation: {e}")
-        # ... (other error messages from before)
-
-
-if __name__ == "__main__":
-    if not os.path.exists(DOWNLOAD_ROOT_DIR):
-        os.makedirs(DOWNLOAD_ROOT_DIR)
-
-    download_and_unzip_kaggle_dataset(
-        DATASET_SLUG, TARGET_DATA_DIR, CHECK_FOLDER_NAME)
-
-    if os.path.exists(TARGET_DATA_DIR):
-        print(f"\nFinal contents of '{TARGET_DATA_DIR}' after all processing:")
-        for root, dirs, files in os.walk(TARGET_DATA_DIR):
-            level = root.replace(TARGET_DATA_DIR, '').count(os.sep)
-            indent = ' ' * 4 * (level)
-            print(f'{indent}{os.path.basename(root)}/')
-            sub_indent = ' ' * 4 * (level + 1)
-            for f in files:
-                print(f'{sub_indent}{f}')
+    if not (base_folder / TEST_ANNOS_FILENAME).exists():
+        logger.info("Downloading labelled test annotations (%s).", TEST_ANNOS_FILENAME)
+        download_url(TEST_ANNOS_URL, root=str(base_folder),
+                     filename=TEST_ANNOS_FILENAME, md5=TEST_ANNOS_MD5)
