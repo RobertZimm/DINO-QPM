@@ -78,7 +78,7 @@ The QPM feature selection solves a quadratic program with [Gurobi](https://www.g
 
 We release DINO-QPM checkpoints for CUB-200-2011 and Stanford Cars, 5 seeds each, as the dense model and the fine-tuned (sparse, interpretable) model: 20 checkpoints in total.
 
-> **These are reproductions, not the checkpoints behind the paper's tables.** The original checkpoints were not kept. The released models were retrained with the same architecture, losses and hyperparameters, but with a shorter schedule: 10 dense epochs and 25 fine-tuning epochs with fine-tuning batch size 16 (paper: 40 and 50 epochs, batch size 32), and over 5 seeds (the paper's DINO-QPM numbers are over 15 seeds). They were trained with our internal training code, a successor of this repository; their accuracy was re-computed with this repository and matches the values logged at training time exactly.
+> **These are reproductions, not the checkpoints behind the paper's tables.** The original checkpoints were not kept. The released models were retrained with the same architecture, losses and hyperparameters, but with a shorter schedule: 10 dense epochs and 25 fine-tuning epochs with fine-tuning batch size 16 (paper: 40 and 50 epochs, batch size 32), and 5 seeds per dataset, as for all models in the paper except the main DINO-QPM configuration, which the paper accidentally evaluated over 15 seeds. They were trained with our internal training code, a successor of this repository; their accuracy was re-computed with this repository and matches the values logged at training time exactly.
 
 Test accuracy (%) of the released checkpoints, mean ± standard deviation over 5 seeds:
 
