@@ -16,7 +16,7 @@ import torch as ch
 
 from dino_qpm.sparsification.utils import safe_zip
 
-# TODO checkout this change: Marks changes to the group version of glmsaga
+# "Changed from glm_saga" marks changes to the group version of glm_saga.
 
 """
 This would need glm_saga to run
@@ -343,7 +343,7 @@ class FeatureSelectionFitting:
             logger = logging.getLogger('glm_saga').info
         else:
             logger = print
-        while self.selected_features.sum() < self.nKeep:  # TODO checkout this change, one iteration per feature
+        while self.selected_features.sum() < self.nKeep:  # Changed from glm_saga: one iteration per feature
             n_feature_to_keep = self.selected_features.sum()
             for i, (lam, lr) in enumerate(zip(lams, lrs)):
                 lam = lam * self.lam_Fac
@@ -404,7 +404,7 @@ class FeatureSelectionFitting:
                         logger(
                             f"({i}) lambda {lam:.4f}, loss {loss:.4f} [val loss {loss_val:.4f}] [test loss {loss_test:.4f}], sparsity {nnz / total} [{nnz}/{total}], time {time.time() - start_time}, lr {lr:.4f}")
 
-                # TODO checkout this change, canceling if new feature is used
+                # Changed from glm_saga: canceling if new feature is used
                 if self.check_new_feature(linear.weight):
                     if checkpoint is not None:
                         ch.save(params, os.path.join(
@@ -420,7 +420,7 @@ class FeatureSelectionFitting:
             return False
 
     def check_new_feature(self, weight):
-        # TODO checkout this change, checking if new feature is used
+        # Changed from glm_saga: checking if new feature is used
         copied_weight = torch.tensor(weight.cpu())
         used_features = torch.unique(
             torch.nonzero(copied_weight)[:, 1])
@@ -434,7 +434,7 @@ class FeatureSelectionFitting:
         return False
 
     def fit(self, feature_loaders, metadata, device):
-        # TODO checkout this change, glm saga code slightly adapted to return to_drop
+        # Changed from glm_saga: glm saga code slightly adapted to return to_drop
         print("Initializing linear model...")
         linear = nn.Linear(self.num_features, self.n_classes).to(device)
         for p in [linear.weight, linear.bias]:
