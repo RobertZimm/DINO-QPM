@@ -87,6 +87,23 @@ def download_pretrained(dataset: str = "cub",
     return Path(hf_hub_download(filename="model.safetensors", **kwargs))
 
 
+BACKBONE_FILES = ("dinov2_vitb14_reg4_pretrain.pth",)
+
+
+def download_backbone(file_name: str, target: str | Path) -> bool:
+    """Copy of a backbone weights file from the Hugging Face repository to ``target``.
+
+    Returns False if the repository does not hold this backbone.
+    """
+    if file_name not in BACKBONE_FILES:
+        return False
+    import shutil
+    from huggingface_hub import hf_hub_download
+    cached = hf_hub_download(repo_id=HF_REPO_ID, filename=f"backbone/{file_name}")
+    shutil.copyfile(cached, target)
+    return True
+
+
 def load_checkpoint(model_path: str | Path,
                     config: dict | None = None,
                     stage: str = "finetune") -> tuple[torch.nn.Module, dict]:

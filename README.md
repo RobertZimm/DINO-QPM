@@ -1,6 +1,6 @@
 # DINO-QPM: Adapting Visual Foundation Models for Globally Interpretable Image Classification
 
-[![arXiv](https://img.shields.io/badge/arXiv-2604.07166-b31b1b.svg)](https://arxiv.org/abs/2604.07166v1)
+[![arXiv](https://img.shields.io/badge/arXiv-2604.07166-b31b1b.svg)](https://arxiv.org/abs/2604.07166)
 <p align="center">
   <img src="res/cover_figure_ink.svg" alt="Pipeline Diagram" width="100%">
 </p>
@@ -58,57 +58,123 @@ Although visual foundation models like DINOv2 provide state-of-the-art performan
 
 ## Code
 
-Before being able to run the installation a Conda distribution must be installed (Anaconda or Miniconda).[^5]
-
 ### Installation
 
-From the repository root:
+A Conda distribution (Anaconda or Miniconda) is needed.[^5] From the repository root:
 
 ```bash
 conda env create -f environment.yml
 conda activate DINO-QPM
-python -m pip install --upgrade pip
-python -m pip install -e .
+pip install -e .
 ```
+
+`environment.yml` pins the package versions the code was tested with (Python 3.10, PyTorch 2.4.1). On Linux, the PyTorch wheel includes CUDA 12.1; for another CUDA version or a CPU-only machine, install `torch`/`torchvision` first as described on [pytorch.org](https://pytorch.org/get-started/locally/) and remove them from `environment.yml`.
+
+#### Gurobi licence
+
+The QPM feature selection solves a quadratic program with [Gurobi](https://www.gurobi.com/). The `gurobipy` package from pip ships with a size-limited licence that is too small for this problem, so **training (fine-tuning) needs a full Gurobi licence**; academics get one free of charge ([academic licences](https://www.gurobi.com/academia/academic-program-and-licenses/)). Solving takes up to 3 hours per run (`finetune.time_limit`). Evaluation, inference and the pretrained models below do not need Gurobi.
+
+### Pretrained Models
+
+We release DINO-QPM checkpoints for CUB-200-2011 and Stanford Cars, 5 seeds each, as the dense model and the fine-tuned (sparse, interpretable) model: 20 checkpoints in total.
+
+> **These are reproductions, not the checkpoints behind the paper's tables.** The original checkpoints were not kept. The released models were retrained with the same architecture, losses and hyperparameters, but with a shorter schedule: 10 dense epochs and 25 fine-tuning epochs with fine-tuning batch size 16 (paper: 40 and 50 epochs, batch size 32). They were trained with our internal training code, a successor of this repository; their accuracy was re-computed with this repository and matches the values logged at training time exactly.
+
+Test accuracy (%) of the released checkpoints, mean ± standard deviation over 5 seeds:
+
+RESULTS_TABLE_PLACEHOLDER
+
+The checkpoints are hosted on the [Hugging Face Hub](https://huggingface.co/HF_REPO_PLACEHOLDER) and archived on [Zenodo](https://doi.org/ZENODO_DOI_PLACEHOLDER) (DOI `ZENODO_DOI_PLACEHOLDER`). Each checkpoint is a `model.safetensors` file (the interpretability adapter on top of the frozen backbone; ~44 MB) with the `config.yaml` it was trained with. The fine-tuned checkpoints also store the QPM feature selection, so no other files are needed. The frozen DINOv2 ViT-B/14 (with registers) backbone is downloaded automatically from Meta on first use.
+
+Available seeds: `2847391`, `3748291`, `5647382`, `6190452`, `9182736`.
+
+#### From the Hugging Face Hub
+
+The checkpoint is downloaded and cached on first use:
+
+```bash
+# evaluate the fine-tuned CUB model of seed 2847391
+python main.py evaluate --pretrained cub/2847391/finetune --eval-mode accuracy
+
+# dense Stanford Cars model of another seed
+python main.py evaluate --pretrained cars/3748291/dense --eval-mode accuracy
+
+# predict and visualise your own images
+python main.py inference --pretrained cub/2847391 --image-path /path/to/image_or_folder
+```
+
+In Python:
+
+```python
+from dino_qpm.hub import load_pretrained
+
+model, config = load_pretrained("cub", seed=2847391, stage="finetune")
+```
+
+`model` is the interpretability adapter; it takes the patch embeddings of the frozen backbone as input (see `dino_qpm/inference/main.py` for a complete forward pass).
+
+#### From Zenodo
+
+The Zenodo record holds one archive per dataset (`dino-qpm-cub.zip`, `dino-qpm-cars.zip`) with the same layout as the Hugging Face repository, plus `SHA256SUMS`:
+
+```bash
+wget https://zenodo.org/records/ZENODO_RECORD_PLACEHOLDER/files/dino-qpm-cub.zip
+wget https://zenodo.org/records/ZENODO_RECORD_PLACEHOLDER/files/SHA256SUMS
+sha256sum -c SHA256SUMS --ignore-missing
+unzip dino-qpm-cub.zip
+
+python main.py evaluate --model-path cub/seed_2847391/finetune/model.safetensors --eval-mode accuracy
+```
+
+Layout of both archives and the Hugging Face repository:
+
+```text
+cub/                          # cars/ for Stanford Cars
+└── seed_2847391/
+    ├── dense/
+    │   ├── model.safetensors
+    │   └── config.yaml
+    └── finetune/
+        ├── model.safetensors
+        └── config.yaml
+```
+
+`--model-path` accepts these files directly; `config.yaml` is picked up from the same folder and the stage (dense or fine-tuned) from the checkpoint.
 
 ### Dataset Setup
 
-By default, data is expected under:
-
-- `~/tmp/Datasets`
-
-Expected dataset folders:
+By default, data is expected under `~/tmp/Datasets` (set `DINO_QPM_DATASETS_ROOT` to use another folder):
 
 ```text
 ~/tmp/Datasets/
 ├── CUB200
-│   └── CUB_200_2011
-│       ├── attributes
-│       ├── class_sim_gts
-│       ├── images
-│       ├── parts
-│       └── segmentations
+│   └── CUB_200_2011
+│       ├── attributes
+│       ├── images
+│       ├── parts
+│       ├── segmentations
+│       ├── images.txt
+│       ├── image_class_labels.txt
+│       └── train_test_split.txt
 ├── StanfordCars
-│   ├── car_devkit
-│   ├── cars_test
-│   └── cars_train
-└── dino_data
-    ├── CUB2011
-    │   └── ...
-    └── StanfordCars
-        └── ...
+│   ├── car_devkit
+│   ├── cars_test
+│   ├── cars_train
+│   └── cars_test_annos_withlabels.mat
+└── dino_data          # created automatically
 ```
 
 #### CUB-200-2011
 
-Download `CUB_200_2011.tgz` from the [official Caltech project page](https://www.vision.caltech.edu/datasets/cub_200_2011/) (mirror: [Caltech Data](https://data.caltech.edu/records/65de6-vp158)) and extract it into `~/tmp/Datasets/CUB200/`:
+Download `CUB_200_2011.tgz` and `segmentations.tgz` from [Caltech Data](https://data.caltech.edu/records/65de6-vp158) (project page: [Caltech](https://www.vision.caltech.edu/datasets/cub_200_2011/)) and extract both:
 
 ```bash
 mkdir -p ~/tmp/Datasets/CUB200
 tar -xzf CUB_200_2011.tgz -C ~/tmp/Datasets/CUB200
+tar -xzf segmentations.tgz -C ~/tmp/Datasets/CUB200/CUB_200_2011
 ```
 
-The archive already contains the expected `CUB_200_2011/` directory with `images/`, `images.txt`, `image_class_labels.txt`, `train_test_split.txt`, `attributes/`, `parts/` and `segmentations/`.
+The segmentation masks are only needed for the Plausibility metric (`--eval-mode cub_segmentation_overlap`).
 
 #### Stanford Cars
 
@@ -118,52 +184,21 @@ The dataset is no longer hosted at the original Stanford URLs. The [`StanfordCar
 python -c "from dino_qpm.dataset_classes.stanfordcars import StanfordCarsClass; StanfordCarsClass(train=True)"
 ```
 
-Alternatively, download the archives manually and arrange them as:
+For a manual setup, arrange the files as shown above; the download URL of the test annotations is in [download_kaggle.py](dino_qpm/dataset_classes/data/download_kaggle.py).
 
-```text
-~/tmp/Datasets/StanfordCars/
-├── car_devkit/
-│   ├── cars_meta.mat
-│   └── cars_train_annos.mat
-├── cars_train/
-├── cars_test/
-└── cars_test_annos_withlabels.mat
-```
+#### Precomputed features
 
-For a manual setup, the test annotations (`cars_test_annos_withlabels.mat`) are not bundled with the devkit and must be added separately; the download URL is in [download_kaggle.py](dino_qpm/dataset_classes/data/download_kaggle.py).
+With `load_pre_computed: True` (default), the backbone's patch embeddings are computed once and stored under `dino_data/`, which makes training much faster. This needs roughly 9 GB of disk space for CUB-200-2011 and 12 GB for Stanford Cars. With `load_pre_computed: False` the backbone runs live instead.
 
-The `dino_data/` folder shown above is generated automatically the first time precomputed feature maps/vectors are written — it does not need to be downloaded.
+### Backbone Weights
 
-### Model Weights
-
-Pretrained backbone weights are expected under:
-
-- `~/tmp/model_weights/`
-
-The exact filename depends on the selected backbone (`arch` and `model_type`). Examples:
-
-```text
-~/tmp/model_weights/
-├── dinov2_vitl14_pretrain.pth              # DINOv2 large
-├── dinov2_vitb14_reg4_pretrain.pth         # DINOv2 base with registers
-└── dino_vitbase16_pretrain.pth             # DINO base
-```
-
-Weights must be downloaded from the upstream repositories (DINO, DINOv2) and placed in this folder. A missing file raises a `FileNotFoundError` pointing at the expected path.
+The frozen backbone weights are downloaded automatically from Meta's servers on first use and stored in `~/tmp/model_weights/` (set `DINO_QPM_WEIGHTS_ROOT` to use another folder). The default backbone is DINOv2 ViT-B/14 with registers ([`dinov2_vitb14_reg4_pretrain.pth`](https://dl.fbaipublicfiles.com/dinov2/dinov2_vitb14/dinov2_vitb14_reg4_pretrain.pth)). Other backbones follow the [DINOv2](https://github.com/facebookresearch/dinov2) and [DINO](https://github.com/facebookresearch/dino) file names, e.g. `dinov2_vitl14_pretrain.pth` or `dino_vitbase16_pretrain.pth`. On a machine without internet access, place the files there manually.
 
 ### Run the Code
 
-Entry point:
+Entry point: `main.py` with the subcommands `train`, `evaluate` and `inference`. `python main.py <command> --help` lists the options; `--log-level DEBUG` (before the command) gives more output.
 
-- `main.py`
-
-Supported subcommands:
-
-- `train`
-- `inference`
-- `evaluate`
-
-### 1. Training
+#### 1. Training
 
 <p align="center">
   <img src="res/qpm_pipeline.svg" alt="Pipeline Diagram" width="60%">
@@ -171,25 +206,56 @@ Supported subcommands:
   <em>An overview of the DINO-QPM training pipeline</em>
 </p>
 
-Note: `train` runs evaluation by default.
-It evaluates the dense model after dense training and, when finetuning is enabled, evaluates the finetuned model as well.
-
-Minimal run using defaults:
-
 ```bash
-python main.py train
+python main.py train --seed 2847391
 ```
 
-#### Configuration
+Training first trains the dense model, evaluates it, then fine-tunes it into the sparse DINO-QPM model (QPM feature selection, 50 features with 5 per class) and evaluates that as well.
 
 Configuration is resolved in two steps:
 
-1. General config (`dino_qpm/configs/main_training.yaml`)
-2. Model config in `dino_qpm/configs/models` selected by `(sldd_mode, arch[, mlp])`, e.g. `qpm/dinov2.yaml`
+1. The general config [`dino_qpm/configs/main_training.yaml`](dino_qpm/configs/main_training.yaml) selects the dataset (`CUB2011` or `StanfordCars`), the backbone (`arch`, `model_type`), the fine-tuning method (`sldd_mode`: `qpm`, `qsenn` or `sldd`) and whether the MLP adapter is used (`mlp`).
+2. These choices select the model config in [`dino_qpm/configs/models`](dino_qpm/configs/models), e.g. `qpm/dinov2.yaml`, which holds all hyperparameters. Its defaults are the paper's settings.
 
-The default configuration processes patch embeddings through the MLP token-by-token and derives the feature vector by average-pooling over all patch tokens (`model.feat_vec_type=avg_pooling`). An alternative no-MLP baseline (`mlp: false`, config `qpm/dinov2_no_mlp.yaml`) skips the MLP entirely and uses the CLS token as the feature vector (`model.feat_vec_type=normal`).
+To train on Stanford Cars, set `dataset: StanfordCars` in `main_training.yaml`. The default configuration processes patch embeddings through the MLP token by token and average-pools them into the feature vector (`model.feat_vec_type: avg_pooling`). The no-MLP baseline (`mlp: False`, config `qpm/dinov2_no_mlp.yaml`) uses the CLS token as feature vector (`model.feat_vec_type: normal`); it has no feature maps to select from and therefore stops after dense training.
 
-### 2. Inference
+Options of `train`:
+
+| Option | Meaning |
+|---|---|
+| `--seed` | Random seed; also names the run folder. Default 383534468. |
+| `--run_number` | Index for repeated fine-tuning runs on the same dense model. |
+| `--log_dir` | Continue a run in an existing folder (relative to the run base folder). |
+| `--multi-seed` | Mark the run as part of a multi-seed setup. |
+
+Runs are written to `~/tmp/DINO-QPM/<arch>/<dataset>/<sldd_mode>/<model_type>/<seed>/` (set `DINO_QPM_TMP_ROOT` to replace `~/tmp`):
+
+```text
+<seed>/
+├── config.yaml
+├── Trained_DenseModel.pth          # dense checkpoint
+├── Results_DenseModel.json         # dense evaluation
+└── ft/
+    ├── config.yaml
+    ├── qpm_50_5_FinetunedModel.pth # fine-tuned checkpoint
+    ├── Results_qpm_50_5_FinetunedModel.json
+    └── qpm_constants_saved/        # QPM feature selection (sel.pt, weight.pt)
+```
+
+A finished stage is skipped when the run is restarted. To load a fine-tuned `.pth` checkpoint, keep it next to its `config.yaml` and `qpm_constants_saved/`.
+
+#### 2. Evaluation
+
+```bash
+python main.py evaluate \
+  --model-path /path/to/model_checkpoint.pth \
+  --eval-mode all \
+  --output-json /path/to/eval_results.json
+```
+
+`--model-path` takes a `.pth` or `.safetensors` checkpoint; `--pretrained` takes a released checkpoint instead (see above). `--mode dense|finetune` sets the stage of a `.pth` checkpoint (default `finetune`). `--eval-mode` takes `all` or a list of metrics: `accuracy`, `class_independence`, `contrastiveness`, `diversity` (SID@5) and `cub_segmentation_overlap` (Plausibility, CUB only). `--save-features` also stores the extracted features next to the checkpoint.
+
+#### 3. Inference
 
 ```bash
 python main.py inference \
@@ -198,15 +264,11 @@ python main.py inference \
   --output-json /path/to/predictions.json
 ```
 
-### 3. Evaluation
+Inference needs a fine-tuned model. It saves the top-k predictions and, per image, the feature maps of the predicted class as heatmaps, a combined heatmap and a GradCAM map in `~/tmp/dino_qpm_results/inference/` (change with `--viz-dir`, disable with `--no-visualize-feature-maps`).
 
-```bash
-python main.py evaluate \
-  --model-path /path/to/model_checkpoint.pth \
-  --mode finetune \
-  --eval-mode all \
-  --output-json /path/to/eval_results.json
-```
+## License
+
+The code and the released checkpoints are licensed under the [Apache License 2.0](LICENSE). The bundled DINO and DINOv2 code is Apache 2.0 licensed by Meta (see [NOTICE](NOTICE)). The checkpoints build on the DINOv2 weights (Apache 2.0) and were trained on CUB-200-2011 and Stanford Cars, which come with their own terms of use for research.
 
 ## Citation
 

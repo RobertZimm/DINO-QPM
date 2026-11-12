@@ -1,0 +1,11 @@
+DINO-QPM
+Copyright 2026 Robert Zimmermann, Thomas Norrenbrock, Bodo Rosenhahn
+(Institute for Information Processing, Leibniz University Hannover)
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+It includes modified copies of
+- DINO (https://github.com/facebookresearch/dino), Copyright (c) Facebook, Inc. and its affiliates,
+  Apache License 2.0, in dino_qpm/backbones/dino
+- DINOv2 (https://github.com/facebookresearch/dinov2), Copyright (c) Meta Platforms, Inc. and affiliates,
+  Apache License 2.0, in dino_qpm/backbones/dinov2

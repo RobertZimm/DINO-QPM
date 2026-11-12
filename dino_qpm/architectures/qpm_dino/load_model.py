@@ -212,9 +212,20 @@ def get_backbone_weights(model_type: str, arch: str = "dinov2", download: bool =
         if not download:
             raise FileNotFoundError(
                 f"Backbone weights {model_path} not found. Download them from {url}.")
-        logger.info("Downloading backbone weights %s to %s", url, model_path)
         model_path.parent.mkdir(parents=True, exist_ok=True)
-        torch.hub.download_url_to_file(url, str(model_path), progress=True)
+        try:
+            logger.info("Downloading backbone weights %s to %s", url, model_path)
+            torch.hub.download_url_to_file(url, str(model_path), progress=True)
+        except Exception as error:
+            # The DINO-QPM Hugging Face repository holds an identical copy of the
+            # default backbone (DINOv2 ViT-B/14 with registers, Apache-2.0).
+            from dino_qpm.hub import download_backbone
+            logger.warning("Download from %s failed (%s); trying the copy on the "
+                           "Hugging Face Hub.", url, error)
+            if not download_backbone(file_name, model_path):
+                raise FileNotFoundError(
+                    f"Could not download the backbone weights. Download {url} "
+                    f"manually and place the file at {model_path}.") from error
 
     return model_path
 
