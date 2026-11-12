@@ -1412,14 +1412,14 @@ def run_paired_visualization(
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    gradcam_folder = Path(
-        "/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/"
-        "qpm/linear_probe/1858406_0"
-    )
-    features_folder = Path(
-        "/home/zimmerro/tmp/dinov2/CUB2011/Masterarbeit_Experiments/"
-        "MAS1-model_type-approach/1792713_10/ft"
-    )
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Paired GradCAM / feature visualisations")
+    parser.add_argument("gradcam_folder", type=str, help="Run folder of the GradCAM baseline model")
+    parser.add_argument("features_folder", type=str, help="Fine-tuned run folder (ft/) of the DINO-QPM model")
+    args = parser.parse_args()
+    gradcam_folder = Path(args.gradcam_folder)
+    features_folder = Path(args.features_folder)
 
     run_paired_visualization(
         gradcam_folder=gradcam_folder,

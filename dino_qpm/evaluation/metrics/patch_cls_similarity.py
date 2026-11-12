@@ -8,7 +8,7 @@ from dino_qpm.dataset_classes.get_data import get_data
 from torch.utils.data import ConcatDataset, DataLoader
 import yaml
 from tqdm import tqdm
-from dino_qpm.configs.core.conf_getter import get_default_save_dir
+from dino_qpm.configs.core.conf_getter import get_conf_path, get_default_save_dir
 
 # Define default save directory for results
 DEFAULT_SAVE_DIR = get_default_save_dir()
@@ -105,7 +105,7 @@ def save_results(results: Dict[str, float], arch: str, model_type: str, dataset:
 
 
 def run(arch: str, model_type: str, dataset: str):
-    with open("configs/test_conf.yaml", "r") as f:
+    with open(get_conf_path("test_conf.yaml"), "r") as f:
         config = yaml.safe_load(f)
 
     config["arch"] = arch
@@ -139,20 +139,12 @@ def run(arch: str, model_type: str, dataset: str):
 
 
 if __name__ == "__main__":
-    pairs = [
-        # ("base", "dinov2", "CUB2011"),
-        # ("large", "dinov2", "CUB2011"),
-        # ("small", "dinov2", "CUB2011"),
-        # ("base_reg", "dinov2", "CUB2011"),
-        # ("large_reg", "dinov2", "CUB2011"),
-        # ("small_reg", "dinov2", "CUB2011"),
-        # ("base", "dino", "CUB2011"),
-        # ("small", "dino", "CUB2011"),
-        # ("giant", "dinov2", "CUB2011"),
-        # ("giant_reg", "dinov2", "CUB2011"),
-        ("base", "dino", "CUB2011")
-    ]
+    import argparse
 
-    for model_type, arch, dataset in pairs:
-        print(f"\n=== Evaluating {arch} with {model_type} on {dataset} ===")
-        run(arch, model_type, dataset)
+    parser = argparse.ArgumentParser(description="Cosine similarity between pooled patch tokens and the CLS token")
+    parser.add_argument("--arch", default="dinov2", choices=["dino", "dinov2"])
+    parser.add_argument("--model-type", default="base_reg")
+    parser.add_argument("--dataset", default="CUB2011", choices=["CUB2011", "StanfordCars"])
+    args = parser.parse_args()
+
+    run(args.arch, args.model_type, args.dataset)

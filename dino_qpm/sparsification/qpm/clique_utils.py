@@ -7,6 +7,9 @@ import numpy as np
 from networkx.algorithms.approximation import ramsey
 from networkx.utils import not_implemented_for
 from tqdm import trange
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def compute_missing_edges(G, set1, set2):
@@ -134,7 +137,7 @@ def find_minimum_viable_threshold(cross_correlation_matrix: torch.Tensor,
             G.remove_edges_from(new_edges)
 
         size = large_clique_size_earlystop(G, target)
-        print("Predicted Size at step", i, ":", size)
+        logger.debug("%s %s %s %s", "Predicted Size at step", i, ":", size)
 
         values.append(threshold)
         sizes.append(size)
@@ -174,8 +177,8 @@ def find_minimum_viable_threshold(cross_correlation_matrix: torch.Tensor,
         G = nx.from_numpy_array(adjacency_matrix)
         max_clique = approx_max_clique_early_stop(G, target)
 
-        print("Time for Apprx Max Clique:", time.time() - start)
-        print("Size of max clique:", len(max_clique))
+        logger.debug("%s %s", "Time for Apprx Max Clique:", time.time() - start)
+        logger.debug("%s %s", "Size of max clique:", len(max_clique))
 
         assert is_subclique(G, max_clique)
 
@@ -184,10 +187,10 @@ def find_minimum_viable_threshold(cross_correlation_matrix: torch.Tensor,
             working_threshold = threshold
             break
 
-    print("Working threshold:", working_threshold)
-    print("Predicted size:", predicted_size)
-    print("Actual size:", len(init_clique))
-    print("Frac:", (target - 2) / (target - 1) - (chosen_i_init - i) / steps)
+    logger.debug("%s %s", "Working threshold:", working_threshold)
+    logger.debug("%s %s", "Predicted size:", predicted_size)
+    logger.debug("%s %s", "Actual size:", len(init_clique))
+    logger.debug("%s %s", "Frac:", (target - 2) / (target - 1) - (chosen_i_init - i) / steps)
 
     return working_threshold, (target - 2) / (target - 1) - (chosen_i_init - i) / steps, len(
         init_clique), init_clique, adjacency_matrix
@@ -197,7 +200,7 @@ def networkit_baseline(adjacency_matrix, target):
     import networkit as nk
     G = nx.from_numpy_array(adjacency_matrix)
     max_size = 0  # len(maxclique)
-    print("Estimated max clique size:", max_size)
+    logger.debug("%s %s", "Estimated max clique size:", max_size)
     if max_size >= target:
         return 0, max_size, max_size
     else:
@@ -214,7 +217,7 @@ def networkit_baseline(adjacency_matrix, target):
         sub_graph = nk.graphtools.subgraphFromNodes(G, clique)
         max_clique = nk.clique.MaximalCliques(sub_graph, maximumOnly=True).run().getCliques()[0]
         added, max_clique = find_missing_edges(sub_graph, max_clique, target)
-        print("Added edges:", added)
+        logger.debug("%s %s", "Added edges:", added)
     return added, len(max_clique), max_size
 
 
@@ -226,7 +229,7 @@ def compute_baseline_slack(adjacency_matrix, target):
 
     max_lengthG = nx.algorithms.approximation.max_clique(G)
     init_length = copy.deepcopy(max_lengthG)
-    print("Estimated max clique size:", len(max_lengthG))
+    logger.debug("%s %s", "Estimated max clique size:", len(max_lengthG))
     removed_nodes = set(max_lengthG)
     while len(max_lengthG) < target:
         remaining_nodes = list(set(G.nodes()) - removed_nodes)
@@ -236,7 +239,7 @@ def compute_baseline_slack(adjacency_matrix, target):
         added_edge += len(harmful_edges)
         removed_nodes = removed_nodes.union(max_length)
         max_lengthG = max_lengthG.union(max_length)
-        print("Estimated max clique size:", max_length)
+        logger.debug("%s %s", "Estimated max clique size:", max_length)
 
     # cliques = list(nx.find_cliques(G))
     # lengths = [len(clique) for clique in cliques]
@@ -310,7 +313,7 @@ def print_slack_cost(constraint, cost, slack_var):
         if val > 0:
             sumed_up += text.add(cost[j], mat)
 
-    print(text)
+    logger.debug("%s", text)
     return sumed_up
 
 

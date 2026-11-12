@@ -729,17 +729,17 @@ def generate_and_compose(
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Generate images and compose the cover figure")
+    parser.add_argument("gradcam_folder", type=str, help="Run folder of the GradCAM baseline model")
+    parser.add_argument("features_folder", type=str, help="Fine-tuned run folder (ft/) of the DINO-QPM model")
+    args = parser.parse_args()
+
     # Full pipeline: generate images + compose covers
     generate_and_compose(
-        gradcam_folder=Path(
-            "/home/zimmerro/tmp/dinov2/CUB2011/CVPR_2026/"
-            "qpm/linear_probe/1858406_0"
-        ),
-        features_folder=Path(
-            "/home/zimmerro/tmp/dinov2/CUB2011/"
-            # "Masterarbeit_Experiments/MAS1-model_type-approach/1792713_10/ft"
-            "CVPR_2026/1-N_f_star-N_f_c/1839193_11/ft"
-        ),
+        gradcam_folder=Path(args.gradcam_folder),
+        features_folder=Path(args.features_folder),
         class_indices=None,
         n_samples=5,
         seed=42,

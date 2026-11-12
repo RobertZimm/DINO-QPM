@@ -20,6 +20,9 @@ from sklearn.cluster import KMeans
 import numpy as np
 from pathlib import Path
 import pickle
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class HardMaskSTEFunction(Function):
@@ -831,7 +834,7 @@ class PrototypeLayer(nn.Module):
         """
         # Stop tracking gradients during projection for protoypes
         if self.prototypes.requires_grad:
-            print("\nDisabling gradients for prototypes after and while projection.\n")
+            logger.info("Disabling gradients for prototypes after and while projection.")
             self.prototypes.requires_grad = False
 
         if functional_mode == "knn":
@@ -907,7 +910,7 @@ class PrototypeLayer(nn.Module):
                 "weights matrix must be provided for project_pca_lda")
 
         # Step 1: Collect features from both dataloaders simultaneously
-        print("Collecting features from both dataloaders...")
+        logger.info("Collecting features from both dataloaders...")
 
         # Dictionary to store features by class: {class_id: {'dino': [...], 'model': [...]}}
         features_by_class = load_features_per_class(
@@ -940,8 +943,8 @@ class PrototypeLayer(nn.Module):
         weights_np = weights.cpu().numpy()  # Shape: (n_classes, n_selected_prototypes)
         n_classes, n_selected_prototypes = weights_np.shape
 
-        print(f"\nWeights matrix shape: {weights_np.shape}")
-        print(f"Processing {n_selected_prototypes} selected prototypes")
+        logger.info(f"Weights matrix shape: {weights_np.shape}")
+        logger.info(f"Processing {n_selected_prototypes} selected prototypes")
 
         # Initialize tensor to store all prototypes
         new_prototypes_tensor = torch.zeros(
@@ -949,10 +952,10 @@ class PrototypeLayer(nn.Module):
 
         # Step 4: Iterate over each selected prototype
         for proto_idx in range(n_selected_prototypes):
-            print(f"\n{'='*60}")
+            logger.info(f"{'='*60}")
             print(
                 f"Processing prototype {proto_idx+1}/{n_selected_prototypes}")
-            print(f"{'='*60}")
+            logger.info(f"{'='*60}")
 
             # Shape: (embed_dim,)
             if selection is not None:
@@ -972,7 +975,7 @@ class PrototypeLayer(nn.Module):
                 continue
 
             ass_plus_1 = assigned_classes + 1
-            print(f"Assigned classes: {ass_plus_1.tolist()}")
+            logger.info(f"Assigned classes: {ass_plus_1.tolist()}")
 
             # Collect DINO and model features for assigned classes only
             dino_features_subset = []
@@ -1030,7 +1033,7 @@ class PrototypeLayer(nn.Module):
 
             print(
                 f"Total patches for this prototype: {dino_features_np.shape[0]}")
-            print(f"Classes represented: {len(assigned_classes)}")
+            logger.info(f"Classes represented: {len(assigned_classes)}")
 
             # Convert labels to tensor for compatibility
             all_labels_tensor = torch.from_numpy(labels_np).long().to(device)
@@ -1076,7 +1079,7 @@ class PrototypeLayer(nn.Module):
 
         # --- One-time transition from 2D to 3D Parameter ---
         if self.prototypes.dim() == 2:
-            print("Transitioning prototypes to multi-embedding format.")
+            logger.info("Transitioning prototypes to multi-embedding format.")
             # Replace the 2D nn.Parameter with a new 3D one
             self.prototypes = nn.Parameter(
                 new_prototypes_tensor.to(self.prototypes.device))
@@ -1159,11 +1162,11 @@ class PrototypeLayer(nn.Module):
             # Print some short description of how the clustering looks like
             unique_clusters, counts = np.unique(
                 cluster_labels, return_counts=True)
-            print(f"K-Means clustering info:")
-            print(f"Cluster centers shape: {cluster_centers.shape}")
+            logger.info(f"K-Means clustering info:")
+            logger.info(f"Cluster centers shape: {cluster_centers.shape}")
             print(
                 f"K-Means inertia: {np.sum((all_features_lda - cluster_centers[cluster_labels])**2):.2f}")
-            print(f"Samples per cluster: {dict(zip(unique_clusters, counts))}")
+            logger.info(f"Samples per cluster: {dict(zip(unique_clusters, counts))}")
 
         # For each cluster center, find the closest vector in LDA space
         # and get its corresponding vector in the original model feature space
@@ -1188,7 +1191,7 @@ class PrototypeLayer(nn.Module):
                            save_path: Optional[Path] = None,
                            ignore_first_n_components: int = 0) -> torch.Tensor:
         # Step 1: Perform PCA with all components to get explained variance
-        print(f"Performing PCA to preserve {gamma*100:.1f}% of variance...")
+        logger.info(f"Performing PCA to preserve {gamma*100:.1f}% of variance...")
         pca_full = PCA()
         pca_full.fit(dino_features)
 
@@ -1218,8 +1221,8 @@ class PrototypeLayer(nn.Module):
 
             print(
                 f"Ignoring the first {ignore_first_n_components} PCA components")
-            print(f"Lost variance ratio: {lost_variance:.4f}")
-            print(f"Resulting new variance ratio: {new_variance:.4f}")
+            logger.info(f"Lost variance ratio: {lost_variance:.4f}")
+            logger.info(f"Resulting new variance ratio: {new_variance:.4f}")
 
             all_features_pca = all_features_pca[:, ignore_first_n_components:]
             n_components -= ignore_first_n_components
@@ -1249,7 +1252,7 @@ class PrototypeLayer(nn.Module):
                 "No labels available for LDA, cannot perform LDA step.")
 
         # Step 4: Apply K-Means clustering to LDA-transformed features
-        print(f"\nPerforming K-Means clustering with {n_clusters} clusters...")
+        logger.info(f"Performing K-Means clustering with {n_clusters} clusters...")
         kmeans = KMeans(
             n_clusters=n_clusters,
             random_state=42,
@@ -1260,12 +1263,12 @@ class PrototypeLayer(nn.Module):
         cluster_labels = kmeans.fit_predict(all_features_lda)
         cluster_centers = kmeans.cluster_centers_
 
-        print(f"K-Means inertia: {kmeans.inertia_:.2f}")
-        print(f"Cluster centers shape: {cluster_centers.shape}")
+        logger.info(f"K-Means inertia: {kmeans.inertia_:.2f}")
+        logger.info(f"Cluster centers shape: {cluster_centers.shape}")
 
         # Count samples per cluster
         unique_clusters, counts = np.unique(cluster_labels, return_counts=True)
-        print(f"Samples per cluster: {dict(zip(unique_clusters, counts))}")
+        logger.info(f"Samples per cluster: {dict(zip(unique_clusters, counts))}")
 
         if save_path is not None:
             ext_save_path = save_path / f'{prototype_idx}'
@@ -1282,7 +1285,7 @@ class PrototypeLayer(nn.Module):
                     'n_clusters': n_clusters,
                     'prototype': prototype
                 }, f)
-            print(f"Saved PCA, LDA, and K-Means models to {save_path}")
+            logger.info(f"Saved PCA, LDA, and K-Means models to {save_path}")
 
         return cluster_centers, cluster_labels, all_features_lda
 
@@ -1555,7 +1558,7 @@ class PrototypeLayer(nn.Module):
             os.makedirs(os.path.dirname(save_projection_info), exist_ok=True)
             with open(save_projection_info, 'w') as f:
                 json.dump(best_projection_info, f, indent=2)
-            print(f"Saved projection info to {save_projection_info}")
+            logger.info(f"Saved projection info to {save_projection_info}")
 
         return {
             'updated_prototypes_count': self.n_prototypes,
@@ -1629,9 +1632,9 @@ class PrototypeLayer(nn.Module):
         }
 
         torch.save(state, filepath)
-        print(f"Saved prototype state to {filepath}")
-        print(f"  - Prototype shape: {self.prototypes.shape}")
-        print(f"  - Projection count: {self._projection_count}")
+        logger.info(f"Saved prototype state to {filepath}")
+        logger.info(f"  - Prototype shape: {self.prototypes.shape}")
+        logger.info(f"  - Projection count: {self._projection_count}")
 
     def load_prototype_state(self, filepath: str, device: str = 'cuda', selection=None) -> bool:
         """
@@ -1661,7 +1664,7 @@ class PrototypeLayer(nn.Module):
         if not os.path.exists(filepath):
             return False
 
-        print(f"Loading prototype state from {filepath}")
+        logger.info(f"Loading prototype state from {filepath}")
         state = torch.load(filepath, map_location=device)
 
         # Validate configuration
@@ -1701,7 +1704,7 @@ class PrototypeLayer(nn.Module):
             if checkpoint_prototypes.shape != self.prototypes.shape:
                 print(f"  Note: Checkpoint prototype shape {checkpoint_prototypes.shape} "
                       f"differs from current {self.prototypes.shape}")
-                print(f"  Replacing prototype buffer to match checkpoint...")
+                logger.info(f"  Replacing prototype buffer to match checkpoint...")
                 # Unregister old buffer and register new one with checkpoint shape
                 delattr(self, 'prototypes')
                 self.register_buffer('prototypes', checkpoint_prototypes)
@@ -1725,10 +1728,10 @@ class PrototypeLayer(nn.Module):
             self._projection_count = state.get(
                 'projection_count', state.get('alignment_count', 0))
 
-        print(f"Successfully loaded prototype state:")
-        print(f"  - Prototype shape: {self.prototypes.shape}")
-        print(f"  - Projection count: {self._projection_count}")
-        print(f"  - Initialized: {self._prototypes_initialized.item()}")
+        logger.info(f"Successfully loaded prototype state:")
+        logger.info(f"  - Prototype shape: {self.prototypes.shape}")
+        logger.info(f"  - Projection count: {self._projection_count}")
+        logger.info(f"  - Initialized: {self._prototypes_initialized.item()}")
 
         return True
 

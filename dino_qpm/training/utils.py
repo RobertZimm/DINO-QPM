@@ -230,9 +230,6 @@ class TrainingLogger:
                 print("No data found in CSV file")
                 return
 
-            print(f"Debug - CSV file: {self.csv_file}")
-            print(f"Debug - Mode: {self.mode}")
-
             # Set up matplotlib style
             plt.style.use('default')
             sns.set_palette("husl")
@@ -528,11 +525,6 @@ class TrainingLogger:
 
     def _plot_training_overview(self, df: pd.DataFrame, save_plots: bool):
         """Create an overview plot with multiple metrics."""
-        print(f"Debug - Available columns: {list(df.columns)}")
-        print(f"Debug - DataFrame shape: {df.shape}")
-        print(
-            f"Debug - Unique phases: {df['phase'].unique() if 'phase' in df.columns else 'No phase column'}")
-
         fig, axes = plt.subplots(2, 3, figsize=(18, 10))
         fig.suptitle(
             f'Training Overview - {self.mode.title()} Mode', fontsize=16)
@@ -821,11 +813,11 @@ def get_prototype_training_logs(
 
 
 if __name__ == "__main__":
-    # Example usage
-    log_dir = Path.home() / "tmp/dinov2" / "Fitzpatrick17k" / \
-        "Study1-Split_Method/1470223_9/ft"
-    mode = "finetune"
-    logger = TrainingLogger(log_dir, mode)
+    import argparse
 
-    logger.visualize_training(save_plots=True)
-    # logger.plot_single_metric("Acc", save_plot=False, show_plot=True)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("log_dir", type=str, help="Run folder with the training logs")
+    parser.add_argument("--mode", choices=["dense", "finetune"], default="finetune")
+    args = parser.parse_args()
+
+    TrainingLogger(Path(args.log_dir), args.mode).visualize_training(save_plots=True)

@@ -1,5 +1,8 @@
 import numpy as np
 import torch
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_start_solution(changed_tensor, edges, selected_features):
@@ -31,13 +34,13 @@ class IterativeConstraint:
         return not self.iterator.changed_features()
 
     def check_valid_tensor(self, selected_edge_tensor, selected_features):
-        print("Checking valid tensor for ", self.__class__.__name__)
+        logger.debug("%s %s", "Checking valid tensor for ", self.__class__.__name__)
         self.check_constraints(selected_edge_tensor, selected_features)
         assert not self.next_iter(), "Invalid tensor for " + self.__class__.__name__
-        print("Valid tensor for ", self.__class__.__name__)
+        logger.debug("%s %s", "Valid tensor for ", self.__class__.__name__)
 
     def get_start_solution(self, selected_edge_tensor, similarity_measurement_matrix, edges, last_one):
-        print("Computing start Solution for Iterative Constraint ", self.__class__.__name__)
+        logger.debug("%s %s", "Computing start Solution for Iterative Constraint ", self.__class__.__name__)
         if self.next_iter():
             unsparsified_edge_tensor = self.compute_start_solution(selected_edge_tensor, similarity_measurement_matrix[
                 self.iterator.get_last_selection()])
@@ -49,7 +52,7 @@ class IterativeConstraint:
             initial_start_edges = get_start_solution(unsparsified_edge_tensor, edges,
                                                      self.iterator.get_last_selection())
 
-        print("Finished Computing start Solution for Iterative Constraint ", self.__class__.__name__)
+        logger.debug("%s %s", "Finished Computing start Solution for Iterative Constraint ", self.__class__.__name__)
         return initial_start_edges
 
     def after_optimization(self, features, edge_tensor):

@@ -1290,14 +1290,16 @@ def run_per_class_accuracy_analysis(
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    dense_folder = Path(
-        "/home/zimmerro/tmp/dinov2/CUB2011/Masterarbeit_Experiments/"
-        "MAS1-model_type-approach/1792713_10"
-    )
-    ft_folder = Path(
-        "/home/zimmerro/tmp/dinov2/CUB2011/Masterarbeit_Experiments/"
-        "MAS1-model_type-approach/1792713_10/ft"
-    )
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Per-class accuracy analysis of a dense and fine-tuned model")
+    parser.add_argument("dense_folder", type=str, help="Run folder of the dense model")
+    parser.add_argument("--ft-folder", type=str, default=None,
+                        help="Fine-tuned run folder (default: <dense_folder>/ft)")
+    parser.add_argument("--classes", type=int, nargs="*", default=[96], help="Class indices to analyse")
+    args = parser.parse_args()
+    dense_folder = Path(args.dense_folder)
+    ft_folder = Path(args.ft_folder) if args.ft_folder else dense_folder / "ft"
 
     run_per_class_accuracy_analysis(
         dense_folder=dense_folder,
@@ -1305,7 +1307,7 @@ if __name__ == "__main__":
         # -- Class / sample selection --
         n_worst_classes=0,
         n_best_classes=0,
-        class_indices=[96],
+        class_indices=args.classes,
         max_images_per_class=6,
         max_correct_samples=2,
         max_samples_per_group=2,
