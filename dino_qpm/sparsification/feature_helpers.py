@@ -11,6 +11,9 @@ import dino_qpm.sparsification.utils
 from dino_qpm.architectures.registry import is_vision_foundation_model
 import torch.cuda
 from pathlib import Path
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 sys.path.append('')
 
@@ -74,7 +77,7 @@ def load_full_features(dino_dataloader, model_dataloader, device: str = 'cuda'):
         model_features.append(model_patches.cpu())
         labels.append(dino_labels.cpu())
 
-    print(f"\nProcessed {batch_idx + 1} batches")
+    logger.info(f"Processed {batch_idx + 1} batches")
 
     dino_features = torch.cat(dino_features).numpy()
     model_features = torch.cat(model_features).numpy()
@@ -117,8 +120,8 @@ def load_features_per_class(dino_dataloader, model_dataloader, device: str = 'cu
             features_by_class[label]['model'].append(
                 model_patches[b].cpu())
 
-    print(f"\nProcessed {batch_idx + 1} batches")
-    print(f"Found {len(features_by_class)} unique classes")
+    logger.info(f"Processed {batch_idx + 1} batches")
+    logger.info(f"Found {len(features_by_class)} unique classes")
 
     return features_by_class
 
@@ -199,9 +202,9 @@ def compute_features(loader: torch.utils.data.DataLoader,
     """
     if torch.cuda.is_available():
         device = "cuda"
-        print("mem_get_info before", torch.cuda.mem_get_info())
+        logger.debug("%s %s", "mem_get_info before", torch.cuda.mem_get_info())
         torch.cuda.empty_cache()
-        print("mem_get_info after", torch.cuda.mem_get_info())
+        logger.debug("%s %s", "mem_get_info after", torch.cuda.mem_get_info())
         model = model.to(device)
 
     if filename is None or not os.path.exists(os.path.join(filename, f'0_features.npy')):
@@ -218,7 +221,7 @@ def compute_features(loader: torch.utils.data.DataLoader,
                                                           config=config)
 
                 if batch_idx == 0:
-                    print("Latents shape", latents.shape)
+                    logger.debug("%s %s", "Latents shape", latents.shape)
                 Nsamples += latents.size(0)
 
                 all_latents.append(latents.cpu())
@@ -270,7 +273,7 @@ def load_feature_loader(out_dir_feats: str,
                         random_seed: int):
     feature_loaders = {}
     for mode in ['train', 'test']:
-        print(f"For {mode} set...")
+        logger.info(f"For {mode} set...")
         sink_path = f"{out_dir_feats}/features_{mode}"
         metadata_path = f"{out_dir_feats}/metadata_{mode}.pth"
         feature_ds = load_features(sink_path)
@@ -304,7 +307,7 @@ def balance_dataset(dataset: ch.utils.data.Dataset):
         Torch dataset with equal number of samples/class
     """
 
-    print("Balancing dataset...")
+    logger.info("Balancing dataset...")
     n = len(dataset)
     labels = ch.Tensor([dataset[i][1] for i in range(n)]).int()
     n0 = sum(labels).item()
@@ -465,7 +468,7 @@ def load_features(feature_path):
         ds_list.append(ch.utils.data.TensorDataset(features, labels))
         chunk_id += 1
 
-    print(f"==> loaded {chunk_id} files of representations...")
+    logger.info(f"==> loaded {chunk_id} files of representations...")
     return ch.utils.data.ConcatDataset(ds_list)
 
 
@@ -485,7 +488,7 @@ def calculate_metadata(loader,
     """
 
     if filename is not None and os.path.exists(filename):
-        print("loading Metadata from ", filename)
+        logger.info("%s %s", "loading Metadata from ", filename)
         return ch.load(filename,
                        weights_only=True)
 
@@ -494,7 +497,7 @@ def calculate_metadata(loader,
         num_classes = 1
         for batch in loader:
             y = batch[1]
-            print(y)
+            logger.debug("%s", y)
             num_classes = max(num_classes, y.max().item() + 1)
 
     eye = ch.eye(num_classes)
@@ -502,7 +505,7 @@ def calculate_metadata(loader,
     X_bar, y_bar, y_max, n = 0, 0, 0, 0
 
     # calculate means and maximum
-    print("Calculating means")
+    logger.info("Calculating means")
     for ans in tqdm(loader, total=len(loader)):
         X, y = ans[:2]
         X_bar += X.sum(0)
@@ -515,7 +518,7 @@ def calculate_metadata(loader,
 
     # calculate std
     X_std, y_std = 0, 0
-    print("Calculating standard deviations")
+    logger.info("Calculating standard deviations")
     for ans in tqdm(loader, total=len(loader)):
         X, y = ans[:2]
         X_std += ((X - X_bar) ** 2).sum(0)
@@ -525,7 +528,7 @@ def calculate_metadata(loader,
 
     # calculate maximum regularization
     inner_products = 0
-    print("Calculating maximum lambda")
+    logger.info("Calculating maximum lambda")
     for ans in tqdm(loader, total=len(loader)):
         X, y = ans[:2]
         y_map = (eye[y] - y_bar) / y_std

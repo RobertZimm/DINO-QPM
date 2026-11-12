@@ -13,6 +13,9 @@ from dino_qpm.architectures.qpm_dino.load_model import load_model
 from sklearn.preprocessing import minmax_scale
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 # Isnt able to return feat_vec AND att_map but thats alright for now
@@ -185,9 +188,9 @@ def generate_features(folder: str | Path,
     data_loader = DataLoader(image_dataset, batch_size=batch_size,
                              shuffle=False, num_workers=8)
 
-    print(
-        f">>> Generating Maps and if selected Vectors for {len(img_paths)} images")
-    print(f">>> Saving to folder {folder}\n")
+    logger.info(
+        f"Generating maps (and vectors, if selected) for {len(img_paths)} images")
+    logger.info(f"Saving to folder {folder}")
 
     # --- Iterate over batches of images ---
     for imgs, paths_batch in tqdm(data_loader):
@@ -324,7 +327,6 @@ def generate_features(folder: str | Path,
         else:
             raise ValueError(f"Architecture {arch} not supported.")
 
-    print("")
 
 
 if __name__ == "__main__":

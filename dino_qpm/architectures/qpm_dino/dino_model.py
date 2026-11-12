@@ -6,6 +6,9 @@ import torch.nn as nn
 import yaml
 from dino_qpm.architectures.FinalLayer import FinalLayer
 from dino_qpm.architectures.qpm_dino.layers import MaskingLayer, BatchNorm1dPermuted, PrototypeLayer
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class Dino2Div(nn.Module, FinalLayer):
@@ -25,8 +28,8 @@ class Dino2Div(nn.Module, FinalLayer):
             self.seq = None
 
         if self.n_layers == 0 and self.n_features != self.dino_channels:
-            print(f">>> Warning: n_features {self.n_features} is not equal to dino_channels {self.dino_channels}. "
-                  f"Forcing n_features to dino_channels as n_layers=0.")
+            logger.warning(f"n_features {self.n_features} is not equal to dino_channels {self.dino_channels}. "
+                           f"Forcing n_features to dino_channels as n_layers=0.")
             self.n_features = self.dino_channels
 
         if self.proto_layer is not None and self.proto_method != "pipnet":
@@ -355,7 +358,7 @@ class Dino2Div(nn.Module, FinalLayer):
         if config.get("model", {}).get("hidden_size") is not None:
             self.hidden_size = config["model"]["hidden_size"]
         else:
-            print(">>> Using default hidden size of 2048.")
+            logger.info("Using default hidden size of 2048.")
             self.hidden_size = 2048
 
         self.num_classes = num_classes
@@ -399,7 +402,7 @@ class Dino2Div(nn.Module, FinalLayer):
             self.dino_channels = 1536
 
         else:
-            raise ValueError(f">>> Unknown model type: {model_type}")
+            raise ValueError(f"Unknown model type: {model_type}")
 
         if self.deprecated_notation:
             self.layer_strings = config["model"]["layers"]

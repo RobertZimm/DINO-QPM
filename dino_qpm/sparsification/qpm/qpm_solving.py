@@ -10,6 +10,9 @@ from dino_qpm.sparsification.qpm.clique_utils import find_minimum_viable_thresho
 from dino_qpm.sparsification.qpm.iterativeConstraints.BalancedAssignment import ClassSparsity
 from dino_qpm.sparsification.qpm.iterativeConstraints.Iterator import Iterator
 from dino_qpm.sparsification.qpm.iterativeConstraints.deduplication import DeDuplipication
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def solve_qp(mat_a: np.ndarray | torch.Tensor,
@@ -239,7 +242,7 @@ def solve_qp(mat_a: np.ndarray | torch.Tensor,
 
             results_dict["Runtime"] = runtime
 
-            print("Finished all Iterations")
+            logger.debug("Finished all Iterations")
             deduplicated_value = opt_model.objVal
 
             results_dict["InitSolutionObj"] = initial_optimal_solution
@@ -247,7 +250,7 @@ def solve_qp(mat_a: np.ndarray | torch.Tensor,
                   initial_optimal_solution - deduplicated_value)
 
             nonzeros = len(torch.nonzero(selected_edge_tensor))
-            print("Nonzeros ", nonzeros)
+            logger.debug("%s %s", "Nonzeros ", nonzeros)
 
             assert nonzeros == n_features_per_class * n_classes
             assert len(selected_features) == n_features
@@ -269,12 +272,12 @@ def solve_qp(mat_a: np.ndarray | torch.Tensor,
                     b[selected_features]).sum()
 
             results_dict["TotalObjectiveValue"] = opt_model.objVal
-            print("Sparsest Class", min_n_features_per_class)
+            logger.debug("%s %s", "Sparsest Class", min_n_features_per_class)
 
             min_n_class_per_fea = selected_edge_tensor.sum(dim=1).min()
 
-            print("Sparsest Feature", min_n_class_per_fea)
-            print("Log of QP", results_dict)
+            logger.debug("%s %s", "Sparsest Feature", min_n_class_per_fea)
+            logger.debug("%s %s", "Log of QP", results_dict)
 
         else:
             raise NotImplementedError(f"Mode {mode} not implemented")

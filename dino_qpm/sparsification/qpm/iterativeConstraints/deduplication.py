@@ -7,6 +7,9 @@ import sklearn.metrics
 import torch
 from gurobipy import GRB
 from dino_qpm.sparsification.qpm.iterativeConstraints.IterativeConstraint import IterativeConstraint
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class DeDuplipication(IterativeConstraint):
@@ -28,7 +31,7 @@ class DeDuplipication(IterativeConstraint):
             selected_edge_tensor)
 
     def compute_start_solution(self, selected_edge_tensor, selected_similarity_measurement_matrix):
-        print("Deduplicating without maintaing feature sparsity")
+        logger.debug("Deduplicating without maintaing feature sparsity")
         return sophisticated_deduplication(torch.tensor(selected_edge_tensor),
                                            torch.tensor(selected_similarity_measurement_matrix))
 
@@ -86,13 +89,13 @@ def check_duplicate(selected_edge_tensor, similarity_matrix, raise_error=False, 
                     second_order_min=False, no_duplicates=True):
     duplicates, relevant_classes = get_duplicates(selected_edge_tensor)
     if len(duplicates) == 0:
-        print("No duplicates")
+        logger.debug("No duplicates")
     else:
-        print("Duplicates", duplicates)
+        logger.debug("%s %s", "Duplicates", duplicates)
         if raise_error:
             raise ValueError("Duplicates")
         elif raise_warning:
-            print("WARNING: Duplicates")
+            logger.warning("WARNING: Duplicates")
         else:
             similarity_matrix = torch.tensor(similarity_matrix)
             remining_duplicates = duplicates
@@ -100,7 +103,7 @@ def check_duplicate(selected_edge_tensor, similarity_matrix, raise_error=False, 
             added = set()
             idx = 0
             if second_order_min:
-                print("Directly trying sophisticated deduplication")
+                logger.debug("Directly trying sophisticated deduplication")
                 return sophisticated_deduplication(pre_deduplication, similarity_matrix)
             min_number_of_entries = second_order_min if second_order_min else 1
             while len(remining_duplicates) > 0:
@@ -169,7 +172,7 @@ def check_duplicate(selected_edge_tensor, similarity_matrix, raise_error=False, 
                 #       remining_duplicates)
                 idx += 1
 
-            print("Duplicates removed Manually")
+            logger.debug("Duplicates removed Manually")
             check_duplicate(selected_edge_tensor,
                             similarity_matrix, raise_error=True)
 
@@ -201,7 +204,7 @@ def sophisticated_deduplication(selected_edge_tensor, similarity_matrix):
     # GOALS: Remove duplicates by:  Solve duplicate
     # by removing one at a time via changing lowest assigned to highest unassigned
     # if unassigned does not introduce new duplicates. Since we want to maintain min sparsity, we do not change sparsity.
-    print("Sophisticated Deduplication")
+    logger.debug("Sophisticated Deduplication")
     remining_duplicates, relevant_classes = get_duplicates(
         selected_edge_tensor)
     print("Remaining Duplicates Before Sophisticated Deduplication ",
@@ -213,7 +216,7 @@ def sophisticated_deduplication(selected_edge_tensor, similarity_matrix):
         noDuplicate_Checker = SwapDuplicateChecker(selected_edge_tensor)
 
         if idx >= len(remining_duplicates):
-            print("Sophisticated Deduplication failed")
+            logger.debug("Sophisticated Deduplication failed")
             return selected_edge_tensor
 
         c1, c2 = remining_duplicates[idx]
@@ -253,7 +256,7 @@ def sophisticated_deduplication(selected_edge_tensor, similarity_matrix):
                             to_remove = remove_feature
         idx += 1
         if not swap_found:
-            print("No feasible swap found for this pair of duplicates")
+            logger.debug("No feasible swap found for this pair of duplicates")
             continue
         selected_edge_tensor[to_remove, best_class] = False
         selected_edge_tensor[best_idx, best_class] = True
@@ -269,9 +272,9 @@ def sophisticated_deduplication(selected_edge_tensor, similarity_matrix):
               remining_duplicates)
 
     duplicates, relevant_classes = get_duplicates(selected_edge_tensor)
-    print("Total time taken : ", time.time() - start_time, "seconds")
-    print("Remaining Duplicates after Sophisticated Deduplication ", len(duplicates))
-    print("Cost of sophisticated Deduplication ", total_cost)
+    logger.debug("%s %s %s", "Total time taken : ", time.time() - start_time, "seconds")
+    logger.debug("%s %s", "Remaining Duplicates after Sophisticated Deduplication ", len(duplicates))
+    logger.debug("%s %s", "Cost of sophisticated Deduplication ", total_cost)
     return selected_edge_tensor
 
 

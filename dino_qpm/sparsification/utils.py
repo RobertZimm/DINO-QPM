@@ -5,14 +5,17 @@ import torch
 from dino_qpm.sparsification import feature_helpers
 from pathlib import Path
 from dino_qpm.architectures.registry import is_vision_foundation_model
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def safe_zip(*args):
     for iterable in args[1:]:
         if len(iterable) != len(args[0]):
-            print("Unequally sized iterables to zip, printing lengths")
+            logger.info("Unequally sized iterables to zip, printing lengths")
             for i, entry in enumerate(args):
-                print(i, len(entry))
+                logger.info("%s %s", i, len(entry))
             raise ValueError("Unequally sized iterables to zip")
     return zip(*args)
 
@@ -24,7 +27,7 @@ def compute_features_and_metadata(args,
                                   out_dir_feats,
                                   num_classes,
                                   config: dict):
-    print("Computing/loading deep features...")
+    logger.info("Computing/loading deep features...")
 
     Ntotal = len(train_loader.dataset)
     feature_loaders = {}
@@ -37,7 +40,7 @@ def compute_features_and_metadata(args,
 
     for mode, loader in zip(['train', 'test'],
                             [train_loader, test_loader]):
-        print(f"For {mode} set...")
+        logger.info(f"For {mode} set...")
 
         sink_path = f"{out_dir_feats}/features_{mode}"
         metadata_path = f"{out_dir_feats}/metadata_{mode}.pth"

@@ -3,6 +3,9 @@ import torch
 from sortedcontainers import SortedDict
 
 from dino_qpm.sparsification.qpm.iterativeConstraints.IterativeConstraint import IterativeConstraint
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class ClassSparsity(IterativeConstraint):
@@ -40,7 +43,7 @@ class ClassSparsity(IterativeConstraint):
                                              self.parameter, self.total_missing)
 
     def next_iter(self):
-        print("Total missing for classes: ", self.total_missing)
+        logger.debug("%s %s", "Total missing for classes: ", self.total_missing)
         return self.total_missing > 0
 
 
@@ -60,7 +63,7 @@ class RemoveCandidateCounter:
 
     def add_candidate(self, value, index):
         while value in self.values:
-            print("Value already in dict, adding tiny value")
+            logger.debug("Value already in dict, adding tiny value")
             value += np.random.rand() * 1e-10
         if len(self.values) < self.goal:
             self.values[value] = index
@@ -82,7 +85,7 @@ def add_second_order_min_sparsity(problematic_classes,
                                   total_missing):
     # non_problematic_classes = np.arange(selected_edge_tensor.shape[1]).pop(problematic_classes)
     if int(selected_edge_tensor.sum() / selected_edge_tensor.shape[1]) == second_order_min:
-        print("Simple greedy sparsity")
+        logger.debug("Simple greedy sparsity")
         answer_matrix = torch.zeros_like(selected_edge_tensor)
 
         for single_class in range(selected_edge_tensor.shape[1]):

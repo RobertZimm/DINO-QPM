@@ -12,6 +12,9 @@ from dino_qpm.sparsification.qpm_constants.compute_A import compute_feat_class_c
 from dino_qpm.sparsification.qpm_constants.compute_B import compute_locality_bias
 from dino_qpm.sparsification.qpm_constants.compute_R import compute_cos_sim_matrix
 from dino_qpm.sparsification.utils import get_feature_loaders
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def compute_qpm_feature_selection_and_assignment(model: torch.nn.Module,
@@ -45,7 +48,7 @@ def compute_qpm_feature_selection_and_assignment(model: torch.nn.Module,
 
     if (os.path.exists(save_folder / "A.pt")
             and os.path.exists(save_folder / "R.pt")):
-        print(f">>> Loading Matrix A and R from {save_folder}")
+        logger.info(f"Loading Matrix A and R from {save_folder}")
 
         a_matrix = torch.load(save_folder / "A.pt",
                               map_location=torch.device('cpu'),
@@ -68,7 +71,7 @@ def compute_qpm_feature_selection_and_assignment(model: torch.nn.Module,
                            weights_only=False)
 
     else:
-        print("Running QPM constant computation in local mode")
+        logger.info("Running QPM constant computation in local mode")
 
         a_matrix = compute_feat_class_corr_matrix(full_train_dataset_loader)
         a_matrix = a_matrix / np.abs(a_matrix).max()
@@ -137,7 +140,7 @@ def compute_qpm_feature_selection_and_assignment(model: torch.nn.Module,
                   results_dict)
 
         if not torch.cuda.is_available():
-            print("No GPU available; skipping any job-queue handoff in local-only mode.")
+            logger.info("No GPU available; skipping any job-queue handoff in local-only mode.")
 
     mean, std = metadata["X"]['mean'], metadata["X"]['std']
 

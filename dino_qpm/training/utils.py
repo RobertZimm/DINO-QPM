@@ -230,9 +230,6 @@ class TrainingLogger:
                 print("No data found in CSV file")
                 return
 
-            print(f"Debug - CSV file: {self.csv_file}")
-            print(f"Debug - Mode: {self.mode}")
-
             # Set up matplotlib style
             plt.style.use('default')
             sns.set_palette("husl")
@@ -528,11 +525,6 @@ class TrainingLogger:
 
     def _plot_training_overview(self, df: pd.DataFrame, save_plots: bool):
         """Create an overview plot with multiple metrics."""
-        print(f"Debug - Available columns: {list(df.columns)}")
-        print(f"Debug - DataFrame shape: {df.shape}")
-        print(
-            f"Debug - Unique phases: {df['phase'].unique() if 'phase' in df.columns else 'No phase column'}")
-
         fig, axes = plt.subplots(2, 3, figsize=(18, 10))
         fig.suptitle(
             f'Training Overview - {self.mode.title()} Mode', fontsize=16)

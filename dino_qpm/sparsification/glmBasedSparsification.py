@@ -11,6 +11,9 @@ from torch import nn
 from dino_qpm.sparsification.FeatureSelection import FeatureSelectionFitting
 from dino_qpm.sparsification import data_helpers
 from dino_qpm.sparsification.utils import get_default_args, compute_features_and_metadata, select_in_loader, get_feature_loaders
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_glm_selection(feature_loaders, metadata,  args, num_classes, device, n_features_to_select, folder):
@@ -69,13 +72,13 @@ def fit_glm(log_dir, mean, std, feature_loaders,  num_classes,   select_features
         linear = nn.Linear(select_features, num_classes).to(device)
         for p in [linear.weight, linear.bias]:
             p.data.zero_()
-        print("Preparing normalization preprocess and indexed dataloader")
+        logger.info("Preparing normalization preprocess and indexed dataloader")
         metadata = {"X": {"mean": mean, "std": std}, }
         preprocess = data_helpers.NormalizedRepresentation(feature_loaders['train'],
                                                            metadata=metadata,
                                                            device=linear.weight.device)
 
-        print("Calculating the regularization path")
+        logger.info("Calculating the regularization path")
         mpl_logger = logging.getLogger("matplotlib")
         mpl_logger.setLevel(logging.WARNING)
         params = glm_saga(linear,
@@ -106,7 +109,7 @@ def load_glm(result_dir):
     Nlambda = max([int(f.split('params')[1].split('.pth')[0])
                    for f in os.listdir(result_dir) if 'params' in f]) + 1
 
-    print(f"Loading regularization path of length {Nlambda}")
+    logger.info(f"Loading regularization path of length {Nlambda}")
 
     params_dict = {i: torch.load(os.path.join(result_dir, f"params{i}.pth"),
                                  map_location=torch.device('cpu'), weights_only=True) for i in range(Nlambda)}

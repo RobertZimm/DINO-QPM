@@ -4,6 +4,9 @@ import torch
 from dino_qpm.finetuning.base import FinetuneResult
 from dino_qpm.training.train import train_n_epochs
 from dino_qpm.sparsification.qsenn import compute_qsenn_feature_selection_and_assignment
+from dino_qpm.helpers.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def finetune_qsenn(model,
@@ -19,7 +22,7 @@ def finetune_qsenn(model,
     n_per_class = config["finetune"]["n_per_class"]
 
     for iteration_epoch in range(4):
-        print(f"Starting iteration epoch {iteration_epoch}")
+        logger.info(f"Starting iteration epoch {iteration_epoch}")
         this_log_dir = log_dir / f"iteration_epoch_{iteration_epoch}"
         this_log_dir.mkdir(parents=True, exist_ok=True)
         feature_sel, sparse_layer, bias_sparse, current_mean, current_std = compute_qsenn_feature_selection_and_assignment(
@@ -43,5 +46,5 @@ def finetune_qsenn(model,
                                           config=config,)
 
         torch.save(model.state_dict(), this_log_dir / "trained_model.pth")
-        print(f"Finished iteration epoch {iteration_epoch}")
+        logger.info(f"Finished iteration epoch {iteration_epoch}")
     return FinetuneResult(model=model)
