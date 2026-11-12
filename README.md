@@ -99,6 +99,13 @@ Per seed:
 | 6190452 | 80.6 | 88.4 | 91.9 | 93.6 |
 | 9182736 | 80.6 | 88.1 | 91.6 | 93.4 |
 
+Interpretability metrics (%) of the fine-tuned models, computed with this repository (`--eval-mode class_independence contrastiveness diversity`), mean ± standard deviation over 5 seeds:
+
+| Model | SID@5 CUB | SID@5 Cars | Class-Indep. CUB | Class-Indep. Cars | Contrast. CUB | Contrast. Cars |
+|---|---|---|---|---|---|---|
+| DINO-QPM, released | 92.0 ± 0.3 | 94.0 ± 0.1 | 93.9 ± 0.1 | 93.7 ± 0.1 | 99.8 ± 0.0 | 99.8 ± 0.0 |
+| DINO-QPM, paper | 90.1 ± 0.0 | 91.7 ± 0.2 | 93.7 ± 0.1 | 93.7 ± 0.1 | 100.0 ± 0.0 | 100.0 ± 0.0 |
+
 The checkpoints are hosted on the [Hugging Face Hub](https://huggingface.co/HF_REPO_PLACEHOLDER) and archived on [Zenodo](https://doi.org/ZENODO_DOI_PLACEHOLDER) (DOI `ZENODO_DOI_PLACEHOLDER`). Each checkpoint is a `model.safetensors` file (the interpretability adapter on top of the frozen backbone; ~44 MB) with the `config.yaml` it was trained with. The fine-tuned checkpoints also store the QPM feature selection, so no other files are needed. The frozen DINOv2 ViT-B/14 (with registers) backbone is downloaded automatically from Meta on first use.
 
 Available seeds: `2847391`, `3748291`, `5647382`, `6190452`, `9182736`.
