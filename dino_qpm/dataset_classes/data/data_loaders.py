@@ -3,7 +3,6 @@ import random
 import shutil
 from pathlib import Path
 import pickle
-import lmdb
 import cv2
 import numpy as np
 import pandas as pd
@@ -28,6 +27,12 @@ except ImportError:
         raise ImportError(
             "dino_qpm.masking.fm_attn_masking is not available in this publication build."
         )
+
+
+def _lmdb():
+    """Import lmdb lazily; it is only needed for the optional LMDB feature cache."""
+    import lmdb
+    return lmdb
 
 
 class DinoData(Dataset):
@@ -163,7 +168,7 @@ class DinoData(Dataset):
             else:
                 try:
                     # Quickly open DB to count entries
-                    env = lmdb.open(str(self.lmdb_path),
+                    env = _lmdb().open(str(self.lmdb_path),
                                     readonly=True, lock=False)
                     with env.begin() as txn:
                         num_entries = txn.stat()['entries']
@@ -243,7 +248,7 @@ class DinoData(Dataset):
 
         # Open existing Environment
         # sync=False is fast, but we rely on frequent commits for safety
-        env = lmdb.open(str(self.lmdb_path), map_size=map_size,
+        env = _lmdb().open(str(self.lmdb_path), map_size=map_size,
                         sync=False, writemap=True)
 
         # --- RESUME LOGIC ---
@@ -333,7 +338,7 @@ class DinoData(Dataset):
         Lazy init called inside __getitem__ to support multiprocessing
         """
         if self.lmdb_env is None:
-            self.lmdb_env = lmdb.open(
+            self.lmdb_env = _lmdb().open(
                 str(self.lmdb_path),
                 readonly=True,
                 lock=False,
