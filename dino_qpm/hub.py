@@ -21,7 +21,7 @@ import yaml
 
 from dino_qpm.architectures.qpm_dino.load_model import load_dense_model, load_final_model
 
-HF_REPO_ID = os.environ.get("DINO_QPM_HF_REPO", "TODO-org/DINO-QPM")
+HF_REPO_ID = os.environ.get("DINO_QPM_HF_REPO", "zimmerro/DINO-QPM")
 
 DATASETS = {"cub": "CUB2011", "cars": "StanfordCars"}
 SEEDS = (2847391, 3748291, 5647382, 6190452, 9182736)
