@@ -135,6 +135,8 @@ model, config = load_pretrained("cub", seed=2847391, stage="finetune")
 
 `model` is the interpretability adapter; it takes the patch embeddings of the frozen backbone as input (see `dino_qpm/inference/main.py` for a complete forward pass).
 
+If the download fails with `TypeError: process() takes no keyword arguments`, the installed `brotli` package is too old for newer `huggingface_hub` versions; `pip install -U brotli` fixes it.
+
 #### From Zenodo
 
 The Zenodo record holds one archive per dataset (`dino-qpm-cub.zip`, `dino-qpm-cars.zip`) with the same layout as the Hugging Face repository, plus `SHA256SUMS`:
