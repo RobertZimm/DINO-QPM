@@ -23,6 +23,7 @@ preferred-citation:
       given-names: Bodo
   collection-title: "2026 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)"
   year: 2026
+  url: "https://openaccess.thecvf.com/content/CVPR2026W/XAI4CV/html/Zimmermann_DINO-QPM_Adapting_Visual_Foundation_Models_for_Globally_Interpretable_Image_Classification_CVPRW_2026_paper.html"
   identifiers:
     - type: other
       value: "arXiv:2604.07166"

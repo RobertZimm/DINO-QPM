@@ -1,6 +1,9 @@
 # DINO-QPM: Adapting Visual Foundation Models for Globally Interpretable Image Classification
 
+[![Paper](https://img.shields.io/badge/CVPRW%202026-paper-1f6feb.svg)](https://openaccess.thecvf.com/content/CVPR2026W/XAI4CV/html/Zimmermann_DINO-QPM_Adapting_Visual_Foundation_Models_for_Globally_Interpretable_Image_Classification_CVPRW_2026_paper.html)
 [![arXiv](https://img.shields.io/badge/arXiv-2604.07166-b31b1b.svg)](https://arxiv.org/abs/2604.07166)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-models-yellow.svg)](https://huggingface.co/zimmerro/DINO-QPM)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24194857.svg)](https://doi.org/10.5281/zenodo.24194857)
 <p align="center">
   <img src="res/cover_figure_ink.svg" alt="Pipeline Diagram" width="100%">
 </p>
